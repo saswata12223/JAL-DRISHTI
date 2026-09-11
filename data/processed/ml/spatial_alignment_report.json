@@ -1,0 +1,31 @@
+{
+  "title": "Phase 5 Spatial Alignment & Downscaling Report",
+  "standard_crs": "EPSG:4326 (WGS-84 Geographic Latitude/Longitude)",
+  "spatial_grids": {
+    "dynamic_atmospheric_soil_grid": {
+      "dimensions": "30 Lats x 33 Lons (990 cells)",
+      "resolution": "0.10 degrees (~10 km)",
+      "bounding_box": [
+        77.8,
+        28.5,
+        81.1,
+        31.5
+      ]
+    },
+    "high_resolution_morphometric_grid": {
+      "dimensions": "3600 Lats x 3961 Lons (14,259,600 cells)",
+      "resolution": "~0.0008333 degrees (~90 m)",
+      "bounding_box": [
+        77.7992,
+        28.5,
+        81.1,
+        31.5
+      ]
+    }
+  },
+  "resampling_strategy": {
+    "continuous_terrain_features": "Bilinear / nearest coordinate interpolation to grid center",
+    "categorical_landcover_class": "Exact nearest-neighbor sampling to preserve discrete ESA WorldCover codes",
+    "station_point_linkages": "Haversine great-circle distance computation in kilometers"
+  }
+}

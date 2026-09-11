@@ -1,0 +1,9 @@
+{
+  "model_title": "FlashFloodAI PPT-Aligned Flood Risk Engine",
+  "champion_model": "XGBClassifier",
+  "champion_version": "6.1.0",
+  "trained_at_utc": "2026-09-01T07:14:56.309661+00:00",
+  "random_seed": 42,
+  "predictor_count": 44,
+  "decision_threshold": 0.4
+}

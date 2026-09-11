@@ -1,0 +1,77 @@
+{
+  "report_title": "FlashFloodAI Phase 2 Data Quality & Standardization Audit",
+  "generated_at_utc": "2026-09-01T07:09:53.699052+00:00",
+  "target_region": "Uttarakhand, India",
+  "bounding_box": {
+    "west": 77.8,
+    "east": 81.1,
+    "south": 28.5,
+    "north": 31.5
+  },
+  "crs_compliance": "100% EPSG:4326 across all raster and vector outputs",
+  "zero_synthetic_data_status": "VERIFIED (Zero artificial, synthetic, or placeholder numbers)",
+  "metrics": {
+    "static_grid": {
+      "shape": [
+        3600,
+        3961
+      ],
+      "total_pixels": 14259600,
+      "crs": "EPSG:4326",
+      "elevation_stats": {
+        "min": 142.0,
+        "max": 7512.0,
+        "mean": 2244.154296875
+      },
+      "slope_mean": 15.955892562866211,
+      "twi_mean": 7.490017890930176,
+      "runoff_coefficient_mean": 0.36576202511787415,
+      "mannings_roughness_mean": 0.06771809607744217
+    },
+    "dynamic_grid": {
+      "spatial_shape": [
+        30,
+        33
+      ],
+      "time_steps": 8,
+      "crs": "EPSG:4326",
+      "max_rainfall_3h": 60.42000198364258,
+      "mean_surface_soil_moisture": 0.7701848149299622,
+      "mean_rootzone_soil_moisture": 0.8140957951545715
+    },
+    "weather_stations": {
+      "total_stations": 157,
+      "status_breakdown": {
+        "STALE": 119,
+        "LIVE": 30,
+        "RECENT": 8
+      },
+      "active_stations_with_temperature": 145,
+      "stations_with_pressure": 55
+    },
+    "water_level_stations": {
+      "total_stations": 20,
+      "telemetry_live_count": 0,
+      "telemetry_null_count": 20,
+      "telemetry_status": "TELEMETRY_OFFLINE (Preserved as NaN/null due to HTTP 503)"
+    },
+    "historical_events": {
+      "total_canonical_events": 15,
+      "date_range": [
+        "1970-07-20",
+        "2024-07-31"
+      ],
+      "event_types": {
+        "cloudburst-induced flood": 6,
+        "flash flood": 3,
+        "debris-flow/flood event": 3,
+        "extreme rainfall flood": 2,
+        "glacial lake outburst flood (GLOF)": 1
+      },
+      "total_documented_deaths": 7167,
+      "confidence_distribution": {
+        "HIGH": 15
+      }
+    }
+  }
+}

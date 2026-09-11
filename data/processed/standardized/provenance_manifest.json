@@ -1,0 +1,118 @@
+{
+  "title": "FlashFloodAI End-to-End Dataset Lineage & Provenance Manifest",
+  "version": "2.0.0",
+  "generated_at_utc": "2026-09-01T07:09:53.699052+00:00",
+  "pipeline_stages": {
+    "Phase 1A": {
+      "source": "NASA Earthdata CMR / GPM IMERG Early v07",
+      "url": "https://cmr.earthdata.nasa.gov/",
+      "files": [
+        "data/processed/gpm_combined.nc",
+        "data/processed/rainfall_features.nc"
+      ],
+      "output_variable": [
+        "precipitation",
+        "rainfall_30min",
+        "rainfall_1h",
+        "rainfall_3h",
+        "max_rainfall_intensity",
+        "mean_rainfall_intensity",
+        "rainfall_trend"
+      ]
+    },
+    "Phase 1B": {
+      "source": "India Meteorological Department (IMD) GeoServer / AWS Network",
+      "url": "https://reactjs.imd.gov.in/geoserver/wfs",
+      "files": [
+        "data/processed/weather/imd_weather_stations.csv",
+        "data/processed/weather/imd_weather_latest.json"
+      ],
+      "output_variable": [
+        "temperature_c",
+        "relative_humidity_pct",
+        "wind_speed_kmh",
+        "pressure_hpa",
+        "rainfall_mm"
+      ]
+    },
+    "Phase 1C": {
+      "source": "NASA Earthdata / SMAP SPL3SMP_E & L4 Soil Moisture",
+      "url": "https://cmr.earthdata.nasa.gov/",
+      "files": [
+        "data/processed/smap/smap_soil_moisture.nc",
+        "data/processed/smap/smap_soil_moisture_latest.json"
+      ],
+      "output_variable": [
+        "surface_soil_moisture",
+        "rootzone_soil_moisture",
+        "profile_soil_moisture"
+      ]
+    },
+    "Phase 1D": {
+      "source": "NASA / USGS SRTM 90m DEM (v4.1)",
+      "url": "https://srtm.csi.cgiar.org/",
+      "files": [
+        "data/processed/srtm/srtm_uttarakhand_dem.tif",
+        "data/processed/srtm/srtm_uttarakhand_dem.nc"
+      ],
+      "output_variable": [
+        "elevation"
+      ]
+    },
+    "Phase 1E": {
+      "source": "Derived deterministically from SRTM DEM (Horn 1981 / Beven & Kirkby 1979)",
+      "url": "https://srtm.csi.cgiar.org/ (Deterministic Terrain Modeling from SRTM DEM)",
+      "files": [
+        "data/processed/terrain/terrain_features.tif",
+        "data/processed/terrain/terrain_features.nc"
+      ],
+      "output_variable": [
+        "slope",
+        "flow_direction",
+        "flow_accumulation",
+        "stream_network",
+        "twi"
+      ]
+    },
+    "Phase 1F": {
+      "source": "ESA WorldCover 2021 10m Sentinel-1/2 LULC",
+      "url": "https://esa-worldcover.org/",
+      "files": [
+        "data/processed/landcover/landcover_uttarakhand.tif",
+        "data/processed/landcover/landcover_uttarakhand.nc"
+      ],
+      "output_variable": [
+        "landcover_class",
+        "runoff_coefficient",
+        "mannings_roughness"
+      ]
+    },
+    "Phase 1G": {
+      "source": "Central Water Commission (CWC) / Ministry of Jal Shakti",
+      "url": "https://ffs.india-water.gov.in/",
+      "files": [
+        "data/processed/waterlevel/cwc_water_level_stations.csv",
+        "data/processed/waterlevel/cwc_water_level_latest.json"
+      ],
+      "output_variable": [
+        "water_level",
+        "discharge_cumec",
+        "warning_level_m",
+        "danger_level_m",
+        "hfl_m"
+      ]
+    },
+    "Phase 1H": {
+      "source": "Geological Survey of India (GSI) / NDMA / USDMA / IMD / Scientific Literature",
+      "url": "https://gsi.gov.in/",
+      "files": [
+        "data/processed/events/historical_flood_events.csv",
+        "data/processed/events/historical_flood_events.json",
+        "data/processed/events/historical_flood_events.geojson"
+      ],
+      "output_variable": [
+        "historical_event_ground_truth"
+      ]
+    }
+  }
+}

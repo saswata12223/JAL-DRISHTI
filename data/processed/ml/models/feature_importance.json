@@ -1,0 +1,266 @@
+[
+  {
+    "rank": 1,
+    "feature": "surface_soil_moisture_vol",
+    "importance": 0.94207,
+    "is_physics_layer": false
+  },
+  {
+    "rank": 2,
+    "feature": "wind_speed_ms",
+    "importance": 0.04302,
+    "is_physics_layer": false
+  },
+  {
+    "rank": 3,
+    "feature": "relative_humidity_pct",
+    "importance": 0.00675,
+    "is_physics_layer": false
+  },
+  {
+    "rank": 4,
+    "feature": "ambient_temperature_c",
+    "importance": 0.00493,
+    "is_physics_layer": false
+  },
+  {
+    "rank": 5,
+    "feature": "max_rainfall_intensity_mmh",
+    "importance": 0.00265,
+    "is_physics_layer": false
+  },
+  {
+    "rank": 6,
+    "feature": "flash_flood_susceptibility_index",
+    "importance": 0.00021,
+    "is_physics_layer": false
+  },
+  {
+    "rank": 7,
+    "feature": "slope_deg",
+    "importance": 0.0002,
+    "is_physics_layer": false
+  },
+  {
+    "rank": 8,
+    "feature": "nearest_cwc_station_dist_km",
+    "importance": 0.0001,
+    "is_physics_layer": false
+  },
+  {
+    "rank": 9,
+    "feature": "elevation_m",
+    "importance": 6e-05,
+    "is_physics_layer": false
+  },
+  {
+    "rank": 10,
+    "feature": "scs_peak_runoff_potential",
+    "importance": 0.0,
+    "is_physics_layer": true
+  },
+  {
+    "rank": 11,
+    "feature": "scs_initial_abstraction_ia_mm",
+    "importance": 0.0,
+    "is_physics_layer": true
+  },
+  {
+    "rank": 12,
+    "feature": "scs_direct_runoff_q_mm",
+    "importance": 0.0,
+    "is_physics_layer": true
+  },
+  {
+    "rank": 13,
+    "feature": "danger_level_m",
+    "importance": 0.0,
+    "is_physics_layer": false
+  },
+  {
+    "rank": 14,
+    "feature": "hfl_m",
+    "importance": 0.0,
+    "is_physics_layer": false
+  },
+  {
+    "rank": 15,
+    "feature": "gauge_datum_msl_m",
+    "importance": 0.0,
+    "is_physics_layer": false
+  },
+  {
+    "rank": 16,
+    "feature": "water_level_m",
+    "importance": 0.0,
+    "is_physics_layer": false
+  },
+  {
+    "rank": 17,
+    "feature": "water_level_missing",
+    "importance": 0.0,
+    "is_physics_layer": false
+  },
+  {
+    "rank": 18,
+    "feature": "warning_exceedance_m",
+    "importance": 0.0,
+    "is_physics_layer": false
+  },
+  {
+    "rank": 19,
+    "feature": "danger_exceedance_m",
+    "importance": 0.0,
+    "is_physics_layer": false
+  },
+  {
+    "rank": 20,
+    "feature": "hfl_exceedance_m",
+    "importance": 0.0,
+    "is_physics_layer": false
+  },
+  {
+    "rank": 21,
+    "feature": "scs_potential_retention_s_mm",
+    "importance": 0.0,
+    "is_physics_layer": true
+  },
+  {
+    "rank": 22,
+    "feature": "topographic_runoff_potential",
+    "importance": 0.0,
+    "is_physics_layer": false
+  },
+  {
+    "rank": 23,
+    "feature": "landcover_class",
+    "importance": 0.0,
+    "is_physics_layer": false
+  },
+  {
+    "rank": 24,
+    "feature": "stream_power_index",
+    "importance": 0.0,
+    "is_physics_layer": false
+  },
+  {
+    "rank": 25,
+    "feature": "sediment_transport_index",
+    "importance": 0.0,
+    "is_physics_layer": false
+  },
+  {
+    "rank": 26,
+    "feature": "runoff_coefficient",
+    "importance": 0.0,
+    "is_physics_layer": false
+  },
+  {
+    "rank": 27,
+    "feature": "mannings_roughness_n",
+    "importance": 0.0,
+    "is_physics_layer": false
+  },
+  {
+    "rank": 28,
+    "feature": "warning_level_m",
+    "importance": 0.0,
+    "is_physics_layer": false
+  },
+  {
+    "rank": 29,
+    "feature": "weather_data_missing",
+    "importance": 0.0,
+    "is_physics_layer": false
+  },
+  {
+    "rank": 30,
+    "feature": "topographic_wetness_index",
+    "importance": 0.0,
+    "is_physics_layer": false
+  },
+  {
+    "rank": 31,
+    "feature": "drainage_network_indicator",
+    "importance": 0.0,
+    "is_physics_layer": false
+  },
+  {
+    "rank": 32,
+    "feature": "flow_accumulation_cells",
+    "importance": 0.0,
+    "is_physics_layer": false
+  },
+  {
+    "rank": 33,
+    "feature": "soil_saturation_index",
+    "importance": 0.0,
+    "is_physics_layer": false
+  },
+  {
+    "rank": 34,
+    "feature": "profile_soil_moisture_vol",
+    "importance": 0.0,
+    "is_physics_layer": false
+  },
+  {
+    "rank": 35,
+    "feature": "rootzone_soil_moisture_vol",
+    "importance": 0.0,
+    "is_physics_layer": false
+  },
+  {
+    "rank": 36,
+    "feature": "surface_pressure_hpa",
+    "importance": 0.0,
+    "is_physics_layer": false
+  },
+  {
+    "rank": 37,
+    "feature": "antecedent_precipitation_index_mm",
+    "importance": 0.0,
+    "is_physics_layer": false
+  },
+  {
+    "rank": 38,
+    "feature": "effective_precipitation_mm",
+    "importance": 0.0,
+    "is_physics_layer": false
+  },
+  {
+    "rank": 39,
+    "feature": "rainfall_trend",
+    "importance": 0.0,
+    "is_physics_layer": false
+  },
+  {
+    "rank": 40,
+    "feature": "rainfall_surge_ratio",
+    "importance": 0.0,
+    "is_physics_layer": false
+  },
+  {
+    "rank": 41,
+    "feature": "mean_rainfall_intensity_mmh",
+    "importance": 0.0,
+    "is_physics_layer": false
+  },
+  {
+    "rank": 42,
+    "feature": "rainfall_3h_mm",
+    "importance": 0.0,
+    "is_physics_layer": false
+  },
+  {
+    "rank": 43,
+    "feature": "rainfall_1h_mm",
+    "importance": 0.0,
+    "is_physics_layer": false
+  },
+  {
+    "rank": 44,
+    "feature": "rainfall_30min_mm",
+    "importance": 0.0,
+    "is_physics_layer": false
+  }
+]

@@ -1,0 +1,30 @@
+{
+  "title": "Phase 6 Upgraded Prediction Schema",
+  "columns": {
+    "sample_id": "str",
+    "sample_type": "str",
+    "spatial_id": "str",
+    "latitude": "float64",
+    "longitude": "float64",
+    "timestamp_utc": "str",
+    "district": "str",
+    "major_basin": "str",
+    "model_name": "str",
+    "model_version": "str",
+    "prediction_probability": "float32",
+    "ml_risk_class": "str",
+    "ml_decision_threshold": "float64",
+    "scs_direct_runoff_q_mm": "float64",
+    "scs_peak_runoff_potential": "float64",
+    "official_flood_status": "str",
+    "official_alert_stage": "str",
+    "warning_level_m": "float64",
+    "danger_level_m": "float64",
+    "hfl_m": "float64",
+    "water_level_m": "float64",
+    "water_level_missing": "int64",
+    "actual_label": "int64",
+    "split_group": "str"
+  },
+  "record_count": 8199
+}

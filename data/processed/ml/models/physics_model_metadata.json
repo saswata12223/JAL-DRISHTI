@@ -1,0 +1,19 @@
+{
+  "title": "SCS-CN / HEC-HMS Compatible Hydrological Physics Layer",
+  "implemented_components": [
+    "SCS-CN Direct Runoff Depth (Q) calculation using rainfall P and potential retention S",
+    "Antecedent Moisture Condition (AMC I, II, III) curve number dynamic adjustment via SMAP SSI",
+    "Initial abstraction (Ia = 0.20 * S) infiltration barrier",
+    "Slope-gravitational kinematic peak runoff wave potential scaling"
+  ],
+  "unavailable_hec_hms_components": [
+    "1D unsteady Saint-Venant cross-section hydraulic routing (requires surveyed bathymetry)",
+    "Reservoir gate operational discharge curves (requires real-time dam telemetry)"
+  ],
+  "physics_variables": [
+    "scs_potential_retention_s_mm",
+    "scs_initial_abstraction_ia_mm",
+    "scs_direct_runoff_q_mm",
+    "scs_peak_runoff_potential"
+  ]
+}

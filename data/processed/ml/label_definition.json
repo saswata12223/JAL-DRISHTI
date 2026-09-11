@@ -1,0 +1,33 @@
+{
+  "title": "Phase 5 Target Label Construction & Strategy",
+  "target_variable": "flood_event_label",
+  "label_strategy": {
+    "1": {
+      "name": "CONFIRMED_FLOOD_DISASTER",
+      "count": 15,
+      "description": "Historical high-impact flood, flash-flood, cloudburst, or GLOF disaster verified by official government agencies (NDMA/USDMA/GSI/CWC).",
+      "sources": "Phase 1H Historical Flood Events Catalog"
+    },
+    "0": {
+      "name": "CONFIRMED_QUIESCENT_BASELINE",
+      "count": 8184,
+      "description": "Verified quiescent non-disaster monitoring intervals with zero active emergency declarations.",
+      "sources": "Operational state-wide meteorological monitoring network"
+    }
+  },
+  "multiclass_taxonomy": {
+    "quiescent_monsoon_baseline": 8184,
+    "cloudburst-induced flood": 6,
+    "flash flood": 3,
+    "debris-flow/flood event": 3,
+    "extreme rainfall flood": 2,
+    "glacial lake outburst flood (GLOF)": 1
+  },
+  "severity_breakdown": {
+    "NONE": 8184,
+    "Major": 9,
+    "Catastrophic": 4,
+    "Moderate": 2
+  },
+  "prohibition_of_fake_negatives": "Unmonitored historical gaps are excluded from negative labeling to prevent noisy label contamination."
+}

@@ -1,0 +1,23 @@
+{
+  "title": "Phase 5 Temporal Alignment & Chronological Strategy Report",
+  "alignment_standard": "UTC (ISO 8601)",
+  "operational_monitoring_interval": {
+    "start_utc": "2026-08-27T00:00:00Z",
+    "end_utc": "2026-08-27T03:30:00Z",
+    "timestep_interval": "30 minutes (half-hourly)",
+    "total_timesteps": 8
+  },
+  "historical_benchmark_interval": {
+    "start_date": "1970-07-20",
+    "end_date": "2024-07-31",
+    "total_canonical_events": 15
+  },
+  "temporal_aggregation_methods": {
+    "rainfall_1h_mm": "Rolling backward sum of 2 consecutive 30-minute intervals",
+    "rainfall_3h_mm": "Rolling backward sum of 6 consecutive 30-minute intervals",
+    "max_rainfall_intensity_mmh": "Peak half-hourly intensity observed in rolling window",
+    "mean_rainfall_intensity_mmh": "Arithmetic mean half-hourly intensity over window",
+    "antecedent_precipitation_index_mm": "Recursive daily decay formulation: API_t = P_t + 0.85 * API_(t-1)"
+  },
+  "temporal_leakage_safeguards": "Strict backward-looking rolling windows only. Zero future timestamp leakage."
+}

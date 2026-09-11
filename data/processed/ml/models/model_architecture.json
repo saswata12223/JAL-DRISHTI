@@ -1,0 +1,41 @@
+{
+  "title": "FlashFloodAI PPT-Aligned Modeling Architecture",
+  "models_implemented": [
+    {
+      "name": "random_forest_baseline",
+      "type": "RandomForestClassifier",
+      "role": "Preserved Baseline"
+    },
+    {
+      "name": "xgboost",
+      "type": "XGBClassifier",
+      "role": "Primary Tabular Champion"
+    },
+    {
+      "name": "lightgbm",
+      "type": "LGBMClassifier",
+      "role": "Gradient Boosting Comparison"
+    },
+    {
+      "name": "spatiotemporal_lstm",
+      "type": "PyTorch LSTM (2 layers)",
+      "role": "Temporal Sequence Engine"
+    },
+    {
+      "name": "gnn_model",
+      "type": "PyTorch Geometric GCN",
+      "role": "Spatial Message Passing"
+    },
+    {
+      "name": "hybrid_gnn_lstm",
+      "type": "GCNConv + LSTM + MLP Head",
+      "role": "PPT Spatio-Temporal Hybrid"
+    },
+    {
+      "name": "physics_hybrid_model",
+      "type": "SCS-CN + GCNConv + LSTM",
+      "role": "Physics-Informed Hybrid"
+    }
+  ],
+  "physics_layer": "SCS-CN Runoff (Q) & Potential Retention (S) with SMAP AMC Dynamic Adjustment"
+}

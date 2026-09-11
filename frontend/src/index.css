@@ -1,0 +1,165 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root, .dark, .light {
+    /* Jal Drishti Institutional Brand System Tokens */
+    --jd-yale-blue: #0F4C81;
+    --jd-yale-dark: #0B3B66;
+    --jd-aqua-blue: #8FD3E8;
+    --jd-snow-white: #F8FAFC;
+    
+    --jd-primary: #0F4C81;
+    --jd-primary-soft: #F1F5F9;
+    --jd-background: #F8FAFC;
+    --jd-surface: #FFFFFF;
+    --jd-text: #0F172A;
+    --jd-text-secondary: #334155;
+    --jd-muted: #64748B;
+    --jd-border: #E2E8F0;
+    --jd-border-subtle: #F1F5F9;
+
+    /* Mapped App Theme Tokens */
+    --color-bg: #F8FAFC;
+    --color-surface: #FFFFFF;
+    --color-surface-elevated: #FFFFFF;
+    --color-surface-hover: #F1F5F9;
+    --color-border: #E2E8F0;
+    --color-border-subtle: #F1F5F9;
+    --color-text-primary: #0F172A;
+    --color-text-secondary: #334155;
+    --color-text-muted: #64748B;
+    --color-accent: #0F4C81;
+    --color-accent-hover: #0B3B66;
+    --color-accent-subtle: rgba(15, 76, 129, 0.08);
+    --color-card-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05);
+    --color-chart-grid: rgba(15, 23, 42, 0.06);
+  }
+
+  html, body {
+    background-color: #F8FAFC !important;
+    color: var(--color-text-primary) !important;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    margin: 0;
+    padding: 0;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+  }
+}
+
+/* Explicit App Theme Utilities */
+.bg-app-bg { background-color: #F8FAFC !important; }
+.bg-app-surface { background-color: #FFFFFF !important; }
+.bg-app-surface-elevated { background-color: #FFFFFF !important; }
+.bg-app-surface-hover:hover { background-color: #F1F5F9 !important; }
+.border-app-border { border-color: #E2E8F0 !important; }
+.border-app-border-subtle { border-color: #F1F5F9 !important; }
+.text-app-text-primary { color: #0F172A !important; }
+.text-app-text-secondary { color: #334155 !important; }
+.text-app-text-muted { color: #64748B !important; }
+
+/* Institutional Card & Header Classes */
+.glass-panel-level1 {
+  background: #FFFFFF !important;
+  border: 1px solid #E2E8F0 !important;
+  box-shadow: 0 1px 3px 0 rgba(15, 23, 42, 0.05) !important;
+}
+
+.glass-panel-level2 {
+  background: #FFFFFF !important;
+  border: 1px solid #CBD5E1 !important;
+  box-shadow: 0 2px 4px -1px rgba(15, 23, 42, 0.06) !important;
+}
+
+.glass-sidebar {
+  background: #FFFFFF !important;
+  border-right: 1px solid #E2E8F0 !important;
+}
+
+.glass-header {
+  background: #FFFFFF !important;
+  border-bottom: 1px solid #E2E8F0 !important;
+  box-shadow: 0 1px 2px 0 rgba(15, 23, 42, 0.03) !important;
+}
+
+/* Custom Primary Button Component */
+.btn-primary {
+  background-color: #0F4C81 !important;
+  color: #FFFFFF !important;
+  border: 1px solid #0B3B66 !important;
+  font-weight: 600;
+  transition: all 0.15s ease-in-out;
+}
+.btn-primary:hover {
+  background-color: #0B3B66 !important;
+  box-shadow: 0 2px 4px rgba(15, 76, 129, 0.2) !important;
+}
+
+/* Custom Clean Scrollbar */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(165, 241, 247, 0.5);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(165, 241, 247, 0.8);
+}
+
+/* Leaflet Container Overrides */
+.leaflet-container {
+  background-color: #F7FCFD !important;
+  font-family: 'Inter', sans-serif !important;
+  outline: none !important;
+  z-index: 1;
+}
+
+.leaflet-popup-content-wrapper {
+  background-color: rgba(255, 255, 255, 0.95) !important;
+  color: #102A2E !important;
+  border: 1px solid rgba(165, 241, 247, 0.4) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 10px 30px rgba(16, 42, 46, 0.12) !important;
+  backdrop-filter: blur(16px) !important;
+  padding: 4px !important;
+}
+
+.leaflet-popup-tip {
+  background-color: rgba(255, 255, 255, 0.95) !important;
+}
+
+.leaflet-popup-content {
+  margin: 8px 12px !important;
+  line-height: 1.4 !important;
+}
+
+/* Map Pulse Rings */
+@keyframes pulse-ring {
+  0% {
+    transform: scale(0.95);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.4);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+}
+
+.pulse-extreme {
+  animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+}
+

@@ -1,0 +1,309 @@
+{
+  "title": "FlashFloodAI Phase 6 Machine Learning Feature Allowlist & Leakage Control",
+  "version": "6.0.0",
+  "target_variable": "flood_event_label",
+  "allowed_predictors": [
+    {
+      "feature": "rainfall_30min_mm",
+      "group": "rainfall",
+      "rationale": "Immediate half-hourly precipitation pulse"
+    },
+    {
+      "feature": "rainfall_1h_mm",
+      "group": "rainfall",
+      "rationale": "Short-term 1-hour convective rainfall accumulation"
+    },
+    {
+      "feature": "rainfall_3h_mm",
+      "group": "rainfall",
+      "rationale": "3-hour rolling accumulated rainfall"
+    },
+    {
+      "feature": "max_rainfall_intensity_mmh",
+      "group": "rainfall",
+      "rationale": "Peak half-hourly intensity observed in window"
+    },
+    {
+      "feature": "mean_rainfall_intensity_mmh",
+      "group": "rainfall",
+      "rationale": "Mean rainfall intensity over window"
+    },
+    {
+      "feature": "rainfall_trend",
+      "group": "rainfall",
+      "rationale": "Temporal derivative of rainfall intensity"
+    },
+    {
+      "feature": "rainfall_surge_ratio",
+      "group": "rainfall",
+      "rationale": "Convective surge index (peak/mean intensity ratio)"
+    },
+    {
+      "feature": "effective_precipitation_mm",
+      "group": "rainfall",
+      "rationale": "Direct runoff-generating rainfall scaled by soil saturation"
+    },
+    {
+      "feature": "antecedent_precipitation_index_mm",
+      "group": "rainfall",
+      "rationale": "Antecedent moisture accumulation API"
+    },
+    {
+      "feature": "surface_soil_moisture_vol",
+      "group": "soil",
+      "rationale": "SMAP 0-5cm surface volumetric soil moisture"
+    },
+    {
+      "feature": "rootzone_soil_moisture_vol",
+      "group": "soil",
+      "rationale": "SMAP 0-100cm rootzone volumetric soil moisture"
+    },
+    {
+      "feature": "profile_soil_moisture_vol",
+      "group": "soil",
+      "rationale": "SMAP profile volumetric soil moisture"
+    },
+    {
+      "feature": "soil_saturation_index",
+      "group": "soil",
+      "rationale": "Combined surface and rootzone soil saturation index"
+    },
+    {
+      "feature": "ambient_temperature_c",
+      "group": "weather",
+      "rationale": "Surface air temperature from nearest IMD station"
+    },
+    {
+      "feature": "relative_humidity_pct",
+      "group": "weather",
+      "rationale": "Relative humidity percentage"
+    },
+    {
+      "feature": "surface_pressure_hpa",
+      "group": "weather",
+      "rationale": "Barometric pressure indicator of convective storm activity"
+    },
+    {
+      "feature": "wind_speed_ms",
+      "group": "weather",
+      "rationale": "Surface wind speed"
+    },
+    {
+      "feature": "weather_data_missing",
+      "group": "weather",
+      "rationale": "Binary indicator for missing local weather observations"
+    },
+    {
+      "feature": "elevation_m",
+      "group": "terrain",
+      "rationale": "SRTM DEM surface elevation in meters MSL"
+    },
+    {
+      "feature": "slope_deg",
+      "group": "terrain",
+      "rationale": "Terrain slope angle driving gravitational runoff acceleration"
+    },
+    {
+      "feature": "flow_accumulation_cells",
+      "group": "terrain",
+      "rationale": "Upslope contributing area in cells"
+    },
+    {
+      "feature": "drainage_network_indicator",
+      "group": "terrain",
+      "rationale": "Binary stream channel presence indicator"
+    },
+    {
+      "feature": "topographic_wetness_index",
+      "group": "terrain",
+      "rationale": "Topographic Wetness Index (soil water convergence)"
+    },
+    {
+      "feature": "stream_power_index",
+      "group": "terrain",
+      "rationale": "Stream Power Index (erosive flow power)"
+    },
+    {
+      "feature": "sediment_transport_index",
+      "group": "terrain",
+      "rationale": "Sediment Transport Index (debris-flow potential)"
+    },
+    {
+      "feature": "topographic_runoff_potential",
+      "group": "terrain",
+      "rationale": "Topographic Runoff Potential (accum x sin(slope))"
+    },
+    {
+      "feature": "flash_flood_susceptibility_index",
+      "group": "terrain",
+      "rationale": "Multi-criteria Flash Flood Susceptibility Index (FFSI)"
+    },
+    {
+      "feature": "landcover_class",
+      "group": "landcover",
+      "rationale": "Categorical ESA WorldCover class code (10-100)"
+    },
+    {
+      "feature": "runoff_coefficient",
+      "group": "landcover",
+      "rationale": "Hydrological runoff coefficient C [0.10, 0.85]"
+    },
+    {
+      "feature": "mannings_roughness_n",
+      "group": "landcover",
+      "rationale": "Manning's surface hydraulic roughness coefficient"
+    },
+    {
+      "feature": "nearest_cwc_station_dist_km",
+      "group": "cwc_reference",
+      "rationale": "Proximity to nearest monitored river gauge site"
+    },
+    {
+      "feature": "warning_level_m",
+      "group": "cwc_reference",
+      "rationale": "Official CWC warning stage benchmark"
+    },
+    {
+      "feature": "danger_level_m",
+      "group": "cwc_reference",
+      "rationale": "Official CWC danger stage benchmark"
+    },
+    {
+      "feature": "hfl_m",
+      "group": "cwc_reference",
+      "rationale": "Official CWC Highest Flood Level benchmark"
+    },
+    {
+      "feature": "gauge_datum_msl_m",
+      "group": "cwc_reference",
+      "rationale": "Official CWC zero gauge datum"
+    },
+    {
+      "feature": "water_level_m",
+      "group": "cwc_reference",
+      "rationale": "Observed water level (NaN when offline)"
+    },
+    {
+      "feature": "water_level_missing",
+      "group": "cwc_reference",
+      "rationale": "Binary missing indicator for live river telemetry"
+    },
+    {
+      "feature": "warning_exceedance_m",
+      "group": "cwc_reference",
+      "rationale": "Stage exceedance above warning level (NaN when offline)"
+    },
+    {
+      "feature": "danger_exceedance_m",
+      "group": "cwc_reference",
+      "rationale": "Stage exceedance above danger level (NaN when offline)"
+    },
+    {
+      "feature": "hfl_exceedance_m",
+      "group": "cwc_reference",
+      "rationale": "Stage exceedance above HFL (NaN when offline)"
+    }
+  ],
+  "excluded_features": [
+    {
+      "feature": "sample_id",
+      "reason": "Unique row identifier; contains temporal/spatial coordinates"
+    },
+    {
+      "feature": "sample_type",
+      "reason": "Structural metadata grouping representation"
+    },
+    {
+      "feature": "spatial_id",
+      "reason": "Categorical coordinate tag; prevents overfitting on specific lat/lon"
+    },
+    {
+      "feature": "latitude",
+      "reason": "Direct spatial coordinate; excluded to force learning on physical terrain features rather than memorizing locations"
+    },
+    {
+      "feature": "longitude",
+      "reason": "Direct spatial coordinate; excluded to force spatial generalization"
+    },
+    {
+      "feature": "timestamp_utc",
+      "reason": "Temporal identifier; prevents chronological target leakage"
+    },
+    {
+      "feature": "district",
+      "reason": "Administrative string; excluded from direct model inputs"
+    },
+    {
+      "feature": "major_basin",
+      "reason": "Basin name string; excluded to ensure hydrodynamic features drive predictions"
+    },
+    {
+      "feature": "nearest_weather_station_id",
+      "reason": "Station ID code; metadata only"
+    },
+    {
+      "feature": "nearest_cwc_station_id",
+      "reason": "Station ID code; metadata only"
+    },
+    {
+      "feature": "nearest_cwc_station_name",
+      "reason": "Station name string; metadata only"
+    },
+    {
+      "feature": "landcover_name",
+      "reason": "String representation of landcover_class; redundant with numerical class code"
+    },
+    {
+      "feature": "historical_event_id",
+      "reason": "Post-event label attribute; severe target leakage if used"
+    },
+    {
+      "feature": "flood_event_label",
+      "reason": "Primary target variable"
+    },
+    {
+      "feature": "flood_event_type",
+      "reason": "Target multiclass taxonomy; target leakage if used as input"
+    },
+    {
+      "feature": "severity_category",
+      "reason": "Target severity outcome; target leakage if used as input"
+    },
+    {
+      "feature": "label_confidence",
+      "reason": "Label attribution metadata"
+    },
+    {
+      "feature": "split_group",
+      "reason": "Partition assignment indicator"
+    },
+    {
+      "feature": "split_rationale",
+      "reason": "Partition rationale metadata"
+    },
+    {
+      "feature": "official_flood_status",
+      "reason": "CWC rule-based alert status output; target-adjacent"
+    },
+    {
+      "feature": "official_alert_stage",
+      "reason": "CWC rule-based alert stage output; target-adjacent"
+    },
+    {
+      "feature": "deaths",
+      "reason": "Disaster aftermath casualty figure (post-event information)"
+    },
+    {
+      "feature": "missing_persons",
+      "reason": "Disaster aftermath figure (post-event information)"
+    },
+    {
+      "feature": "affected_population",
+      "reason": "Disaster aftermath impact figure (post-event information)"
+    },
+    {
+      "feature": "infrastructure_damage",
+      "reason": "Disaster aftermath description (post-event information)"
+    }
+  ]
+}

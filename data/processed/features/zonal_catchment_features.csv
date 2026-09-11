@@ -1,0 +1,14 @@
+district,division,latitude,longitude,major_basin,sub_basins,mean_elevation_m,mean_slope_deg,mean_twi,mean_runoff_coefficient,flash_flood_susceptibility_index,max_stream_power_index,rainfall_3h_mm,soil_saturation_index,effective_precipitation_mm,antecedent_precipitation_index_mm,rainfall_surge_ratio
+Chamoli,Garhwal,30.412,79.431,Alaknanda Basin,"Birahi Ganga, Rishi Ganga, Dhauliganga, Nandakini",2574.25,28.24,6.5,0.258,0.376,100000.0,0.48,0.82,0.43,0.42,3.36
+Rudraprayag,Garhwal,30.285,78.981,Mandakini Basin,"Mandakini, Madhyamaheshwar, Kali Ganga",1733.7,23.52,6.54,0.197,0.298,94838.23,0.44,0.841,0.4,0.4,5.41
+Uttarkashi,Garhwal,30.726,78.435,Bhagirathi & Tons Basins,"Bhagirathi, Asi Ganga, Tons, Supin",2212.36,25.27,6.51,0.208,0.32,100000.0,0.95,0.849,0.86,0.75,3.49
+Tehri Garhwal,Garhwal,30.38,78.48,Bhagirathi & Bhilangna Basins,"Bhilangna, Song, Ganga",1484.94,24.08,6.49,0.207,0.304,81588.33,0.0,0.839,0.0,0.34,7.71
+Pauri Garhwal,Garhwal,29.868,78.78,Alaknanda & Western Ramganga Basins,"Alaknanda, Khoh, Malini, Nayar",1206.83,20.91,6.58,0.186,0.27,45329.4,1.49,0.731,1.24,2.33,4.61
+Dehradun,Garhwal,30.316,78.032,Yamuna & Ganga Basins,"Yamuna, Tons, Song, Bandal, Asan",915.1,12.07,7.59,0.234,0.24,75272.66,1.24,0.706,1.0,0.96,2.88
+Haridwar,Garhwal,29.956,78.171,Ganga Basin,"Ganga, Solani, Ranipur Rao",451.35,6.52,8.28,0.256,0.22,30231.21,0.0,0.48,0.0,0.54,7.53
+Pithoragarh,Kumaon,29.583,80.216,Kali / Sharda Basin,"Kali, Gori Ganga, Dhauli Ganga (East), Sarju",1326.8,22.44,6.55,0.198,0.287,63530.0,3.58,0.909,3.37,2.73,1.74
+Bageshwar,Kumaon,29.84,79.77,Saryu Basin,"Saryu, Gomati, Pindar (head)",1622.43,21.04,6.62,0.197,0.281,62446.69,4.47,0.865,4.09,3.2,1.67
+Almora,Kumaon,29.597,79.659,Kosi & Western Ramganga Basins,"Kosi, Suyal, Western Ramganga",1583.5,19.01,6.69,0.198,0.266,66019.34,1.51,0.813,1.34,1.52,4.24
+Champawat,Kumaon,29.333,80.1,Kali / Sharda Basin,"Lodhiva, Sharda, Lohawati",1150.82,20.86,6.65,0.194,0.272,55194.96,7.23,0.907,6.81,6.17,1.85
+Nainital,Kumaon,29.38,79.45,Gaula & Kosi Basins,"Gaula, Kosi, Nandhaur, Bhakra",1076.91,15.06,7.32,0.208,0.244,66945.59,4.89,0.811,4.3,4.91,3.28
+Udham Singh Nagar,Kumaon,28.98,79.4,Tarai-Ganga Basins,"Kalyani, Dhandi, Baur, Haripura",235.64,1.17,9.11,0.332,0.248,18825.12,19.91,0.691,16.0,12.74,2.29

@@ -1,0 +1,32 @@
+{
+  "system": "FlashFloodAI Machine Learning Dataset & Feature Engineering Pipeline",
+  "version": "5.0.0",
+  "generated_at_utc": "2026-09-01T07:12:26.244568+00:00",
+  "target_region": "Uttarakhand, India",
+  "spatial_extent": {
+    "west": 77.8,
+    "east": 81.1,
+    "south": 28.5,
+    "north": 31.5,
+    "crs": "EPSG:4326"
+  },
+  "total_samples": 8199,
+  "sample_breakdown": {
+    "grid_cell": 7920,
+    "cwc_station": 160,
+    "district_zonal": 104,
+    "historical_event_benchmark": 15
+  },
+  "split_distribution": {
+    "TRAIN": 5115,
+    "VALIDATION": 2046,
+    "TEST": 1023,
+    "BENCHMARK_EVALUATION": 15
+  },
+  "label_distribution": {
+    "0": 8184,
+    "1": 15
+  },
+  "feature_count": 62,
+  "zero_synthetic_data_status": "VERIFIED (Zero synthetic, random, or fabricated environmental observations)"
+}

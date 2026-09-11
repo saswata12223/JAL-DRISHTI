@@ -1,0 +1,492 @@
+{
+  "type": "FeatureCollection",
+  "name": "Uttarakhand_CWC_Flood_Thresholds",
+  "crs": {
+    "type": "name",
+    "properties": {
+      "name": "urn:ogc:def:crs:OGC:1.3:CRS84"
+    }
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          78.599,
+          30.146
+        ]
+      },
+      "properties": {
+        "station_id": "CWC_UK_001",
+        "station_name": "Devprayag",
+        "river_name": "Ganga (Alaknanda-Bhagirathi Confluence)",
+        "district": "Tehri / Pauri Garhwal",
+        "gauge_datum_msl_m": 450.0,
+        "warning_level_m": 461.5,
+        "danger_level_m": 463.0,
+        "hfl_m": 465.2,
+        "hfl_date": "2013-06-17",
+        "provenance_classification": "DIRECT_CWC",
+        "threshold_status": "VERIFIED_OFFICIAL_CWC",
+        "source_agency": "Central Water Commission (CWC), Ministry of Jal Shakti"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          78.293,
+          30.108
+        ]
+      },
+      "properties": {
+        "station_id": "CWC_UK_002",
+        "station_name": "Rishikesh",
+        "river_name": "Ganga",
+        "district": "Dehradun",
+        "gauge_datum_msl_m": 330.0,
+        "warning_level_m": 339.5,
+        "danger_level_m": 340.5,
+        "hfl_m": 341.2,
+        "hfl_date": "2013-06-17",
+        "provenance_classification": "DIRECT_CWC",
+        "threshold_status": "VERIFIED_OFFICIAL_CWC",
+        "source_agency": "Central Water Commission (CWC) / USDMA"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          78.171,
+          29.956
+        ]
+      },
+      "properties": {
+        "station_id": "CWC_UK_003",
+        "station_name": "Haridwar (Bhimgoda Barrage)",
+        "river_name": "Ganga",
+        "district": "Haridwar",
+        "gauge_datum_msl_m": 285.0,
+        "warning_level_m": 293.0,
+        "danger_level_m": 294.0,
+        "hfl_m": 295.3,
+        "hfl_date": "2010-09-19",
+        "provenance_classification": "DIRECT_CWC",
+        "threshold_status": "VERIFIED_OFFICIAL_CWC",
+        "source_agency": "Central Water Commission (CWC) & UP Irrigation Department"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          79.567,
+          30.559
+        ]
+      },
+      "properties": {
+        "station_id": "CWC_UK_004",
+        "station_name": "Joshimath (Marwari)",
+        "river_name": "Alaknanda",
+        "district": "Chamoli",
+        "gauge_datum_msl_m": 1365.0,
+        "warning_level_m": 1378.0,
+        "danger_level_m": 1380.0,
+        "hfl_m": 1383.5,
+        "hfl_date": "2021-02-07",
+        "provenance_classification": "DIRECT_CWC",
+        "threshold_status": "VERIFIED_OFFICIAL_CWC",
+        "source_agency": "Central Water Commission (CWC) Alaknanda Division Dehradun"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          79.317,
+          30.331
+        ]
+      },
+      "properties": {
+        "station_id": "CWC_UK_005",
+        "station_name": "Nandprayag",
+        "river_name": "Alaknanda (Confluence with Nandakini)",
+        "district": "Chamoli",
+        "gauge_datum_msl_m": 860.0,
+        "warning_level_m": 870.0,
+        "danger_level_m": 872.0,
+        "hfl_m": 874.1,
+        "hfl_date": "2013-06-17",
+        "provenance_classification": "DIRECT_CWC",
+        "threshold_status": "VERIFIED_OFFICIAL_CWC",
+        "source_agency": "Central Water Commission (CWC)"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          79.219,
+          30.258
+        ]
+      },
+      "properties": {
+        "station_id": "CWC_UK_006",
+        "station_name": "Karanprayag",
+        "river_name": "Alaknanda (Confluence with Pindar)",
+        "district": "Chamoli",
+        "gauge_datum_msl_m": 755.0,
+        "warning_level_m": 765.0,
+        "danger_level_m": 767.0,
+        "hfl_m": 769.8,
+        "hfl_date": "2013-06-17",
+        "provenance_classification": "DIRECT_CWC",
+        "threshold_status": "VERIFIED_OFFICIAL_CWC",
+        "source_agency": "Central Water Commission (CWC)"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          78.981,
+          30.285
+        ]
+      },
+      "properties": {
+        "station_id": "CWC_UK_007",
+        "station_name": "Rudraprayag",
+        "river_name": "Alaknanda (Confluence with Mandakini)",
+        "district": "Rudraprayag",
+        "gauge_datum_msl_m": 615.0,
+        "warning_level_m": 624.0,
+        "danger_level_m": 626.0,
+        "hfl_m": 628.9,
+        "hfl_date": "2013-06-17",
+        "provenance_classification": "DIRECT_CWC",
+        "threshold_status": "VERIFIED_OFFICIAL_CWC",
+        "source_agency": "Central Water Commission (CWC)"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          78.784,
+          30.222
+        ]
+      },
+      "properties": {
+        "station_id": "CWC_UK_008",
+        "station_name": "Srinagar",
+        "river_name": "Alaknanda",
+        "district": "Pauri Garhwal",
+        "gauge_datum_msl_m": 525.0,
+        "warning_level_m": 535.0,
+        "danger_level_m": 536.0,
+        "hfl_m": 538.5,
+        "hfl_date": "2013-06-17",
+        "provenance_classification": "DIRECT_CWC",
+        "threshold_status": "VERIFIED_OFFICIAL_CWC",
+        "source_agency": "Central Water Commission (CWC)"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          78.435,
+          30.727
+        ]
+      },
+      "properties": {
+        "station_id": "CWC_UK_009",
+        "station_name": "Uttarkashi",
+        "river_name": "Bhagirathi",
+        "district": "Uttarkashi",
+        "gauge_datum_msl_m": 1110.0,
+        "warning_level_m": 1122.0,
+        "danger_level_m": 1124.0,
+        "hfl_m": 1126.5,
+        "hfl_date": "2012-08-04",
+        "provenance_classification": "DIRECT_CWC",
+        "threshold_status": "VERIFIED_OFFICIAL_CWC",
+        "source_agency": "Central Water Commission (CWC) Bhagirathi Division"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          78.481,
+          30.378
+        ]
+      },
+      "properties": {
+        "station_id": "CWC_UK_010",
+        "station_name": "Tehri (Zero Point / Reservoir)",
+        "river_name": "Bhagirathi",
+        "district": "Tehri Garhwal",
+        "gauge_datum_msl_m": 800.0,
+        "warning_level_m": 828.0,
+        "danger_level_m": 830.0,
+        "hfl_m": 835.0,
+        "hfl_date": "2010-09-20",
+        "provenance_classification": "OFFICIAL_GOVERNMENT_DOCUMENT",
+        "threshold_status": "VERIFIED_OFFICIAL_CWC",
+        "source_agency": "THDC India Limited & Central Water Commission (CWC)"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          79.091,
+          30.505
+        ]
+      },
+      "properties": {
+        "station_id": "CWC_UK_011",
+        "station_name": "Kund (Guptkashi)",
+        "river_name": "Mandakini",
+        "district": "Rudraprayag",
+        "gauge_datum_msl_m": 905.0,
+        "warning_level_m": 920.0,
+        "danger_level_m": 922.0,
+        "hfl_m": 925.0,
+        "hfl_date": "2013-06-17",
+        "provenance_classification": "DIRECT_CWC",
+        "threshold_status": "VERIFIED_OFFICIAL_CWC",
+        "source_agency": "Central Water Commission (CWC)"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.788,
+          30.505
+        ]
+      },
+      "properties": {
+        "station_id": "CWC_UK_012",
+        "station_name": "Dakpathar",
+        "river_name": "Yamuna",
+        "district": "Dehradun",
+        "gauge_datum_msl_m": 445.0,
+        "warning_level_m": 454.0,
+        "danger_level_m": 456.0,
+        "hfl_m": 458.2,
+        "hfl_date": "2013-06-17",
+        "provenance_classification": "DIRECT_CWC",
+        "threshold_status": "VERIFIED_OFFICIAL_CWC",
+        "source_agency": "Central Water Commission (CWC) & UJVNL"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.85,
+          30.533
+        ]
+      },
+      "properties": {
+        "station_id": "CWC_UK_013",
+        "station_name": "Kalsi (Hari-ki-Doon)",
+        "river_name": "Tons",
+        "district": "Dehradun",
+        "gauge_datum_msl_m": 500.0,
+        "warning_level_m": 510.0,
+        "danger_level_m": 512.0,
+        "hfl_m": 514.0,
+        "hfl_date": "2019-08-19",
+        "provenance_classification": "DIRECT_CWC",
+        "threshold_status": "VERIFIED_OFFICIAL_CWC",
+        "source_agency": "Central Water Commission (CWC) Tons Sub-Division"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          80.54,
+          29.851
+        ]
+      },
+      "properties": {
+        "station_id": "CWC_UK_014",
+        "station_name": "Dharchula",
+        "river_name": "Kali (Mahakali)",
+        "district": "Pithoragarh",
+        "gauge_datum_msl_m": 875.0,
+        "warning_level_m": 889.0,
+        "danger_level_m": 890.0,
+        "hfl_m": 892.5,
+        "hfl_date": "2013-06-17",
+        "provenance_classification": "DIRECT_CWC",
+        "threshold_status": "VERIFIED_OFFICIAL_CWC",
+        "source_agency": "Central Water Commission (CWC) & Indo-Nepal Joint River Commission"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          80.376,
+          29.752
+        ]
+      },
+      "properties": {
+        "station_id": "CWC_UK_015",
+        "station_name": "Jauljibi",
+        "river_name": "Kali (Confluence with Gori Ganga)",
+        "district": "Pithoragarh",
+        "gauge_datum_msl_m": 595.0,
+        "warning_level_m": 606.0,
+        "danger_level_m": 608.0,
+        "hfl_m": 610.5,
+        "hfl_date": "2013-06-17",
+        "provenance_classification": "DIRECT_CWC",
+        "threshold_status": "VERIFIED_OFFICIAL_CWC",
+        "source_agency": "Central Water Commission (CWC)"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          80.38,
+          29.575
+        ]
+      },
+      "properties": {
+        "station_id": "CWC_UK_016",
+        "station_name": "Jhoolaghat",
+        "river_name": "Kali",
+        "district": "Pithoragarh",
+        "gauge_datum_msl_m": 550.0,
+        "warning_level_m": 563.0,
+        "danger_level_m": 565.0,
+        "hfl_m": 567.0,
+        "hfl_date": "2013-06-17",
+        "provenance_classification": "DIRECT_CWC",
+        "threshold_status": "VERIFIED_OFFICIAL_CWC",
+        "source_agency": "Central Water Commission (CWC)"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          80.252,
+          29.438
+        ]
+      },
+      "properties": {
+        "station_id": "CWC_UK_017",
+        "station_name": "Pancheshwar",
+        "river_name": "Kali (Confluence with Saryu)",
+        "district": "Champawat",
+        "gauge_datum_msl_m": 415.0,
+        "warning_level_m": 428.0,
+        "danger_level_m": 430.0,
+        "hfl_m": 433.0,
+        "hfl_date": "2013-06-17",
+        "provenance_classification": "DIRECT_CWC",
+        "threshold_status": "VERIFIED_OFFICIAL_CWC",
+        "source_agency": "Central Water Commission (CWC) / Pancheshwar Development Authority"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          80.076,
+          28.995
+        ]
+      },
+      "properties": {
+        "station_id": "CWC_UK_018",
+        "station_name": "Banbasa (Sharda Barrage)",
+        "river_name": "Sharda / Kali",
+        "district": "Champawat",
+        "gauge_datum_msl_m": 215.0,
+        "warning_level_m": 220.5,
+        "danger_level_m": 221.7,
+        "hfl_m": 223.2,
+        "hfl_date": "2021-10-19",
+        "provenance_classification": "DIRECT_CWC",
+        "threshold_status": "VERIFIED_OFFICIAL_CWC",
+        "source_agency": "Central Water Commission (CWC) & UP/Uttarakhand Irrigation Dept"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          79.771,
+          29.839
+        ]
+      },
+      "properties": {
+        "station_id": "CWC_UK_019",
+        "station_name": "Bageshwar",
+        "river_name": "Saryu (Confluence with Gomati)",
+        "district": "Bageshwar",
+        "gauge_datum_msl_m": 845.0,
+        "warning_level_m": 855.0,
+        "danger_level_m": 857.0,
+        "hfl_m": 859.0,
+        "hfl_date": "2013-06-17",
+        "provenance_classification": "DIRECT_CWC",
+        "threshold_status": "VERIFIED_OFFICIAL_CWC",
+        "source_agency": "Central Water Commission (CWC) Saryu Sub-Division"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          79.352,
+          29.878
+        ]
+      },
+      "properties": {
+        "station_id": "CWC_UK_020",
+        "station_name": "Chaukhutia",
+        "river_name": "Western Ramganga",
+        "district": "Almora",
+        "gauge_datum_msl_m": 910.0,
+        "warning_level_m": 920.0,
+        "danger_level_m": 922.0,
+        "hfl_m": 924.5,
+        "hfl_date": "2010-09-19",
+        "provenance_classification": "DIRECT_CWC",
+        "threshold_status": "VERIFIED_OFFICIAL_CWC",
+        "source_agency": "Central Water Commission (CWC) Ramganga Division"
+      }
+    }
+  ]
+}

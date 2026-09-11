@@ -1,0 +1,52 @@
+{
+  "acquisition_time_utc": "2026-08-29T08:54:29.159077+00:00",
+  "product": "NASA / USGS SRTM 90m Digital Elevation Model (v4.1)",
+  "source_provider": "CGIAR-CSI / NASA JPL / USGS",
+  "source_url_template": "https://srtm.csi.cgiar.org/wp-content/uploads/files/srtm_5x5/TIFF/{}.zip",
+  "tiles_ingested": [
+    "srtm_52_06",
+    "srtm_53_06",
+    "srtm_52_07",
+    "srtm_53_07"
+  ],
+  "target_region": "Uttarakhand, India",
+  "bounding_box": {
+    "west": 77.8,
+    "east": 81.1,
+    "south": 28.5,
+    "north": 31.5
+  },
+  "spatial_metadata": {
+    "crs": "EPSG:4326 (WGS 84)",
+    "pixel_resolution_deg": 0.0008333333333333334,
+    "pixel_resolution_approx_m": 90.0,
+    "grid_dimensions": {
+      "rows_lat": 3600,
+      "cols_lon": 3961,
+      "total_pixels": 14259600
+    },
+    "lon_range": [
+      77.79958333333333,
+      81.09958333333333
+    ],
+    "lat_range": [
+      28.500416666666666,
+      31.499583333333334
+    ],
+    "nodata_value": -32768,
+    "nodata_pixel_count": 0,
+    "valid_pixel_percentage": 100.0
+  },
+  "elevation_statistics_meters": {
+    "minimum_elevation": 142.0,
+    "maximum_elevation": 7512.0,
+    "mean_elevation": 2244.15,
+    "std_elevation": 1915.7,
+    "vertical_units": "meters"
+  },
+  "file_artifacts": {
+    "raw_tiles_directory": "C:\\FlashFloodAI\\data\\raw\\srtm",
+    "processed_geotiff": "C:\\FlashFloodAI\\data\\processed\\srtm\\srtm_uttarakhand_dem.tif",
+    "processed_netcdf": "C:\\FlashFloodAI\\data\\processed\\srtm\\srtm_uttarakhand_dem.nc"
+  }
+}

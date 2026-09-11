@@ -1,0 +1,27 @@
+{
+  "title": "Phase 5 Recommended Train, Validation, and Test Split Strategy",
+  "split_type": "Chronological Time-Aware & Out-of-Sample Historical Benchmark Partitioning",
+  "partitions": {
+    "TRAIN": {
+      "count": 5115,
+      "percentage": 62.39,
+      "description": "Operational early intervals (t=0..4 / 00:00Z to 02:00Z)"
+    },
+    "VALIDATION": {
+      "count": 2046,
+      "percentage": 24.95,
+      "description": "Operational intermediate intervals (t=5..6 / 02:30Z to 03:00Z)"
+    },
+    "TEST": {
+      "count": 1023,
+      "percentage": 12.48,
+      "description": "Operational holdout interval (t=7 / 03:30Z)"
+    },
+    "BENCHMARK_EVALUATION": {
+      "count": 15,
+      "percentage": 0.18,
+      "description": "15 canonical historical disaster events (1970\u20132024) for out-of-time hindcast evaluation"
+    }
+  },
+  "recommendation_for_phase6": "Use chronological rolling-window CV or spatial block cross-validation to account for mountain topography and weather persistence."
+}

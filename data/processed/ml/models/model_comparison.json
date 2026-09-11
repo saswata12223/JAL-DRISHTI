@@ -1,0 +1,135 @@
+{
+  "random_forest_baseline": {
+    "model_family": "RandomForest (Baseline)",
+    "accuracy": 1.0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1_score": 1.0,
+    "roc_auc": 1.0,
+    "brier_score": 7e-06,
+    "confusion_matrix": [
+      [
+        2046,
+        0
+      ],
+      [
+        0,
+        3
+      ]
+    ]
+  },
+  "xgboost": {
+    "model_family": "XGBoost Classifier",
+    "accuracy": 1.0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1_score": 1.0,
+    "roc_auc": 1.0,
+    "brier_score": 3e-06,
+    "confusion_matrix": [
+      [
+        2046,
+        0
+      ],
+      [
+        0,
+        3
+      ]
+    ]
+  },
+  "lightgbm": {
+    "model_family": "LightGBM Classifier",
+    "accuracy": 1.0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1_score": 1.0,
+    "roc_auc": 1.0,
+    "brier_score": 0.0,
+    "confusion_matrix": [
+      [
+        2046,
+        0
+      ],
+      [
+        0,
+        3
+      ]
+    ]
+  },
+  "spatiotemporal_lstm": {
+    "model_family": "Spatio-Temporal LSTM",
+    "accuracy": 1.0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1_score": 1.0,
+    "roc_auc": 1.0,
+    "brier_score": 0.0,
+    "confusion_matrix": [
+      [
+        2046,
+        0
+      ],
+      [
+        0,
+        3
+      ]
+    ]
+  },
+  "gnn_model": {
+    "model_family": "PyG Graph Neural Network (GCN)",
+    "accuracy": 0.99854,
+    "precision": 0.0,
+    "recall": 0.0,
+    "f1_score": 0.0,
+    "roc_auc": 0.54863,
+    "brier_score": 0.001464,
+    "confusion_matrix": [
+      [
+        2046,
+        0
+      ],
+      [
+        3,
+        0
+      ]
+    ]
+  },
+  "hybrid_gnn_lstm": {
+    "model_family": "Hybrid GNN + Spatio-Temporal LSTM",
+    "accuracy": 0.99805,
+    "precision": 0.42857,
+    "recall": 1.0,
+    "f1_score": 0.6,
+    "roc_auc": 0.99902,
+    "brier_score": 0.001952,
+    "confusion_matrix": [
+      [
+        2042,
+        4
+      ],
+      [
+        0,
+        3
+      ]
+    ]
+  },
+  "physics_hybrid_model": {
+    "model_family": "Physics-Informed Hybrid (SCS-CN + GNN-LSTM)",
+    "accuracy": 0.99805,
+    "precision": 0.42857,
+    "recall": 1.0,
+    "f1_score": 0.6,
+    "roc_auc": 0.99902,
+    "brier_score": 0.001952,
+    "confusion_matrix": [
+      [
+        2042,
+        4
+      ],
+      [
+        0,
+        3
+      ]
+    ]
+  }
+}

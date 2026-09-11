@@ -1,0 +1,35 @@
+{
+  "report_title": "FlashFloodAI Phase 3 Multimodal Feature Engineering Quality Report",
+  "generated_at_utc": "2026-09-01T07:10:13.051600+00:00",
+  "target_region": "Uttarakhand, India",
+  "spatial_crs": "EPSG:4326",
+  "total_features_engineered": 26,
+  "zero_synthetic_data_status": "VERIFIED (Zero artificial, synthetic, or placeholder observations)",
+  "metrics": {
+    "static_features": {
+      "total_bands": 13,
+      "grid_dimensions": [
+        3600,
+        3961
+      ],
+      "spi_mean": 338.62847900390625,
+      "sti_mean": 32.11922836303711,
+      "trp_mean": 0.13999779522418976,
+      "ffsi_mean": 0.34717613458633423,
+      "ffsi_max": 0.8483566045761108
+    },
+    "dynamic_features": {
+      "total_variables": 13,
+      "time_steps": 8,
+      "ssi_mean": 0.7877492308616638,
+      "peff_max": 51.222511291503906,
+      "api_max": 44.88963317871094,
+      "surge_ratio_mean": 2.8038265705108643
+    },
+    "zonal_catchments": {
+      "districts_count": 13,
+      "highest_susceptibility_district": "Chamoli",
+      "highest_effective_rainfall_district": "Udham Singh Nagar"
+    }
+  }
+}

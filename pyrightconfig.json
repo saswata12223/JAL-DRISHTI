@@ -1,0 +1,19 @@
+{
+  "venvPath": ".",
+  "venv": ".venv",
+  "extraPaths": [
+    "backend",
+    "."
+  ],
+  "include": [
+    "backend",
+    "scripts",
+    "ml",
+    "pipelines",
+    "tests"
+  ],
+  "exclude": [
+    "**/node_modules",
+    "**/.venv"
+  ]
+}

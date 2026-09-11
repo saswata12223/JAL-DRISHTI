@@ -1,0 +1,99 @@
+{
+  "system": "FlashFloodAI Government-Aligned Flood Threshold & Risk Label Engine",
+  "version": "4.0.0",
+  "target_region": "Uttarakhand, India",
+  "standards_authority": "Central Water Commission (CWC), Ministry of Jal Shakti, Government of India",
+  "classification_rules": {
+    "NORMAL": {
+      "condition": "water_level < warning_level_m",
+      "alert_stage": "NONE",
+      "description": "River stage below official CWC warning level. River within normal monsoonal channel capacity."
+    },
+    "ABOVE_NORMAL": {
+      "condition": "warning_level_m <= water_level < danger_level_m",
+      "alert_stage": "YELLOW",
+      "description": "River stage has reached or exceeded official warning level. Low-lying riparian floodplains on notice."
+    },
+    "SEVERE": {
+      "condition": "danger_level_m <= water_level < hfl_m",
+      "alert_stage": "ORANGE",
+      "description": "River stage has breached official danger level. Embankment overtopping, structural inundation active."
+    },
+    "EXTREME": {
+      "condition": "water_level >= hfl_m",
+      "alert_stage": "RED",
+      "description": "River stage has exceeded historical all-time Highest Flood Level (HFL). Catastrophic inundation."
+    },
+    "DATA_UNAVAILABLE": {
+      "condition": "water_level is null / NaN",
+      "alert_stage": "UNKNOWN",
+      "description": "Live gauge telemetry offline (HTTP 503 / sensor maintenance). Missing values preserved as null."
+    }
+  },
+  "risk_variables": {
+    "gauge_datum_msl_m": {
+      "units": "meters (m MSL)",
+      "description": "Station zero gauge datum elevation above MSL"
+    },
+    "warning_level_m": {
+      "units": "meters (m MSL)",
+      "description": "Official CWC warning stage benchmark"
+    },
+    "danger_level_m": {
+      "units": "meters (m MSL)",
+      "description": "Official CWC danger stage benchmark"
+    },
+    "hfl_m": {
+      "units": "meters (m MSL)",
+      "description": "Official CWC Highest Flood Level (all-time peak)"
+    },
+    "water_level_m": {
+      "units": "meters (m MSL)",
+      "description": "Current observed water level above MSL"
+    },
+    "warning_exceedance_m": {
+      "units": "meters (m)",
+      "description": "Water level exceedance above warning level"
+    },
+    "danger_exceedance_m": {
+      "units": "meters (m)",
+      "description": "Water level exceedance above danger level"
+    },
+    "hfl_exceedance_m": {
+      "units": "meters (m)",
+      "description": "Water level exceedance above HFL"
+    },
+    "warning_ratio": {
+      "units": "dimensionless ratio",
+      "description": "Ratio of water level to warning level"
+    },
+    "danger_ratio": {
+      "units": "dimensionless ratio",
+      "description": "Ratio of water level to danger level"
+    },
+    "hfl_ratio": {
+      "units": "dimensionless ratio",
+      "description": "Ratio of water level to HFL"
+    },
+    "flood_status": {
+      "units": "categorical",
+      "classes": [
+        "NORMAL",
+        "ABOVE_NORMAL",
+        "SEVERE",
+        "EXTREME",
+        "DATA_UNAVAILABLE"
+      ]
+    },
+    "alert_stage": {
+      "units": "categorical",
+      "classes": [
+        "NONE",
+        "YELLOW",
+        "ORANGE",
+        "RED",
+        "UNKNOWN"
+      ]
+    }
+  }
+}
