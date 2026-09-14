@@ -1,40 +1,101 @@
 # Environment variables & secrets
+
 .env
+
 .env.local
+
 .env.*.local
+
 *.env.local
 
 
+
+
+
 # Python
+
 __pycache__/
+
 *.py[cod]
+
 *$py.class
+
 .venv/
+
 env/
+
 venv/
+
 *.sqlite3
 
+
+
 # Node / Frontend
+
 node_modules/
+
 dist/
+
 .vite/
+
 npm-debug.log*
+
 yarn-debug.log*
+
 yarn-error.log*
 
+
+
 # OS / IDE
+
 .DS_Store
+
 Thumbs.db
+
 .idea/
+
 .vscode/
 
+
+
 # Large Datasets & Binary Rasters (generated via ingest scripts)
+
 data/raw/
+
 data/backup_august_2026/
+
 *.nc
+
 *.nc4
+
 *.tif
+
 *.tiff
+
 *.zip
+
 *.tar.gz
 
+
+
+# Generated ML transient datasets, caches & experimental outputs
+
+data/processed/ml/rolling/
+
+data/processed/ml/nowcast/
+
+data/processed/ml/validation/
+
+data/processed/ml/insat3dr/
+
+data/processed/ml/*.parquet
+
+data/processed/ml/*.csv
+
+data/processed/smap/*.json
+
+data/processed/weather/*.json
+
+data/processed/waterlevel/*.json
+
+data/processed/waterlevel/*.csv

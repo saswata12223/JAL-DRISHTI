@@ -1,0 +1,127 @@
+{
+
+  "title": "Jal Drishti ML Phase 4 Candidate Feature Allowlist",
+
+  "version": "4.0.0",
+
+  "target_variable": "flood_event_label",
+
+  "predictor_count": 34,
+
+  "predictors": [
+
+    "rainfall_30min_mm",
+
+    "rainfall_1h_mm",
+
+    "rainfall_3h_mm",
+
+    "max_rainfall_intensity_mmh",
+
+    "mean_rainfall_intensity_mmh",
+
+    "rainfall_trend",
+
+    "rainfall_surge_ratio",
+
+    "effective_precipitation_mm",
+
+    "antecedent_precipitation_index_mm",
+
+    "ambient_temperature_c",
+
+    "relative_humidity_pct",
+
+    "surface_pressure_hpa",
+
+    "wind_speed_ms",
+
+    "surface_soil_moisture_vol",
+
+    "rootzone_soil_moisture_vol",
+
+    "profile_soil_moisture_vol",
+
+    "soil_saturation_index",
+
+    "elevation_m",
+
+    "slope_deg",
+
+    "flow_accumulation_cells",
+
+    "drainage_network_indicator",
+
+    "topographic_wetness_index",
+
+    "stream_power_index",
+
+    "sediment_transport_index",
+
+    "topographic_runoff_potential",
+
+    "flash_flood_susceptibility_index",
+
+    "landcover_class",
+
+    "runoff_coefficient",
+
+    "mannings_roughness_n",
+
+    "scs_potential_retention_s_mm",
+
+    "scs_initial_abstraction_ia_mm",
+
+    "scs_direct_runoff_q_mm",
+
+    "scs_peak_runoff_potential",
+
+    "nearest_cwc_station_dist_km"
+
+  ],
+
+  "excluded_missingness_indicators": [
+
+    "soil_moisture_missing",
+
+    "rainfall_missing",
+
+    "weather_missing",
+
+    "water_level_missing"
+
+  ],
+
+  "excluded_prohibited_metadata": [
+
+    "sample_id",
+
+    "sample_type",
+
+    "spatial_id",
+
+    "timestamp_utc",
+
+    "district",
+
+    "major_basin",
+
+    "historical_event_id",
+
+    "flood_event_type",
+
+    "severity_category",
+
+    "label_confidence",
+
+    "split_group",
+
+    "split_rationale",
+
+    "official_flood_status",
+
+    "official_alert_stage"
+
+  ]
+
+}
