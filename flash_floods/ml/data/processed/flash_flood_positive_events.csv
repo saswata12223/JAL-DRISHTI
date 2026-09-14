@@ -1,0 +1,27 @@
+event_id,start_date,end_date,duration_days,main_cause,location,district,latitude,longitude,severity,area_affected,human_fatality,human_injured,human_displaced,flash_flood_label
+UEI-IMD-FL-1982-0052,1982-08-08,1982-08-14,7.0,flash floods in a nullah,,Chamoli,,,,,,5.0,,1
+UEI-IMD-FL-1985-0060,,1985-07-28,7.0,flash floods,,Garhwal,,,,,12.0,,,1
+UEI-IMD-FL-2004-0062,,2004-05-29,1.0,flash flood(cloud burst),,Bageshwar,,,,,,3.0,,1
+UEI-IMD-FL-2004-0063,2004-01-06,2004-06-01,1.0,heavy rains(cloud burst),,Almora,,,,,,,,1
+UEI-IMD-FL-2004-0064,2004-06-07,2004-07-06,1.0,heavy rains(cloud burst),,Chamoli,,,,,31.0,28.0,,1
+UEI-IMD-FL-2004-0066,,2004-08-26,1.0,flash flood,,Udam Singh Nagar,,,,,8.0,,,1
+UEI-IMD-FL-2009-0076,2009-08-08,2009-08-08,1.0,severe flood (cloud burst),,Pithoragarh,,,,,43.0,,,1
+UEI-IMD-FL-2012-0077,2012-04-08,2012-08-04,1.0,heavy rains (cloud burst) ,,Chamoli,,,,,7.0,20.0,,1
+UEI-IMD-FL-2012-0078,,2012-09-13,1.0,heavy rains (cloud burst),,Rudra Prayag,,,,,7.0,55.0,,1
+UEI-IMD-FL-2013-0131,,2013-06-18,5.0,"heavy to very rainfall/flash floods (saraswati,mandakini rivers,its tributaries triggered by very heavy rainfall,lake burst), cloudburst on jun16 &17 jun, massive landslides,avalanches reported at multiple places. ",,"Chamoli, Pithoragarh, Rudra Prayag,Uttar Kashi Kashi",,,,,5000.0,,,1
+UEI-IMD-FL-2016-0128,,2016-05-28,1.0,cloud burst,,"Tehri Garhwal,Uttar Kashi Kashi",,,,,5.0,,,1
+UEI-IMD-FL-2016-0129,2016-03-07,2016-07-03,1.0,cloud burst,,"Chamoli, Pithoragarh",,,,,20.0,12.0,,1
+UEI-IMD-FL-2019-0147,2019-06-02,2019-02-06,1.0,Flash floods,,"Almora, Chamoli",,,,,1.0,,1.0,1
+UEI-IMD-FL-2019-0148,,2019-06-21,1.0,Heavy rains & flash flood as a result of cloud burst,,Uttar Kashi Kashi,,,,,1.0,4.0,,1
+UEI-IMD-FL-2019-0151,2019-08-06,2019-06-08,1.0,Heavy rains & flash flood as a result of cloud burst,,"Chamoli, Garhwal, Uttar Kashi Kashi",,,,,,,,1
+UEI-IMD-FL-2019-0152,2019-08-08,2019-09-08,2.0,"Heavy rains, flash flood as a result of cloud burst",,"Chamoli, Garhwal, Rudra Prayag, Tehri Garhwal",,,,,5.0,5.0,,1
+UEI-IMD-FL-2019-0153,2019-08-12,2019-12-08,1.0,"Heavy rains, flash floods & Landslide",,"Bageshwar, Chamoli",,,,,6.0,,,1
+UEI-IMD-FL-2019-0154,,2019-08-18,1.0,"Heavy rains & flash floods (in Tons, Pabbar River) & Landslide",,"Dehradun, Garhwal, Tehri Garhwal, Uttar Kashi Kashi",,,,,19.0,,,1
+UEI-IMD-FL-2019-0155,2019-09-02,2019-02-09,1.0,Cloud Burst,,Almora,,,,,,,,1
+UEI-IMD-FL-2019-0156,2019-09-06,2019-08-09,3.0,Heavy rains & flash flood as a result of cloud burst,,"Chamoli, Pithoragarh",,,,,1.0,3.0,,1
+UEI-IMD-FL-2019-0157,,2019-09-27,1.0,Heavy rains & flash flood,,Dehradun,,,,,,,,1
+UEI-IMD-FL-2020-0139,,2020-07-19,2.0,Heavy Rains & Cloud Burst,,Pithoragarh,,,,,3.0,,8.0,1
+UEI-IMD-FL-2020-0140,,2020-08-25,1.0,Heavy Rains & Cloud Burst,,Chamoli,,,,,1.0,3.0,,1
+UEI-IMD-FL-2022-1099,,2022-08-19,1.0,Cloudburst,,"Dehradun, ",,,,,,3.0,5.0,1
+UEI-IMD-FL-2022-1100,,2022-08-19,1.0,Cloudburst,,Garhwal,,,,,2.0,,,1
+UEI-IMD-FL-2022-1101,,2022-08-19,1.0,Cloudburst,,Tehri Garhwal,,,,,5.0,,2.0,1
