@@ -99,3 +99,5 @@ data/processed/weather/*.json
 data/processed/waterlevel/*.json
 
 data/processed/waterlevel/*.csv
+
+data/processed/weather/*.csv
