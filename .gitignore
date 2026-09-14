@@ -101,3 +101,17 @@ data/processed/waterlevel/*.json
 data/processed/waterlevel/*.csv
 
 data/processed/weather/*.csv
+
+*.h5
+
+*.hdf5
+
+*.grib
+
+*.grib2
+
+scratch_test_gfs.grib2
+
+data/processed/gfs/
+
+data/processed/smap_l4/

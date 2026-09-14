@@ -318,6 +318,8 @@ class RollingPipelineOrchestrator:
 
             "CWC_WATERLEVEL": "NO_DATA",
 
+            "NOAA_GFS": "NO_DATA",
+
             "ESP32_TELEMETRY": "LOCAL_STREAM",
 
             "SRTM_DEM": "CACHED",
@@ -535,6 +537,18 @@ class RollingPipelineOrchestrator:
                 "missing_intervals": [],
 
                 "download_needed": not (PROCESSED_DIR / "waterlevel" / "cwc_water_level_stations.csv").exists(),
+
+            },
+
+            "NOAA_GFS": {
+
+                "required_start": self.start_date_utc.isoformat(),
+
+                "required_end": self.end_date_utc.isoformat(),
+
+                "missing_intervals": [],
+
+                "download_needed": not (PROCESSED_DIR / "gfs" / "latest" / "latest_gfs_summary.json").exists(),
 
             },
 
@@ -852,7 +866,27 @@ class RollingPipelineOrchestrator:
 
                 logger.warning(f"Could not blend live SMAP soil moisture into rolling matrix: {e}")
 
+        # Check latest NOAA GFS forecast summary if available
+        gfs_json_path = PROCESSED_DIR / "gfs" / "latest" / "latest_gfs_summary.json"
+        gfs_status_info = {"status": "NO_DATA"}
+        if gfs_json_path.exists():
+            try:
+                with open(gfs_json_path, "r", encoding="utf-8") as f:
+                    gfs_status_info = json.load(f)
+                logger.info(f"Loaded latest NOAA GFS forecast status: {gfs_status_info.get('status')} (Cycle {gfs_status_info.get('target_cycle')})")
+            except Exception as e:
+                logger.warning(f"Could not load GFS forecast status: {e}")
 
+        # Check latest NASA SMAP L4 summary if available
+        smap_l4_json_path = PROCESSED_DIR / "smap_l4" / "latest" / "latest_smap_l4_summary.json"
+        smap_l4_status_info = {"status": "NO_DATA"}
+        if smap_l4_json_path.exists():
+            try:
+                with open(smap_l4_json_path, "r", encoding="utf-8") as f:
+                    smap_l4_status_info = json.load(f)
+                logger.info(f"Loaded latest NASA SMAP L4 status: {smap_l4_status_info.get('status')} ({smap_l4_status_info.get('freshness_status')}, Age {smap_l4_status_info.get('data_age_hours')}h)")
+            except Exception as e:
+                logger.warning(f"Could not load SMAP L4 summary: {e}")
 
         # Operational metadata (OUTSIDE the 34 ML predictors)
 
@@ -869,6 +903,14 @@ class RollingPipelineOrchestrator:
             "data_window_end_utc": self.end_date_utc.isoformat(),
 
             "rolling_days": self.rolling_days,
+
+            "noaa_gfs_status": gfs_status_info.get("status", "NO_DATA"),
+
+            "noaa_gfs_summary": gfs_status_info,
+
+            "nasa_smap_l4_status": smap_l4_status_info.get("status", "NO_DATA"),
+
+            "nasa_smap_l4_summary": smap_l4_status_info,
 
             "source_freshness": "FRESH",
 
