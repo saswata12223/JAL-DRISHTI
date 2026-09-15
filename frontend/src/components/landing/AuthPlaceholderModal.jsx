@@ -26,35 +26,35 @@ export default function AuthPlaceholderModal({ isOpen, onClose, initialMode = 'l
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-md animate-fade-in">
-      <div className="relative w-full max-w-md bg-white border border-[#A5F1F7] rounded-2xl shadow-2xl overflow-hidden font-sans">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0F4C81]/50 backdrop-blur-xs animate-fade-in">
+      <div className="relative w-full max-w-md bg-[#F8FAFC] border border-[#0F4C81]/30 rounded-xl shadow-2xl overflow-hidden font-sans">
         {/* Header */}
-        <div className="px-6 pt-6 pb-4 border-b border-[rgba(16,42,46,0.08)] flex justify-between items-start bg-[#F7FCFD]">
+        <div className="px-6 pt-5 pb-4 border-b border-[#E2E8F0] flex justify-between items-center bg-[#0F4C81] text-white">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#A5F1F7] to-[#8BE5EC] flex items-center justify-center shadow-md">
-              <span className="material-symbols-outlined text-[#102A2E] text-2xl">tsunami</span>
+            <div className="w-9 h-9 rounded-lg bg-[#8FD3E8]/20 border border-[#8FD3E8]/40 flex items-center justify-center">
+              <span className="material-symbols-outlined text-[#8FD3E8] text-xl">tsunami</span>
             </div>
             <div>
-              <h3 className="text-lg font-bold text-[#102A2E] tracking-tight">Jal Drishti Portal</h3>
-              <p className="text-xs text-[#5F777C] font-semibold">Uttarakhand Flood Intelligence</p>
+              <h3 className="text-base font-bold text-white tracking-tight uppercase">Jal Drishti Portal</h3>
+              <p className="text-[11px] text-[#8FD3E8] font-medium">Uttarakhand Flood Intelligence</p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1 rounded-lg text-[#5F777C] hover:text-[#102A2E] hover:bg-[#F2FAFB] transition-colors cursor-pointer"
+            className="p-1 rounded-md text-white/80 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
           >
             <span className="material-symbols-outlined text-xl">close</span>
           </button>
         </div>
 
         {/* Tab Selection */}
-        <div className="flex border-b border-[rgba(16,42,46,0.08)] bg-[#F2FAFB]">
+        <div className="flex border-b border-[#E2E8F0] bg-white">
           <button
             onClick={() => { setMode('login'); setNotice(''); }}
             className={`flex-1 py-3 text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer ${
               mode === 'login'
-                ? 'text-[#102A2E] border-b-2 border-[#102A2E] bg-white'
-                : 'text-[#5F777C] hover:text-[#102A2E]'
+                ? 'text-[#0F4C81] border-b-2 border-[#0F4C81] bg-[#F8FAFC]'
+                : 'text-[#64748B] hover:text-[#0F4C81]'
             }`}
           >
             Login
@@ -63,8 +63,8 @@ export default function AuthPlaceholderModal({ isOpen, onClose, initialMode = 'l
             onClick={() => { setMode('signup'); setNotice(''); }}
             className={`flex-1 py-3 text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer ${
               mode === 'signup'
-                ? 'text-[#102A2E] border-b-2 border-[#102A2E] bg-white'
-                : 'text-[#5F777C] hover:text-[#102A2E]'
+                ? 'text-[#0F4C81] border-b-2 border-[#0F4C81] bg-[#F8FAFC]'
+                : 'text-[#64748B] hover:text-[#0F4C81]'
             }`}
           >
             Sign Up
@@ -72,7 +72,7 @@ export default function AuthPlaceholderModal({ isOpen, onClose, initialMode = 'l
         </div>
 
         {/* Form Body */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        <form onSubmit={handleSubmit} className="p-6 space-y-4 bg-[#F8FAFC]">
           {notice && (
             <div className="p-3 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-center gap-2 font-medium">
               <span className="material-symbols-outlined text-base text-emerald-600">check_circle</span>
@@ -82,13 +82,13 @@ export default function AuthPlaceholderModal({ isOpen, onClose, initialMode = 'l
 
           {mode === 'signup' && (
             <div>
-              <label className="block text-[11px] font-bold text-[#102A2E] uppercase tracking-wider mb-1.5">
+              <label className="block text-[11px] font-bold text-[#0F4C81] uppercase tracking-wider mb-1">
                 Authorized Personnel Role
               </label>
               <select
                 value={role}
                 onChange={(e) => setRole(e.target.value)}
-                className="w-full px-3 py-2 bg-white border border-[rgba(16,42,46,0.15)] rounded-lg text-[#102A2E] text-xs focus:outline-none focus:border-[#102A2E] font-medium"
+                className="w-full px-3 py-2 bg-white border border-[#CBD5E1] rounded-lg text-[#0F172A] text-xs focus:outline-none focus:border-[#0F4C81] font-medium"
               >
                 <option value="RESPONDER">Emergency Response Official (USDMA)</option>
                 <option value="HYDROLOGIST">Hydrologist / CWC Technical Analyst</option>
@@ -99,57 +99,57 @@ export default function AuthPlaceholderModal({ isOpen, onClose, initialMode = 'l
           )}
 
           <div>
-            <label className="block text-[11px] font-bold text-[#102A2E] uppercase tracking-wider mb-1.5">
+            <label className="block text-[11px] font-bold text-[#0F4C81] uppercase tracking-wider mb-1">
               Official Email Address
             </label>
             <div className="relative">
-              <span className="material-symbols-outlined absolute left-3 top-2.5 text-[#5F777C] text-base">mail</span>
+              <span className="material-symbols-outlined absolute left-3 top-2.5 text-[#64748B] text-base">mail</span>
               <input
                 type="email"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="officer@usdma.uk.gov.in"
-                className="w-full pl-9 pr-3 py-2 bg-white border border-[rgba(16,42,46,0.15)] rounded-lg text-[#102A2E] text-xs placeholder:text-[#5F777C]/60 focus:outline-none focus:border-[#102A2E] font-medium"
+                className="w-full pl-9 pr-3 py-2 bg-white border border-[#CBD5E1] rounded-lg text-[#0F172A] text-xs placeholder:text-[#94A3B8] focus:outline-none focus:border-[#0F4C81] font-medium"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-[11px] font-bold text-[#102A2E] uppercase tracking-wider mb-1.5">
+            <label className="block text-[11px] font-bold text-[#0F4C81] uppercase tracking-wider mb-1">
               Access Token / Password
             </label>
             <div className="relative">
-              <span className="material-symbols-outlined absolute left-3 top-2.5 text-[#5F777C] text-base">lock</span>
+              <span className="material-symbols-outlined absolute left-3 top-2.5 text-[#64748B] text-base">lock</span>
               <input
                 type="password"
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••••••"
-                className="w-full pl-9 pr-3 py-2 bg-white border border-[rgba(16,42,46,0.15)] rounded-lg text-[#102A2E] text-xs placeholder:text-[#5F777C]/60 focus:outline-none focus:border-[#102A2E] font-medium"
+                className="w-full pl-9 pr-3 py-2 bg-white border border-[#CBD5E1] rounded-lg text-[#0F172A] text-xs placeholder:text-[#94A3B8] focus:outline-none focus:border-[#0F4C81] font-medium"
               />
             </div>
           </div>
 
           <button
             type="submit"
-            className="w-full mt-2 py-2.5 px-4 bg-[#A5F1F7] hover:bg-[#8BE5EC] text-[#102A2E] font-extrabold text-xs rounded-xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
+            className="w-full mt-2 py-2.5 px-4 bg-[#0F4C81] hover:bg-[#0B3B66] text-white font-bold text-xs rounded-lg shadow-sm transition-all flex items-center justify-center gap-2 cursor-pointer"
           >
             <span className="material-symbols-outlined text-base">login</span>
             <span>{mode === 'login' ? 'Authenticate System Login' : 'Register Authorized Account'}</span>
           </button>
 
           <div className="relative flex py-1 items-center">
-            <div className="flex-grow border-t border-[rgba(16,42,46,0.1)]"></div>
-            <span className="flex-shrink mx-3 text-[10px] text-[#5F777C] uppercase tracking-widest font-semibold">Or</span>
-            <div className="flex-grow border-t border-[rgba(16,42,46,0.1)]"></div>
+            <div className="flex-grow border-t border-[#E2E8F0]"></div>
+            <span className="flex-shrink mx-3 text-[10px] text-[#64748B] uppercase tracking-widest font-semibold">Or</span>
+            <div className="flex-grow border-t border-[#E2E8F0]"></div>
           </div>
 
           <button
             type="button"
             onClick={handleGuestAccess}
-            className="w-full py-2 px-4 bg-[#F2FAFB] hover:bg-[#EAF8FA] border border-[#A5F1F7] text-[#102A2E] font-bold text-xs rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs"
+            className="w-full py-2 px-4 bg-white hover:bg-[#F1F5F9] border border-[#0F4C81]/30 text-[#0F4C81] font-bold text-xs rounded-lg transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs"
           >
             <span>Proceed to Operational Dashboard</span>
             <span className="material-symbols-outlined text-base">arrow_forward</span>
