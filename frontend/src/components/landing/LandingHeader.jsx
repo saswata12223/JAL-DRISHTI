@@ -19,7 +19,7 @@ export default function LandingHeader({ onOpenAuth }) {
             className="group flex items-center transition-opacity"
           >
             <img
-              src="/assets/images/jal_drishti_logo_transparent.png"
+              src="/assets/images/logo_without_text.png"
               alt="Jal Drishti - Early Insights. Safer Tomorrows."
               className="h-10 sm:h-12 lg:h-14 w-auto object-contain drop-shadow-sm group-hover:scale-[1.01] transition-transform"
             />

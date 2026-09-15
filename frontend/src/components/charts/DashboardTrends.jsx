@@ -4,8 +4,6 @@ import {
   Area,
   BarChart,
   Bar,
-  LineChart,
-  Line,
   XAxis,
   YAxis,
   Tooltip,
@@ -32,15 +30,6 @@ const RAINFALL_TREND_DATA = [
   { time: '11:00', mm: 85, fill: '#DC2626' },
 ];
 
-const WATER_LEVEL_DATA = [
-  { time: '06:00', level: 337.5 },
-  { time: '07:00', level: 338.1 },
-  { time: '08:00', level: 338.9 },
-  { time: '09:00', level: 339.6 },
-  { time: '10:00', level: 340.8 },
-  { time: '11:00', level: 341.7 },
-];
-
 export default function DashboardTrends() {
   const axisTextColor = '#6B858A';
   const tooltipBg = 'rgba(255, 255, 255, 0.96)';
@@ -48,13 +37,12 @@ export default function DashboardTrends() {
   const tooltipText = '#102A2E';
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 select-none font-sans">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 select-none font-sans">
       {/* 1. Risk Probability Trend */}
-      <div className="glass-panel-level1 rounded-2xl p-4 flex flex-col border border-[#A5F1F7]/35 shadow-[0_10px_35px_rgba(16,42,46,0.06)] hover:border-[#A5F1F7] transition-all">
-        <div className="flex items-center justify-between mb-2">
+      <div className="bg-white rounded-2xl p-6 flex flex-col border border-slate-200 shadow-xs hover:shadow-sm transition-all">
+        <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
-            <span className="material-symbols-outlined text-[#24464B] text-[16px]">show_chart</span>
-            <h3 className="text-[11px] font-bold text-[#102A2E] uppercase font-sans tracking-wide">
+            <h3 className="text-[11px] font-bold text-[#102A2E] uppercase font-sans tracking-wider">
               Risk Trend
             </h3>
           </div>
@@ -105,13 +93,12 @@ export default function DashboardTrends() {
         </div>
       </div>
 
-      {/* 2. Rainfall Trend (mm/h) */}
-      <div className="glass-panel-level1 rounded-2xl p-4 flex flex-col border border-[#A5F1F7]/35 shadow-[0_10px_35px_rgba(16,42,46,0.06)] hover:border-[#A5F1F7] transition-all">
-        <div className="flex items-center justify-between mb-2">
+      {/* 2. Rainfall Intensity (mm/h) */}
+      <div className="bg-white rounded-2xl p-6 flex flex-col border border-slate-200 shadow-xs hover:shadow-sm transition-all">
+        <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
-            <span className="material-symbols-outlined text-[#24464B] text-[16px]">rainy</span>
-            <h3 className="text-[11px] font-bold text-[#102A2E] uppercase font-sans tracking-wide">
-              Rainfall Rate
+            <h3 className="text-[11px] font-bold text-[#102A2E] uppercase font-sans tracking-wider">
+              Rainfall Intensity
             </h3>
           </div>
           <span className="text-[11px] font-bold font-mono text-[#DC2626]">
@@ -134,7 +121,7 @@ export default function DashboardTrends() {
                   fontSize: '11px',
                   color: tooltipText,
                 }}
-                formatter={(val) => [`${val} mm/h`, 'Rainfall']}
+                formatter={(val) => [`${val} mm/h`, 'Rainfall Intensity']}
               />
               <Bar dataKey="mm" radius={[4, 4, 0, 0]}>
                 {RAINFALL_TREND_DATA.map((entry, index) => (
@@ -145,64 +132,9 @@ export default function DashboardTrends() {
           </ResponsiveContainer>
         </div>
       </div>
-
-      {/* 3. Water Level Trend (m MSL) */}
-      <div className="glass-panel-level1 rounded-2xl p-4 flex flex-col border border-[#A5F1F7]/35 shadow-[0_10px_35px_rgba(16,42,46,0.06)] hover:border-[#A5F1F7] transition-all">
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center gap-2">
-            <span className="material-symbols-outlined text-[#24464B] text-[16px]">water_do</span>
-            <h3 className="text-[11px] font-bold text-[#102A2E] uppercase font-sans tracking-wide">
-              Stage Level
-            </h3>
-          </div>
-          <span className="text-[11px] font-bold font-mono text-[#DC2626]">
-            341.7 m
-          </span>
-        </div>
-
-        <div className="h-[140px] w-full">
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={WATER_LEVEL_DATA} margin={{ top: 8, right: 8, left: -24, bottom: 0 }}>
-              <CartesianGrid stroke="rgba(16, 42, 46, 0.06)" strokeDasharray="3 3" vertical={false} />
-              <XAxis dataKey="time" stroke={axisTextColor} fontSize={9.5} tickLine={false} axisLine={false} />
-              <YAxis domain={[335, 343]} stroke={axisTextColor} fontSize={9.5} tickLine={false} axisLine={false} />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: tooltipBg,
-                  borderColor: tooltipBorder,
-                  borderRadius: '8px',
-                  boxShadow: '0 10px 25px rgba(16,42,46,0.1)',
-                  fontSize: '11px',
-                  color: tooltipText,
-                }}
-                formatter={(val) => [`${val} m`, 'Water Level']}
-              />
-              <ReferenceLine
-                y={339.5}
-                stroke="#D97706"
-                strokeDasharray="2 2"
-                strokeOpacity={0.7}
-              />
-              <ReferenceLine
-                y={340.5}
-                stroke="#DC2626"
-                strokeDasharray="2 2"
-                strokeOpacity={0.7}
-              />
-              <Line
-                type="monotone"
-                dataKey="level"
-                stroke="#24464B"
-                strokeWidth={2}
-                dot={{ r: 3, fill: '#A5F1F7', stroke: '#24464B', strokeWidth: 1.5 }}
-                activeDot={{ r: 5, fill: '#DC2626' }}
-              />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
     </div>
   );
 }
+
 
 

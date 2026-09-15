@@ -4,7 +4,7 @@ import { NavLink } from 'react-router-dom';
 const MOBILE_ITEMS = [
   { name: 'Dashboard', path: '/dashboard', icon: 'dashboard' },
   { name: 'Actions', path: '/immediate-actions', icon: 'shield_with_heart' },
-  { name: 'Risk Map', path: '/risk-map', icon: 'map' },
+  { name: 'Analytics', path: '/analytics', icon: 'analytics' },
   { name: 'Alerts', path: '/alerts', icon: 'notifications' },
   { name: 'Monitoring', path: '/monitoring', icon: 'sensors' },
 ];

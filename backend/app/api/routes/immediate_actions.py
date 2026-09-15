@@ -263,6 +263,7 @@ class CallDispatchRequest(BaseModel):
     phone_numbers: List[str] = Field(default_factory=lambda: list(DEFAULT_TARGET_NUMBERS))
     auth_token: str = Field(default=DEFAULT_TWILIO_AUTH_TOKEN)
     account_sid: str = Field(default=DEFAULT_TWILIO_ACCOUNT_SID, description="Twilio Account SID (starts with AC...)")
+    api_key: Optional[str] = Field(default=None, description="Twilio API Key SID (starts with SK...)")
     from_number: Optional[str] = Field(default=DEFAULT_TWILIO_FROM_NUMBER, description="Twilio phone number to place calls from")
     language: str = Field(default="hi", description="'hi', 'en', or 'local_uttarakhand'")
     basin_location: str = Field(default="Alaknanda & Mandakini Valley")
@@ -367,7 +368,7 @@ async def dispatch_voice_calls(payload: CallDispatchRequest):
                             "From": actual_from,
                             "Url": twimlet_url,
                         },
-                        auth=(payload.account_sid, payload.auth_token),
+                        auth=(payload.api_key or payload.account_sid, payload.auth_token),
                     )
                     if resp.status_code in (200, 201):
                         resp_data = resp.json()
@@ -383,7 +384,7 @@ async def dispatch_voice_calls(payload: CallDispatchRequest):
                                 "From": actual_from,
                                 "Url": "http://demo.twilio.com/docs/voice.xml",
                             },
-                            auth=(payload.account_sid, payload.auth_token),
+                            auth=(payload.api_key or payload.account_sid, payload.auth_token),
                         )
                         if resp_fallback.status_code in (200, 201):
                             resp_data = resp_fallback.json()

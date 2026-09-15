@@ -334,7 +334,8 @@ export default function ImmediateActionsPage() {
   }, []);
 
   // Call single physical handset via Twilio API
-  const handleCallSingleHandset = async (num) => {
+  const handleCallSingleHandset = async (num, e) => {
+    if (e) e.preventDefault();
     const clean = num.replace(/\s+/g, '');
     const fullNum = clean.startsWith('+') ? clean : `+91${clean}`;
     setSingleCallLoading((prev) => ({ ...prev, [clean]: true }));
@@ -370,7 +371,8 @@ export default function ImmediateActionsPage() {
   };
 
   // Call all 3 physical handsets via Twilio simultaneously
-  const handleCallAllHandsets = async () => {
+  const handleCallAllHandsets = async (e) => {
+    if (e) e.preventDefault();
     setAllCallsLoading(true);
     setAllCallsResult(null);
     try {
@@ -1150,7 +1152,8 @@ export default function ImmediateActionsPage() {
                       {/* Action Buttons */}
                       <div className="space-y-1.5 pt-1 border-t border-slate-100">
                         <button
-                          onClick={() => handleCallSingleHandset(num)}
+                          type="button"
+                          onClick={(e) => handleCallSingleHandset(num, e)}
                           disabled={isCalling}
                           className="w-full py-2 px-3 rounded-lg bg-emerald-600 hover:bg-emerald-500 disabled:opacity-60 text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm shadow-emerald-600/20 transition-all active:scale-98 cursor-pointer"
                         >
@@ -1179,6 +1182,7 @@ export default function ImmediateActionsPage() {
                   Trigger automated outbound phone call to <strong>all 3 registered handsets simultaneously</strong> via Twilio:
                 </div>
                 <button
+                  type="button"
                   onClick={handleCallAllHandsets}
                   disabled={allCallsLoading}
                   className="w-full sm:w-auto shrink-0 px-4 py-2.5 rounded-xl bg-red-600 hover:bg-red-500 disabled:opacity-60 text-white font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-md shadow-red-600/30 transition-all active:scale-98 cursor-pointer"

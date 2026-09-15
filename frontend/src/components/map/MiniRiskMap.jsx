@@ -34,7 +34,7 @@ function MapControls() {
 
   return (
 
-    <div className="absolute bottom-3 right-3 z-[1000] flex flex-col gap-1 pointer-events-auto">
+    <div className="absolute bottom-3 right-3 z-10 flex flex-col gap-1 pointer-events-auto">
 
       <button
 
@@ -102,7 +102,7 @@ export default function MiniRiskMap({ stations = DEFAULT_STATIONS, onSelectStati
 
       {/* Top Left Floating Layers Badge */}
 
-      <div className="absolute top-3 left-3 z-[1000] bg-white/90 border border-[#A5F1F7] px-2.5 py-1 rounded backdrop-blur-sm shadow-xs pointer-events-auto">
+      <div className="absolute top-3 left-3 z-20 bg-white/90 border border-[#A5F1F7] px-2.5 py-1 rounded backdrop-blur-sm shadow-xs pointer-events-auto">
 
         <span className="text-[11px] font-bold text-[#102A2E] flex items-center gap-1.5 uppercase tracking-wider">
 

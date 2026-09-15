@@ -55,7 +55,7 @@ export default function StationTable({
             <tr>
               <th
                 onClick={() => handleSort('status')}
-                className="py-3 px-4 cursor-pointer hover:text-[#24464B] transition-colors"
+                className="py-3 px-2.5 cursor-pointer hover:text-[#24464B] transition-colors"
               >
                 <div className="flex items-center gap-1">
                   <span>Status</span>
@@ -67,7 +67,7 @@ export default function StationTable({
 
               <th
                 onClick={() => handleSort('name')}
-                className="py-3 px-4 cursor-pointer hover:text-[#24464B] transition-colors"
+                className="py-3 px-2.5 cursor-pointer hover:text-[#24464B] transition-colors"
               >
                 <div className="flex items-center gap-1">
                   <span>Station / ID</span>
@@ -79,7 +79,7 @@ export default function StationTable({
 
               <th
                 onClick={() => handleSort('district')}
-                className="py-3 px-4 cursor-pointer hover:text-[#24464B] transition-colors"
+                className="py-3 px-2.5 cursor-pointer hover:text-[#24464B] transition-colors"
               >
                 <div className="flex items-center gap-1">
                   <span>District</span>
@@ -91,7 +91,7 @@ export default function StationTable({
 
               <th
                 onClick={() => handleSort('river')}
-                className="py-3 px-4 cursor-pointer hover:text-[#24464B] transition-colors"
+                className="py-3 px-2.5 cursor-pointer hover:text-[#24464B] transition-colors"
               >
                 <div className="flex items-center gap-1">
                   <span>River Basin</span>
@@ -103,7 +103,7 @@ export default function StationTable({
 
               <th
                 onClick={() => handleSort('waterLevel')}
-                className="py-3 px-4 cursor-pointer hover:text-[#24464B] transition-colors"
+                className="py-3 px-2.5 cursor-pointer hover:text-[#24464B] transition-colors"
               >
                 <div className="flex items-center gap-1">
                   <span>Water Level (MSL)</span>
@@ -115,7 +115,7 @@ export default function StationTable({
 
               <th
                 onClick={() => handleSort('rainfallMm')}
-                className="py-3 px-4 cursor-pointer hover:text-[#24464B] transition-colors"
+                className="py-3 px-2.5 cursor-pointer hover:text-[#24464B] transition-colors"
               >
                 <div className="flex items-center gap-1">
                   <span>Rainfall</span>
@@ -127,7 +127,7 @@ export default function StationTable({
 
               <th
                 onClick={() => handleSort('risk')}
-                className="py-3 px-4 cursor-pointer hover:text-[#24464B] transition-colors"
+                className="py-3 px-2.5 cursor-pointer hover:text-[#24464B] transition-colors"
               >
                 <div className="flex items-center gap-1">
                   <span>Risk State</span>
@@ -137,7 +137,7 @@ export default function StationTable({
                 </div>
               </th>
 
-              <th className="py-3 px-4 text-right">
+              <th className="py-3 px-2.5 text-right">
                 <span>Action</span>
               </th>
             </tr>
@@ -191,7 +191,7 @@ export default function StationTable({
                     }`}
                   >
                     {/* Status */}
-                    <td className="py-3 px-4">
+                    <td className="py-3 px-2.5">
                       <div className="flex items-center gap-2">
                         <span className={`w-2 h-2 rounded-full ${statusDot}`}></span>
                         <span className="text-[11.5px] font-bold text-[#102A2E]">{statusLabel}</span>
@@ -199,7 +199,7 @@ export default function StationTable({
                     </td>
 
                     {/* Station Name & ID */}
-                    <td className="py-3 px-4">
+                    <td className="py-3 px-2.5">
                       <div className="flex flex-col">
                         <span className="font-bold text-[#102A2E]">{st.name}</span>
                         <span className="text-[10px] font-mono text-[#6B858A]">{st.id}</span>
@@ -207,17 +207,17 @@ export default function StationTable({
                     </td>
 
                     {/* District */}
-                    <td className="py-3 px-4 text-[#102A2E] font-medium">
+                    <td className="py-3 px-2.5 text-[#102A2E] font-medium">
                       {st.district}
                     </td>
 
                     {/* River Basin */}
-                    <td className="py-3 px-4 text-[#24464B]">
+                    <td className="py-3 px-2.5 text-[#24464B]">
                       {st.river || '—'}
                     </td>
 
                     {/* Water Level */}
-                    <td className="py-3 px-4 font-mono">
+                    <td className="py-3 px-2.5 font-mono">
                       {st.waterLevel ? (
                         <div className="flex items-center gap-1.5">
                           <span className="font-bold text-[#102A2E]">{st.waterLevel} m</span>
@@ -238,7 +238,7 @@ export default function StationTable({
                     </td>
 
                     {/* Rainfall */}
-                    <td className="py-3 px-4 font-mono">
+                    <td className="py-3 px-2.5 font-mono">
                       {st.rainfallMm ? (
                         <span className={st.rainfallMm > 50 ? 'text-[#DC2626] font-bold' : 'text-[#102A2E]'}>
                           {st.rainfallMm} mm/h
@@ -249,14 +249,14 @@ export default function StationTable({
                     </td>
 
                     {/* Risk Badge */}
-                    <td className="py-3 px-4">
+                    <td className="py-3 px-2.5">
                       <span className={`px-2 py-0.5 rounded-full border text-[10px] font-bold uppercase tracking-wider ${riskBadge}`}>
                         {st.risk || 'LOW'}
                       </span>
                     </td>
 
                     {/* Action Button */}
-                    <td className="py-3 px-4 text-right">
+                    <td className="py-3 px-2.5 text-right">
                       <button
                         onClick={(e) => {
                           e.stopPropagation();

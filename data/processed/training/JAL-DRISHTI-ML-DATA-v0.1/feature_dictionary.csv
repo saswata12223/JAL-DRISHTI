@@ -1,0 +1,33 @@
+feature_name,source,unit,spatial_resolution,temporal_resolution,description,observed_or_derived,availability,missingness,safe_for_training
+event_id,Event Catalogue,string,Point/Catchment,Event,Unique identifier for historical flood event,Observed,100%,0%,Metadata
+event_date,Event Catalogue,YYYY-MM-DD,Point/Catchment,Daily,Official recorded date of flash flood event,Observed,100%,0%,Metadata
+timestamp,NASA GPM,ISO8601,0.1 deg,30-min / 1-hr,Observation timestamp in UTC,Observed,93.3%,6.7%,Metadata
+latitude,Event Catalogue,degrees,Point,Static,Latitude coordinate of event centroid / station,Observed,100%,0%,Spatial Key
+longitude,Event Catalogue,degrees,Point,Static,Longitude coordinate of event centroid / station,Observed,100%,0%,Spatial Key
+precipitation_mm,NASA GPM IMERG V07,mm,0.1 deg,30-min,Half-hourly precipitation accumulation,Observed,93.3%,6.7%,YES
+rainfall_1h_mm,Derived from GPM,mm,0.1 deg,1-hr rolling,1-hour accumulated precipitation,Derived,93.3%,6.7%,YES
+rainfall_3h_mm,Derived from GPM,mm,0.1 deg,3-hr rolling,3-hour accumulated precipitation,Derived,93.3%,6.7%,YES
+rainfall_6h_mm,Derived from GPM,mm,0.1 deg,6-hr rolling,6-hour accumulated precipitation,Derived,93.3%,6.7%,YES
+rainfall_12h_mm,Derived from GPM,mm,0.1 deg,12-hr rolling,12-hour accumulated precipitation,Derived,93.3%,6.7%,YES
+rainfall_24h_mm,Derived from GPM,mm,0.1 deg,24-hr rolling,24-hour accumulated precipitation,Derived,93.3%,6.7%,YES
+rainfall_48h_mm,Derived from GPM,mm,0.1 deg,48-hr rolling,48-hour accumulated precipitation,Derived,93.3%,6.7%,YES
+rainfall_72h_mm,Derived from GPM,mm,0.1 deg,72-hr rolling,72-hour accumulated precipitation,Derived,93.3%,6.7%,YES
+surface_sm,NASA SMAP L4 V8,m3/m3,9 km,3-hr,Surface soil moisture (0-5 cm volumetric fraction),Observed/Modeled,53.3%,46.7%,YES
+rootzone_sm,NASA SMAP L4 V8,m3/m3,9 km,3-hr,Rootzone soil moisture (0-100 cm volumetric fraction),Observed/Modeled,53.3%,46.7%,YES
+elevation,NASA SRTM DEM,meters,90 m,Static,Terrain surface elevation above MSL,Observed,100%,0%,YES
+slope,Derived from SRTM,degrees,90 m,Static,Topographic slope angle,Derived,100%,0%,YES
+aspect,Derived from SRTM,degrees,90 m,Static,Topographic slope aspect direction (0-360),Derived,100%,0%,YES
+curvature,Derived from SRTM,m^-1,90 m,Static,Surface profile curvature,Derived,100%,0%,YES
+flow_accumulation,Derived from SRTM,cells,90 m,Static,Upstream catchment contributing cell count,Derived,100%,0%,YES
+topographic_wetness_index,Derived from SRTM,index,90 m,Static,Topographic wetness index ln(a / tan beta),Derived,100%,0%,YES
+stream_power_index,Derived from SRTM,index,90 m,Static,Stream power index measuring erosion capability,Derived,100%,0%,YES
+distance_to_stream,Derived from SRTM,meters,90 m,Static,Euclidean distance to nearest drainage channel,Derived,100%,0%,YES
+drainage_density,Derived from SRTM,km/km2,90 m,Static,Drainage network density per unit area,Derived,100%,0%,YES
+landcover_class,ESA WorldCover 10m,code,10 m,Static,LULC land cover classification code,Observed,100%,0%,YES
+landcover_name,ESA WorldCover 10m,string,10 m,Static,Land cover label description,Observed,100%,0%,Metadata
+forest_fraction,ESA WorldCover 10m,fraction,10 m,Static,Fractional tree cover in catchment,Derived,100%,0%,YES
+cropland_fraction,ESA WorldCover 10m,fraction,10 m,Static,Fractional agricultural cropland cover,Derived,100%,0%,YES
+urban_fraction,ESA WorldCover 10m,fraction,10 m,Static,Fractional built-up impervious surface cover,Derived,100%,0%,YES
+bare_ground_fraction,ESA WorldCover 10m,fraction,10 m,Static,Fractional bare ground / sparse vegetation cover,Derived,100%,0%,YES
+gfs_forecast_rainfall_mm,NOAA GFS,mm,0.25 deg,3-hr,GFS forecast precipitation (Unavailable historical vintage),Observed/Modeled,0%,100%,NO_HISTORICAL_UNAVAILABLE
+cwc_water_level_m,CWC Gauge,meters,Station,1-hr,River water level gauge observation (Unavailable historical vintage),Observed,0%,100%,NO_HISTORICAL_UNAVAILABLE

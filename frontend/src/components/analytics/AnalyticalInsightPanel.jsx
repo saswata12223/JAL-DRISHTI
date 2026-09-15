@@ -21,17 +21,7 @@ export default function AnalyticalInsightPanel({ insight }) {
         <ul className="flex flex-col gap-2">
           {insight.points.map((pt, i) => (
             <li key={i} className="flex items-start gap-2 text-[11.5px] leading-relaxed text-app-text-secondary">
-              <span
-                className={`material-symbols-outlined text-[14px] mt-px shrink-0 ${
-                  pt.includes('danger mark') || pt.includes('allocate monitoring')
-                    ? 'text-red-500'
-                    : pt.includes('Deterministic') || pt.includes('no generative')
-                    ? 'text-app-text-muted'
-                    : 'text-amber-500'
-                }`}
-              >
-                {pt.includes('Deterministic') || pt.includes('no generative') ? 'info' : 'chevron_right'}
-              </span>
+              <span className="text-app-text-muted mt-px shrink-0 select-none">&bull;</span>
               <span>{pt}</span>
             </li>
           ))}

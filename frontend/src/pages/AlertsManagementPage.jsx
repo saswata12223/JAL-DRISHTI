@@ -62,25 +62,20 @@ function SeverityBadge({ severity }) {
   );
 }
 
-function KpiCard({ label, value, subtext, icon, accent }) {
+function KpiCard({ label, value, subtext, accent }) {
   const accentMap = {
-    red: { bubble: 'bg-red-500/15 text-red-500 border-red-500/25', value: 'text-red-500' },
-    orange: { bubble: 'bg-orange-500/15 text-orange-500 border-orange-500/25', value: 'text-orange-500' },
-    amber: { bubble: 'bg-amber-500/15 text-amber-500 border-amber-500/25', value: 'text-amber-500' },
-    emerald: { bubble: 'bg-emerald-500/15 text-emerald-500 border-emerald-500/25', value: 'text-emerald-500' },
-    sky: { bubble: 'bg-sky-500/15 text-sky-400 border-sky-500/25', value: 'text-app-text-primary' },
+    red: { value: 'text-red-500' },
+    orange: { value: 'text-orange-500' },
+    amber: { value: 'text-amber-500' },
+    emerald: { value: 'text-emerald-500' },
+    sky: { value: 'text-app-text-primary' },
   };
   const a = accentMap[accent] || accentMap.sky;
   return (
-    <div className="bg-app-surface border border-app-border p-4 rounded-xl shadow-sm flex items-center gap-3.5 select-none">
-      <div className={`w-10 h-10 rounded-xl border flex items-center justify-center shrink-0 ${a.bubble}`}>
-        <span className="material-symbols-outlined text-[20px]">{icon}</span>
-      </div>
-      <div className="min-w-0">
-        <span className="text-[10.5px] font-bold text-app-text-muted uppercase tracking-wider block truncate">{label}</span>
-        <span className={`text-[22px] font-bold leading-tight font-mono tracking-tight ${a.value}`}>{value}</span>
-        <span className="text-[11px] text-app-text-secondary font-medium block truncate">{subtext}</span>
-      </div>
+    <div className="bg-app-surface border border-app-border p-6 rounded-xl shadow-sm flex flex-col gap-1 select-none h-full justify-center">
+      <span className="text-[11px] font-bold text-app-text-muted uppercase tracking-wider block truncate">{label}</span>
+      <span className={`text-[32px] font-bold leading-none font-mono tracking-tight ${a.value}`}>{value}</span>
+      <span className="text-[11px] text-app-text-secondary font-medium block truncate mt-1">{subtext}</span>
     </div>
   );
 }
@@ -91,62 +86,53 @@ function KpiCard({ label, value, subtext, icon, accent }) {
 function AlertList({ alerts, selectedId, onSelect }) {
   return (
     <AlertPanelCard
-      icon="notification_important"
       title="Active Alert Register"
-      subtitle="Select an alert to inspect detailed context"
       badge={<span className="text-[11px] font-bold text-app-text-muted">{alerts.length} shown</span>}
     >
-      <div className="flex flex-col gap-1.5 overflow-y-auto max-h-[520px] pr-1">
+      <div className="flex flex-col gap-2 overflow-y-auto max-h-[560px] pr-1">
         {alerts.map((alert) => {
           const selected = alert.id === selectedId;
           return (
             <div
               key={alert.id}
               onClick={() => onSelect && onSelect(alert.id)}
-              className={`grid grid-cols-12 items-center gap-2 bg-app-surface-elevated border rounded-lg px-3 py-2 cursor-pointer transition-all duration-150 group ${
-                selected ? 'border-indigo-500/60 shadow-md' : 'border-app-border hover:border-app-border/80'
+              className={`flex items-center justify-between gap-4 bg-app-surface-elevated border rounded-xl px-4 py-3 cursor-pointer transition-all duration-150 group ${
+                selected ? 'border-indigo-500/60 shadow-md bg-indigo-50/50' : 'border-app-border hover:border-app-border/80'
               }`}
             >
-              <div className="col-span-12 lg:col-span-4 flex items-center gap-2 min-w-0">
-                <span className="material-symbols-outlined text-[16px] text-indigo-400/80 shrink-0">{TYPE_ICON[alert.type] || 'notifications'}</span>
-                <div className="min-w-0">
-                  <div className="text-[12.5px] font-bold text-app-text-primary truncate group-hover:text-indigo-300 transition-colors">
+              <div className="flex flex-col min-w-0 flex-1">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-[14px] font-bold text-app-text-primary truncate group-hover:text-indigo-400 transition-colors">
                     {alert.stationName}
-                  </div>
-                  <div className="text-[10px] text-app-text-muted font-mono truncate">{alert.id}</div>
+                  </span>
+                  <SeverityBadge severity={alert.severity} />
+                </div>
+                <div className="text-[11px] text-app-text-secondary truncate">
+                  {alert.type} &bull; {alert.district} District &bull; {alert.river}
                 </div>
               </div>
 
-              <div className="col-span-12 lg:col-span-3 flex flex-col min-w-0 lg:px-1">
-                <SeverityBadge severity={alert.severity} />
-                <div className="text-[10.5px] text-app-text-secondary truncate mt-0.5">
-                  {alert.district} &bull; {alert.river}
+              <div className="flex items-center gap-6 shrink-0">
+                <div className="flex flex-col items-end min-w-[60px]">
+                  <span className="text-[10px] uppercase tracking-wider font-bold text-app-text-muted">Risk</span>
+                  <span className="text-[14px] font-mono font-bold text-app-text-primary">
+                    {Math.round(alert.probability * 100)}%
+                  </span>
                 </div>
-              </div>
 
-              <div className="col-span-12 lg:col-span-2 flex flex-col min-w-0">
-                <span className="text-[13px] font-mono font-bold text-app-text-primary">
-                  {Math.round(alert.probability * 100)}%
-                </span>
-                <span className={`text-[9.5px] font-bold uppercase tracking-wider ${PRIORITY_COLOR[alert.priority] || 'text-app-text-muted'}`}>
-                  {alert.priority}
-                </span>
-              </div>
+                <div className="flex flex-col items-end min-w-[80px]">
+                  <StatusPill status={alert.status} />
+                  <span className="text-[10px] text-app-text-muted mt-1 font-mono">{alert.updatedAt.split(' ')[0]}</span>
+                </div>
 
-              <div className="col-span-12 lg:col-span-2 flex flex-col min-w-0">
-                <StatusPill status={alert.status} />
-                <span className="text-[9.5px] text-app-text-muted truncate mt-0.5">{alert.updatedAt}</span>
-              </div>
-
-              <div className="col-span-12 lg:col-span-1 flex justify-end">
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
                     onSelect && onSelect(alert.id);
                   }}
-                  className="text-[10px] font-semibold text-indigo-400 flex items-center gap-0.5 hover:underline"
+                  className="text-[11px] font-semibold text-indigo-500 flex items-center gap-0.5 hover:underline"
                 >
-                  Inspect <span className="material-symbols-outlined text-[11px]">chevron_right</span>
+                  Inspect <span className="material-symbols-outlined text-[13px]">chevron_right</span>
                 </button>
               </div>
             </div>
@@ -173,13 +159,15 @@ function FactorRow({ factor }) {
       ? 'text-amber-500'
       : 'text-emerald-500';
   return (
-    <div className="bg-app-surface-elevated border border-app-border rounded-lg p-2.5 flex flex-col gap-0.5">
-      <div className="flex items-center justify-between">
+    <div className="flex items-center justify-between border-b border-app-border/50 py-2 last:border-0">
+      <div className="flex flex-col">
         <span className="text-[11px] font-bold text-app-text-primary">{factor.signal}</span>
-        <span className={`text-[9px] font-bold uppercase tracking-wider ${weightColor}`}>{factor.weight}</span>
+        <span className="text-[10px] text-app-text-secondary">{factor.explanation}</span>
       </div>
-      <span className="text-[11px] font-mono text-indigo-300">{factor.value}</span>
-      <span className="text-[10px] text-app-text-secondary leading-snug">{factor.explanation}</span>
+      <div className="flex flex-col items-end">
+        <span className={`text-[9.5px] font-bold uppercase tracking-wider ${weightColor}`}>{factor.weight}</span>
+        <span className="text-[11.5px] font-mono text-app-text-primary">{factor.value}</span>
+      </div>
     </div>
   );
 }
@@ -193,110 +181,91 @@ function DetailRow({ label, value, mono }) {
   );
 }
 
-function AlertDetail({ alert, onAcknowledge, onResolve, timeline }) {
+function AlertDecisionPanel({ alert, onAcknowledge, onResolve }) {
   const navigate = useNavigate();
   const stageColor =
     alert.stage === 'DANGER ZONE' ? 'text-red-500' : alert.stage === 'WARNING ZONE' ? 'text-orange-500' : 'text-emerald-500';
 
   return (
     <AlertPanelCard
-      icon="visibility"
-      title="Alert Detail"
+      title="Alert Detail & Response"
       subtitle={alert.id}
       badge={<SeverityBadge severity={alert.severity} />}
       right={<StatusPill status={alert.status} />}
     >
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-5">
+        {/* Header Section */}
         <div>
-          <div className="flex items-center gap-2">
-            <span className="material-symbols-outlined text-[18px] text-indigo-400">{TYPE_ICON[alert.type] || 'notifications'}</span>
-            <h2 className="text-[15px] font-bold text-app-text-primary">{alert.stationName}</h2>
-          </div>
-          <p className="text-[11px] text-app-text-secondary mt-0.5">
+          <h2 className="text-[18px] font-bold text-app-text-primary tracking-tight mb-1">{alert.stationName}</h2>
+          <p className="text-[12px] text-app-text-secondary">
             {alert.type} &bull; {alert.district} District &bull; {alert.basin}
           </p>
-          <div className="mt-2">
-            <span className={`text-[11px] font-bold uppercase tracking-wider ${stageColor}`}>{alert.stage}</span>
+          <div className="mt-3">
+            <span className={`text-[13px] font-bold uppercase tracking-wider ${stageColor}`}>{alert.stage}</span>
           </div>
         </div>
 
-        <div className="flex flex-col">
-          <DetailRow label="Alert Type" value={alert.type} />
-          <DetailRow label="Severity" value={alert.severity} mono />
-          <DetailRow label="Priority" value={alert.priority} mono />
-          <DetailRow label="Location" value={`${alert.district} / ${alert.river}`} />
-          <DetailRow label="Risk Probability" value={`${Math.round(alert.probability * 100)}%`} mono />
-          <DetailRow label="Rainfall" value={alert.rainfallMm != null ? `${alert.rainfallMm} mm/h` : '—'} mono />
-          <DetailRow
-            label="Water Level"
-            value={alert.waterLevel != null ? `${alert.waterLevel} m` : 'Gauge offline'}
-            mono
-          />
-          <DetailRow label="Generated" value={alert.generatedAt} />
-          <DetailRow label="Last Updated" value={alert.updatedAt} />
-          <DetailRow label="Data Source" value={alert.source === 'LIVE_BACKEND' ? 'Live backend' : 'Calibrated fallback'} mono />
-        </div>
-
-        {/* Trigger / reason */}
-        <div className="bg-app-surface-elevated border border-app-border rounded-lg p-2.5">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-app-text-muted">Trigger / Reason</span>
-          <p className="text-[11px] text-app-text-secondary leading-snug mt-1">{alert.trigger}</p>
-        </div>
-
-        {/* Contributing factors */}
-        {alert.factors && alert.factors.length > 0 && (
-          <div className="flex flex-col gap-1.5">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-app-text-muted">Contributing Factors</span>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
-              {alert.factors.map((f, i) => (
-                <FactorRow key={i} factor={f} />
-              ))}
-            </div>
+        {/* Key Metrics Row */}
+        <div className="grid grid-cols-3 gap-3 border-y border-app-border/60 py-4">
+          <div className="flex flex-col">
+            <span className="text-[10px] uppercase font-bold text-app-text-muted mb-1">Risk Probability</span>
+            <span className="text-[16px] font-mono font-bold text-app-text-primary">{Math.round(alert.probability * 100)}%</span>
           </div>
-        )}
-
-        {/* Recommended action */}
-        <div className="bg-red-500/5 border border-red-500/20 rounded-lg p-2.5">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-red-400 flex items-center gap-1">
-            <span className="material-symbols-outlined text-[12px]">warning</span> Recommended Response
-          </span>
-          <p className="text-[11px] text-app-text-primary leading-snug mt-1">{alert.action}</p>
+          <div className="flex flex-col">
+            <span className="text-[10px] uppercase font-bold text-app-text-muted mb-1">Rainfall</span>
+            <span className="text-[16px] font-mono font-bold text-app-text-primary">{alert.rainfallMm != null ? `${alert.rainfallMm} mm/h` : '—'}</span>
+          </div>
+          <div className="flex flex-col">
+            <span className="text-[10px] uppercase font-bold text-app-text-muted mb-1">Water Level</span>
+            <span className="text-[16px] font-mono font-bold text-app-text-primary">{alert.waterLevel != null ? `${alert.waterLevel} m` : '—'}</span>
+          </div>
         </div>
 
-        {/* Lifecycle actions (local UI state — not persisted remotely) */}
-        <div className="flex items-center gap-2 flex-wrap">
+        {/* Why this matters (Trigger) */}
+        <div className="flex flex-col gap-1.5">
+          <span className="text-[11px] font-bold uppercase tracking-wider text-app-text-muted">Why This Matters</span>
+          <p className="text-[13px] text-app-text-primary leading-relaxed">{alert.trigger}</p>
+        </div>
+
+        {/* Recommended Action */}
+        <div className="flex flex-col gap-1.5">
+          <span className="text-[11px] font-bold uppercase tracking-wider text-orange-500">Recommended Response</span>
+          <p className="text-[13px] font-medium text-app-text-primary leading-relaxed bg-orange-500/5 p-4 rounded-xl border border-orange-500/20">{alert.action}</p>
+        </div>
+
+        {/* Lifecycle actions */}
+        <div className="flex items-center gap-3 pt-2">
           {alert.status === 'ACTIVE' && (
             <button
               onClick={() => onAcknowledge && onAcknowledge(alert.id)}
-              className="px-3 py-1.5 rounded-lg bg-amber-500/15 border border-amber-500/30 text-amber-500 hover:bg-amber-500/25 text-[11px] font-semibold flex items-center gap-1 cursor-pointer transition-colors"
+              className="px-4 py-2.5 rounded-lg bg-amber-500 text-white hover:bg-amber-600 text-[12px] font-bold cursor-pointer transition-colors"
             >
-              <span className="material-symbols-outlined text-[13px]">task_alt</span> Acknowledge
+              Acknowledge Alert
             </button>
           )}
           {(alert.status === 'ACTIVE' || alert.status === 'ACKNOWLEDGED') && (
             <button
               onClick={() => onResolve && onResolve(alert.id)}
-              className="px-3 py-1.5 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-500 hover:bg-emerald-500/25 text-[11px] font-semibold flex items-center gap-1 cursor-pointer transition-colors"
+              className="px-4 py-2.5 rounded-lg bg-emerald-500 text-white hover:bg-emerald-600 text-[12px] font-bold cursor-pointer transition-colors"
             >
-              <span className="material-symbols-outlined text-[13px]">check</span> Mark Resolved
+              Mark Resolved
             </button>
           )}
-          <span className="text-[9.5px] text-app-text-muted ml-auto">Lifecycle changes are local UI state</span>
         </div>
 
         {/* Navigation */}
-        <div className="flex items-center gap-2 pt-1 border-t border-app-border/60">
+        <div className="flex items-center gap-3 pt-4 border-t border-app-border/60">
           <button
-            onClick={() => navigate('/risk-map')}
-            className="flex-1 px-3 py-2 rounded-lg bg-app-surface-elevated border border-app-border hover:bg-app-surface-hover text-app-text-primary text-[11.5px] font-semibold flex items-center justify-center gap-1 cursor-pointer transition-colors"
+            onClick={() => navigate('/dashboard')}
+            className="flex-1 px-4 py-2.5 rounded-lg bg-app-surface-elevated border border-app-border hover:bg-app-surface-hover text-app-text-primary text-[12px] font-semibold cursor-pointer transition-colors"
           >
-            <span className="material-symbols-outlined text-[14px]">map</span> View Risk Map
+            View Risk Map
           </button>
           <button
             onClick={() => navigate('/monitoring')}
-            className="flex-1 px-3 py-2 rounded-lg bg-app-surface-elevated border border-app-border hover:bg-app-surface-hover text-app-text-primary text-[11.5px] font-semibold flex items-center justify-center gap-1 cursor-pointer transition-colors"
+            className="flex-1 px-4 py-2.5 rounded-lg bg-app-surface-elevated border border-app-border hover:bg-app-surface-hover text-app-text-primary text-[12px] font-semibold cursor-pointer transition-colors"
           >
-            <span className="material-symbols-outlined text-[14px]">sensors</span> View Monitoring
+            View Monitoring
           </button>
         </div>
       </div>
@@ -310,33 +279,32 @@ function AlertDetail({ alert, onAcknowledge, onResolve, timeline }) {
 function Timeline({ alert }) {
   const events = buildAlertTimeline(alert);
   const kindColor = {
-    GENERATED: 'text-indigo-400',
-    UPDATED: 'text-amber-500',
-    ACKNOWLEDGED: 'text-amber-400',
-    ESCALATED: 'text-red-500',
-    RESOLVED: 'text-emerald-500',
+    GENERATED: 'text-indigo-500',
+    UPDATED: 'text-amber-600',
+    ACKNOWLEDGED: 'text-amber-500',
+    ESCALATED: 'text-red-600',
+    RESOLVED: 'text-emerald-600',
     EXPIRED: 'text-app-text-muted',
   };
   return (
     <AlertPanelCard
-      icon="timeline"
-      title="Alert Timeline / Event History"
-      subtitle="Deterministic event record for this alert"
+      title="Alert Timeline"
+      subtitle="Event History"
       badge={<span className="text-[11px] font-bold text-app-text-muted">{events.length} events</span>}
     >
-      <div className="flex flex-col">
+      <div className="flex flex-col mt-2">
         {events.map((ev, i) => (
-          <div key={i} className="flex gap-2.5">
+          <div key={i} className="flex gap-4">
             <div className="flex flex-col items-center">
-              <span className={`w-2 h-2 rounded-full mt-1 ${(kindColor[ev.kind] || 'text-app-text-muted').replace('text-', 'bg-')}`} />
-              {i < events.length - 1 && <span className="w-px flex-1 bg-app-border" />}
+              <span className={`w-2 h-2 rounded-full mt-1.5 ${(kindColor[ev.kind] || 'text-app-text-muted').replace('text-', 'bg-')}`} />
+              {i < events.length - 1 && <span className="w-px flex-1 bg-app-border my-1" />}
             </div>
-            <div className="pb-3 flex-1">
-              <div className="flex items-center justify-between">
-                <span className={`text-[11px] font-bold ${kindColor[ev.kind] || 'text-app-text-muted'}`}>{ev.title}</span>
-                <span className="text-[9.5px] text-app-text-muted font-mono">{ev.time}</span>
+            <div className="pb-4 flex-1">
+              <div className="flex items-center justify-between mb-0.5">
+                <span className={`text-[12px] font-bold ${kindColor[ev.kind] || 'text-app-text-muted'}`}>{ev.title}</span>
+                <span className="text-[10px] text-app-text-muted font-mono">{ev.time}</span>
               </div>
-              <p className="text-[10.5px] text-app-text-secondary leading-snug mt-0.5">{ev.detail}</p>
+              <p className="text-[11.5px] text-app-text-secondary leading-snug">{ev.detail}</p>
             </div>
           </div>
         ))}
@@ -348,17 +316,7 @@ function Timeline({ alert }) {
 // ---------------------------------------------------------------------------
 // EARLY WARNING / RESPONSE PANEL
 // ---------------------------------------------------------------------------
-function EarlyWarningPanel({ alert, kpis }) {
-  const navigate = useNavigate();
-  const levelColor =
-    alert.severity === 'EXTREME'
-      ? 'text-red-500'
-      : alert.severity === 'HIGH'
-      ? 'text-orange-500'
-      : alert.severity === 'MODERATE'
-      ? 'text-amber-500'
-      : 'text-emerald-500';
-
+function TechnicalDetailsPanel({ alert }) {
   const bars = [
     { label: 'Probability', value: Math.round(alert.probability * 100), color: 'bg-red-500' },
     { label: 'Rainfall', value: Math.min(alert.rainfallMm ?? 0, 100), color: 'bg-sky-500' },
@@ -367,86 +325,58 @@ function EarlyWarningPanel({ alert, kpis }) {
 
   return (
     <AlertPanelCard
-      icon="siren"
-      title="Early Warning / Response"
-      subtitle="Observation vs model-derived signal"
-      badge={<StatusPill status={alert.status} />}
+      title="Supporting Technical Info"
+      subtitle="Metadata & Evidence"
     >
-      <div className="flex flex-col gap-3">
-        {/* Warning level */}
-        <div className="flex items-center justify-between bg-app-surface-elevated border border-app-border rounded-lg p-3">
-          <div className="flex flex-col">
-            <span className="text-[10.5px] font-bold uppercase tracking-wider text-app-text-muted">Warning Level</span>
-            <span className={`text-[18px] font-bold font-mono tracking-tight ${levelColor}`}>{alert.stage}</span>
+      <div className="flex flex-col gap-6">
+        
+        {/* Contributing factors */}
+        {alert.factors && alert.factors.length > 0 && (
+          <div className="flex flex-col gap-1">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-app-text-muted mb-1">Contributing Factors</span>
+            <div className="flex flex-col">
+              {alert.factors.map((f, i) => (
+                <FactorRow key={i} factor={f} />
+              ))}
+            </div>
           </div>
-          <div className="flex flex-col items-end">
-            <span className="text-[10.5px] font-bold uppercase tracking-wider text-app-text-muted">Trigger</span>
-            <span className="text-[11.5px] text-app-text-primary font-semibold">{alert.driver}</span>
-          </div>
-        </div>
+        )}
 
         {/* Signal bars */}
-        <div className="flex flex-col gap-1.5">
-          {bars.map((b) => (
-            <div key={b.label} className="flex flex-col gap-0.5">
-              <div className="flex justify-between">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-app-text-muted">{b.label}</span>
-                <span className="text-[10.5px] font-mono text-app-text-primary">{b.value}%</span>
+        <div className="flex flex-col gap-2">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-app-text-muted mb-1">Live Signals</span>
+          <div className="flex flex-col gap-3">
+            {bars.map((b) => (
+              <div key={b.label} className="flex flex-col gap-1">
+                <div className="flex justify-between">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-app-text-secondary">{b.label}</span>
+                  <span className="text-[10.5px] font-mono text-app-text-primary">{b.value}%</span>
+                </div>
+                <div className="h-1 bg-app-surface-elevated border border-app-border rounded-full overflow-hidden">
+                  <div className={`h-full ${b.color}`} style={{ width: `${Math.min(Math.max(b.value, 0), 100)}%` }} />
+                </div>
               </div>
-              <div className="h-1.5 bg-app-surface-elevated border border-app-border rounded-full overflow-hidden">
-                <div className={`h-full ${b.color} transition-all duration-500`} style={{ width: `${Math.min(Math.max(b.value, 0), 100)}%` }} />
-              </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
 
-        {/* Escalation state */}
-        <div className="bg-app-surface-elevated border border-app-border rounded-lg p-2.5 flex items-center justify-between">
-          <div className="flex flex-col">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-app-text-muted">Escalation State</span>
-            <span className={`text-[12px] font-bold ${PRIORITY_COLOR[alert.priority] || 'text-app-text-primary'}`}>
-              {alert.priority === 'CRITICAL'
-                ? 'EMERGENCY RESPONSE'
-                : alert.priority === 'WARNING'
-                ? 'PREPAREDNESS WARNING'
-                : alert.priority === 'WATCH'
-                ? 'ELEVATED WATCH'
-                : 'ROUTINE MONITORING'}
-            </span>
-          </div>
-          <span className="text-[10px] text-app-text-muted font-mono">Policy v8.1.0</span>
+        {/* Metadata */}
+        <div className="flex flex-col gap-1">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-app-text-muted mb-1">System Metadata</span>
+          <DetailRow label="Generated" value={alert.generatedAt} />
+          <DetailRow label="Last Updated" value={alert.updatedAt} />
+          <DetailRow label="Data Source" value={alert.source === 'LIVE_BACKEND' ? 'Live backend' : 'Calibrated fallback'} mono />
+          <DetailRow label="Policy" value="v8.1.0" mono />
         </div>
 
         {/* Confidence / data quality */}
-        <div className="bg-app-surface-elevated border border-app-border rounded-lg p-2.5">
+        <div className="bg-app-surface-elevated border border-app-border rounded-lg p-3">
           <span className="text-[10px] font-bold uppercase tracking-wider text-app-text-muted">Confidence &amp; Data Quality</span>
-          <p className="text-[11px] text-app-text-secondary leading-snug mt-1">
+          <p className="text-[11px] text-app-text-secondary leading-relaxed mt-1.5">
             {alert.source === 'LIVE_BACKEND'
               ? 'Derived from live multi-signal risk decisions with the backend risk engine.'
-              : 'Calibrated canonical data: live gauge/ML telemetry not yet available for this location, so severity is derived from the established station-level risk picture.'}
-            {' '}Each signal bar reflects observed (gauge/rainfall) or model-derived (probability, runoff) values.
+              : 'Calibrated canonical data: live gauge telemetry not yet available, severity derived from established station-level risk.'}
           </p>
-        </div>
-
-        {/* Recommended action */}
-        <div className="bg-orange-500/5 border border-orange-500/20 rounded-lg p-2.5">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-orange-400">Recommended Action</span>
-          <p className="text-[11px] text-app-text-primary leading-snug mt-1">{alert.action}</p>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => navigate('/risk-map')}
-            className="flex-1 px-3 py-2 rounded-lg bg-app-surface-elevated border border-app-border hover:bg-app-surface-hover text-app-text-primary text-[11.5px] font-semibold flex items-center justify-center gap-1 cursor-pointer transition-colors"
-          >
-            <span className="material-symbols-outlined text-[14px]">map</span> Risk Map
-          </button>
-          <button
-            onClick={() => navigate('/monitoring')}
-            className="flex-1 px-3 py-2 rounded-lg bg-app-surface-elevated border border-app-border hover:bg-app-surface-hover text-app-text-primary text-[11.5px] font-semibold flex items-center justify-center gap-1 cursor-pointer transition-colors"
-          >
-            <span className="material-symbols-outlined text-[14px]">sensors</span> Monitoring
-          </button>
         </div>
       </div>
     </AlertPanelCard>
@@ -591,27 +521,27 @@ export default function AlertsManagementPage() {
 
       {/* 2. Alert Summary / KPI Row */}
       <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-        <KpiCard label="Active Alerts" value={kpis.activeAlerts} subtext="Currently unresolved" icon="notifications_active" accent="red" />
-        <KpiCard label="Critical / Extreme" value={kpis.criticalExtreme} subtext="Immediate response priority" icon="crisis_alert" accent="red" />
-        <KpiCard label="High / Warning" value={kpis.highWarning} subtext="Heightened vigilance" icon="warning" accent="orange" />
-        <KpiCard label="Acknowledged" value={kpis.acknowledged} subtext="Awaiting resolution" icon="task_alt" accent="amber" />
-        <KpiCard label="Resolved / Cleared" value={kpis.resolved} subtext={`${kpis.expired} expired`} icon="verified" accent="emerald" />
+        <KpiCard label="Active Alerts" value={kpis.activeAlerts} subtext="Currently unresolved" accent="red" />
+        <KpiCard label="Critical / Extreme" value={kpis.criticalExtreme} subtext="Immediate response priority" accent="red" />
+        <KpiCard label="High / Warning" value={kpis.highWarning} subtext="Heightened vigilance" accent="orange" />
+        <KpiCard label="Acknowledged" value={kpis.acknowledged} subtext="Awaiting resolution" accent="amber" />
+        <KpiCard label="Resolved / Cleared" value={kpis.resolved} subtext={`${kpis.expired} expired`} accent="emerald" />
       </div>
 
       {/* 3. Alert List + Detail (main work surface) */}
-      <div className="grid grid-cols-1 xl:grid-cols-5 gap-5">
-        <div className="xl:col-span-3">
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-5">
+        <div className="lg:col-span-3">
           <AlertList alerts={filteredAlerts} selectedId={selectedId} onSelect={setSelectedId} />
         </div>
-        <div className="xl:col-span-2">
+        <div className="lg:col-span-2">
           {selectedAlert ? (
-            <AlertDetail
+            <AlertDecisionPanel
               alert={selectedAlert}
               onAcknowledge={handleAcknowledge}
               onResolve={handleResolve}
             />
           ) : (
-            <AlertPanelCard icon="info" title="Alert Detail" subtitle="No alert selected">
+            <AlertPanelCard title="Alert Detail" subtitle="No alert selected">
               <p className="text-[12px] text-app-text-muted py-6 text-center">
                 No alerts match the current filters. Adjust or reset the filters above to inspect an alert.
               </p>
@@ -621,12 +551,12 @@ export default function AlertsManagementPage() {
       </div>
 
       {/* 4. Timeline + Early Warning / Response */}
-      <div className="grid grid-cols-1 xl:grid-cols-5 gap-5">
-        <div className="xl:col-span-3">
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-5">
+        <div className="lg:col-span-3">
           {selectedAlert ? <Timeline alert={selectedAlert} /> : null}
         </div>
-        <div className="xl:col-span-2">
-          {selectedAlert ? <EarlyWarningPanel alert={selectedAlert} kpis={kpis} /> : null}
+        <div className="lg:col-span-2">
+          {selectedAlert ? <TechnicalDetailsPanel alert={selectedAlert} /> : null}
         </div>
       </div>
     </div>

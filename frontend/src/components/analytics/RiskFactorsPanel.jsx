@@ -23,21 +23,23 @@ export default function RiskFactorsPanel({ factors, hasExtreme }) {
       subtitle="Qualitative influence of multi-signal drivers"
       badge={<span className="text-[10px] font-bold text-app-text-muted uppercase tracking-wider">Policy v8.1.0</span>}
     >
-      <div className="flex flex-col gap-3 pt-1">
+      <div className="flex flex-col gap-0 pt-1">
         {effective.map((f) => {
           const style = LEVEL_STYLE[f.level] || LEVEL_STYLE.MODERATE;
           return (
-            <div key={f.key} className="flex items-center gap-3">
-              <div className="w-[38%] min-w-[110px]">
-                <div className="text-[11.5px] font-semibold text-app-text-primary truncate">{f.name}</div>
-                <div className="text-[9.5px] text-app-text-muted truncate">{f.detail}</div>
+            <div key={f.key} className="flex flex-col gap-2 py-3 border-b border-app-border/40 last:border-0">
+              <div className="flex items-center justify-between">
+                <div className="flex items-baseline gap-2 min-w-0">
+                  <span className="text-[11.5px] font-bold text-app-text-primary tracking-wide truncate">{f.name}</span>
+                  <span className="text-[10px] text-app-text-muted truncate hidden sm:inline">{f.detail}</span>
+                </div>
+                <span className={`text-[10px] font-extrabold uppercase tracking-wider shrink-0 ${style.text}`}>
+                  {f.level}
+                </span>
               </div>
-              <div className="flex-1 h-2 rounded-full bg-app-surface-elevated border border-app-border overflow-hidden">
-                <div className={`h-full rounded-full ${style.bar}`} style={{ width: `${FACTOR_WEIGHT[f.level] || 50}%` }}></div>
+              <div className="w-full h-1 bg-app-surface-elevated overflow-hidden">
+                <div className={`h-full ${style.bar}`} style={{ width: `${FACTOR_WEIGHT[f.level] || 50}%` }}></div>
               </div>
-              <span className={`text-[10px] font-bold uppercase tracking-wider w-[74px] text-right shrink-0 ${style.text}`}>
-                {f.level}
-              </span>
             </div>
           );
         })}

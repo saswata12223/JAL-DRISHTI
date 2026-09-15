@@ -256,11 +256,11 @@ export default function StationDetailDrawer({ station, onClose }) {
       {/* Operational Action Buttons */}
       <div className="flex flex-col gap-2 pt-1">
         <button
-          onClick={() => navigate('/risk-map')}
+          onClick={() => navigate('/dashboard')}
           className="w-full py-2.5 px-4 rounded-lg font-bold text-[11.5px] uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all shadow-xs cursor-pointer active:scale-98 bg-gradient-to-r from-[#A5F1F7] to-[#D9F9FB] hover:from-[#8BE5EC] hover:to-[#C4F4F8] text-[#102A2E] border border-[#A5F1F7]"
         >
           <span className="material-symbols-outlined text-[16px]">map</span>
-          <span>VIEW ON RISK MAP</span>
+          <span>VIEW ON DASHBOARD MAP</span>
         </button>
 
         <div className="grid grid-cols-2 gap-2">

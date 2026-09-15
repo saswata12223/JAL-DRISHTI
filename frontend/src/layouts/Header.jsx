@@ -1,108 +1,77 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 
 
 
 const PRIMARY_NAV_ITEMS = [
-
   { name: 'Dashboard', path: '/dashboard' },
-
   { name: 'Immediate Actions', path: '/immediate-actions', isUrgent: true },
-
-  { name: 'Risk Map', path: '/risk-map' },
-
-  { name: 'Analytics', path: '/analytics' },
-
-  { name: 'Monitoring', path: '/monitoring' },
-
   { name: 'Live Forecast', path: '/live-forecast' },
-
+  { name: 'Monitoring', path: '/monitoring' },
   { name: 'Flood Simulation', path: '/flood-simulation' },
-
   { name: 'Alerts', path: '/alerts' },
-
+  { name: 'Analytics', path: '/analytics' },
   { name: 'Historical Events', path: '/historical-events' },
-
-  { name: 'Model Intelligence', path: '/model-intelligence' },
-
 ];
 
 
 
 export default function Header({
-
   activeAlertsCount = 2,
-
   systemStatus = 'LIVE',
-
   lastUpdated = '01:32 AM IST',
-
 }) {
-
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [portalMenuOpen, setPortalMenuOpen] = useState(false);
+  const portalMenuRef = useRef(null);
+  const navigate = useNavigate();
+
+  // Handle outside click and escape key for portal menu
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (portalMenuRef.current && !portalMenuRef.current.contains(event.target)) {
+        setPortalMenuOpen(false);
+      }
+    }
+    function handleEscape(event) {
+      if (event.key === 'Escape') {
+        setPortalMenuOpen(false);
+      }
+    }
+    if (portalMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('keydown', handleEscape);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, [portalMenuOpen]);
+
+  const handleSignOut = () => {
+    // Currently, there is no global auth context or session state to clear.
+    // If one is added, clear it here before navigating.
+    setPortalMenuOpen(false);
+    navigate('/');
+  };
 
 
 
   return (
 
-    <header className="fixed top-0 left-0 w-full z-50 bg-[#0A2540] text-white shadow-md select-none border-b border-white/10 backdrop-blur-xl">
-
-      {/* 1. Top Institutional Banner Strip */}
-
-      <div className="border-b border-white/10 px-4 sm:px-6 lg:px-8 py-1.5 flex items-center justify-between text-[11px] font-sans bg-black/20">
-
-        <div className="flex items-center gap-2 text-slate-300">
-
-          <span className="font-bold tracking-widest uppercase text-white text-[10px]">
-
-            Government of Uttarakhand
-
-          </span>
-
-          <span className="text-slate-500 hidden sm:inline">&bull;</span>
-
-          <span className="text-slate-300 hidden sm:inline text-[10.5px]">
-
-            State Disaster Management Authority (USDMA)
-
-          </span>
-
-        </div>
-
-        <div className="flex items-center gap-3 text-slate-300 text-[10.5px]">
-
-          <div className="flex items-center gap-1.5 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/30">
-
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-
-            <span className="font-bold text-emerald-400 text-[10px] uppercase tracking-wider">System {systemStatus}</span>
-
-          </div>
-
-          <span className="hidden md:inline text-slate-600">|</span>
-
-          <span className="hidden md:inline font-mono text-slate-300 text-[10px]">Updated: {lastUpdated}</span>
-
-        </div>
-
-      </div>
+    <header className="fixed top-0 left-0 w-full z-[100] bg-[#0A2540] text-white select-none border-b border-white/10 backdrop-blur-xl">
 
 
 
-      {/* 2. Main Executive Header & Integrated Navigation */}
-
-      <div className="px-4 sm:px-6 lg:px-8 h-15 flex items-center justify-between gap-6">
+      {/* Main Executive Header & Integrated Navigation */}
+      <div className="px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between gap-6">
 
         {/* Brand Identity */}
 
         <NavLink to="/dashboard" className="flex items-center gap-3 shrink-0 group">
 
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-blue-600 text-white flex items-center justify-center font-bold text-base shadow-lg shadow-indigo-500/20 border border-white/20 transition-transform duration-300 group-hover:scale-105">
-
-            <span className="material-symbols-outlined text-[22px]">waves</span>
-
-          </div>
+          <img src="/assets/images/logo_without_text.png" alt="Jal Drishti Logo" className="w-8 h-8 object-contain shrink-0 group-hover:scale-105 transition-transform duration-300" />
 
           <div className="flex flex-col justify-center">
 
@@ -113,9 +82,7 @@ export default function Header({
             </span>
 
             <span className="text-[9.5px] font-bold text-cyan-300 uppercase tracking-widest leading-tight mt-0.5">
-
-              Hydrological Intelligence System
-
+              Sense the storm, see the risk, act in time
             </span>
 
           </div>
@@ -125,8 +92,7 @@ export default function Header({
 
 
         {/* Integrated Primary Horizontal Navigation Links */}
-
-        <nav className="hidden lg:flex items-center gap-1 xl:gap-1.5 h-full">
+        <nav className="hidden lg:flex items-center gap-2 xl:gap-3 h-full overflow-x-auto scrollbar-hide flex-1 min-w-0 px-2 mx-4 pb-1">
 
           {PRIMARY_NAV_ITEMS.map((item) => (
 
@@ -205,13 +171,43 @@ export default function Header({
 
 
           {/* User Profile / Portal Access */}
-
-          <div className="hidden sm:flex items-center gap-2 px-3.5 py-1.5 rounded-xl border border-white/20 text-white text-[12px] font-bold bg-white/10 hover:bg-white/20 cursor-pointer transition-all shadow-sm">
-
-            <span className="material-symbols-outlined text-[18px]">account_circle</span>
-
-            <span>USDMA Portal</span>
-
+          <div className="hidden sm:block relative" ref={portalMenuRef}>
+            <button
+              onClick={() => setPortalMenuOpen(!portalMenuOpen)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  setPortalMenuOpen(!portalMenuOpen);
+                }
+              }}
+              aria-haspopup="menu"
+              aria-expanded={portalMenuOpen}
+              aria-label="Account menu"
+              className="flex items-center gap-2 px-3 py-1.5 text-white/90 text-[12px] font-bold hover:text-white hover:bg-white/10 rounded-xl cursor-pointer transition-all focus:outline-none focus:ring-2 focus:ring-cyan-300"
+            >
+              <span className="material-symbols-outlined text-[18px]">account_circle</span>
+              <span>USDMA Portal</span>
+            </button>
+            
+            {portalMenuOpen && (
+              <div 
+                className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-slate-200 overflow-hidden z-50 text-slate-800"
+                role="menu"
+              >
+                <div className="px-4 py-3 select-none">
+                  <p className="text-[12px] font-bold text-slate-900 leading-tight">USDMA Portal</p>
+                  <p className="text-[11px] text-slate-500 font-medium">Administrator</p>
+                </div>
+                <div className="h-px bg-slate-200 w-full"></div>
+                <button
+                  onClick={handleSignOut}
+                  role="menuitem"
+                  className="w-full text-left px-4 py-2.5 text-[12px] font-semibold text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors focus:outline-none focus:bg-red-50"
+                >
+                  Sign Out
+                </button>
+              </div>
+            )}
           </div>
 
 

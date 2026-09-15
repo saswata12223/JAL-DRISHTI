@@ -34,42 +34,38 @@ export default function TopRiskLocationsPanel({ locations, selectedId, onSelect 
             <div
               key={loc.id}
               onClick={() => onSelect && onSelect(loc.id)}
-              className={`bg-app-surface-elevated border rounded-lg px-3 py-2 flex items-center justify-between gap-2 cursor-pointer transition-all duration-150 group ${
-                selected
-                  ? 'border-indigo-500/60 shadow-md'
-                  : 'border-app-border hover:border-app-border/80'
+              className={`bg-app-surface-elevated border-b border-app-border/40 last:border-0 px-2 py-3 flex items-start justify-between gap-3 cursor-pointer transition-all duration-150 group ${
+                selected ? 'bg-app-surface border-indigo-500/30' : 'hover:bg-app-surface-hover'
               }`}
             >
               <div className="flex flex-col min-w-0">
-                <div className="flex items-center gap-2">
-                  <span className="text-[13px] font-bold text-app-text-primary truncate group-hover:text-indigo-300 dark:group-hover:text-indigo-300 transition-colors">
-                    {loc.name}
-                  </span>
-                  <span className={`px-1.5 py-px rounded-full border text-[9px] font-bold uppercase tracking-wider shrink-0 ${badge}`}>
-                    {loc.risk}
-                  </span>
-                </div>
-                <div className="text-[10.5px] text-app-text-muted truncate">
-                  {loc.district} District &bull; {loc.river} River
-                </div>
-                <div className="text-[10.5px] text-app-text-secondary mt-0.5">
-                  Driver: <span className="font-semibold text-app-text-primary">{loc.driver}</span>
-                </div>
+                <span className={`text-[12px] font-bold truncate transition-colors ${selected ? 'text-indigo-400' : 'text-app-text-primary group-hover:text-indigo-400'}`}>
+                  {loc.name}
+                </span>
+                <span className="text-[10px] text-app-text-muted truncate mt-0.5">
+                  {loc.district} &bull; {loc.river}
+                </span>
+                <span className={`text-[9.5px] font-extrabold uppercase tracking-wider mt-1 ${
+                  loc.risk === 'EXTREME' ? 'text-red-500' : loc.risk === 'HIGH' ? 'text-orange-500' : loc.risk === 'MODERATE' ? 'text-amber-500' : 'text-emerald-500'
+                }`}>
+                  {loc.risk}
+                </span>
               </div>
 
               <div className="flex flex-col items-end gap-1 shrink-0">
-                <span className="font-mono font-bold text-app-text-primary text-[13px]">
+                <span className={`font-mono font-bold text-[13px] ${
+                  loc.prob >= 0.7 ? 'text-red-500' : loc.prob >= 0.4 ? 'text-orange-500' : loc.prob >= 0.2 ? 'text-amber-500' : 'text-emerald-500'
+                }`}>
                   {Math.round(loc.prob * 100)}%
                 </span>
-                <span className={`text-[9.5px] font-bold uppercase tracking-wider ${statusColor}`}>{loc.status}</span>
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
-                    navigate('/risk-map');
+                    navigate('/dashboard');
                   }}
-                  className="text-[10px] font-semibold text-indigo-400 dark:text-indigo-400 flex items-center gap-0.5 hover:underline"
+                  className="text-[10px] font-semibold text-indigo-400 mt-2 hover:underline"
                 >
-                  View Map <span className="material-symbols-outlined text-[11px]">chevron_right</span>
+                  View Map &rarr;
                 </button>
               </div>
             </div>

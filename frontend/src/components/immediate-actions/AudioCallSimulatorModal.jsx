@@ -40,9 +40,10 @@ export default function AudioCallSimulatorModal({
   const [physicalDispatchLoading, setPhysicalDispatchLoading] = useState(false);
   const [dispatchResult, setDispatchResult] = useState(null);
 
-  // Twilio credentials loaded from environment variables
+  // Twilio credentials loaded from environment variables or provided defaults
   const authToken = import.meta.env.VITE_TWILIO_AUTH_TOKEN || '';
   const accountSid = import.meta.env.VITE_TWILIO_ACCOUNT_SID || '';
+  const apiKey = import.meta.env.VITE_TWILIO_API_KEY || '';
   const fromNumber = import.meta.env.VITE_TWILIO_FROM_NUMBER || '';
 
 
@@ -255,7 +256,8 @@ export default function AudioCallSimulatorModal({
   };
 
   // Trigger Live Twilio Dispatch (Backend Integration)
-  const handlePhysicalCallDispatch = async () => {
+  const handlePhysicalCallDispatch = async (e) => {
+    if (e) e.preventDefault();
     setPhysicalDispatchLoading(true);
     setDispatchResult(null);
     try {
@@ -266,6 +268,7 @@ export default function AudioCallSimulatorModal({
           phone_numbers: defaultNumbers,
           auth_token: authToken,
           account_sid: accountSid,
+          api_key: apiKey,
           from_number: fromNumber,
           language: activeLang,
           basin_location: 'Alaknanda & Mandakini Valley (Kedarnath Axis)',
@@ -288,7 +291,8 @@ export default function AudioCallSimulatorModal({
   const [individualStatus, setIndividualStatus] = useState({});
 
   // Trigger individual handset call via Twilio
-  const handleCallSingleNumber = async (num) => {
+  const handleCallSingleNumber = async (num, e) => {
+    if (e) e.preventDefault();
     const clean = num.replace(/\s+/g, '');
     const fullNum = clean.startsWith('+') ? clean : `+91${clean}`;
     setIndividualLoading((prev) => ({ ...prev, [clean]: true }));
@@ -301,6 +305,7 @@ export default function AudioCallSimulatorModal({
           phone_numbers: [fullNum],
           auth_token: authToken,
           account_sid: accountSid,
+          api_key: apiKey,
           from_number: fromNumber,
           language: activeLang,
           basin_location: 'Alaknanda & Mandakini Valley',
@@ -592,8 +597,9 @@ export default function AudioCallSimulatorModal({
                   const status = individualStatus[clean];
                   return (
                     <button
+                      type="button"
                       key={num}
-                      onClick={() => handleCallSingleNumber(num)}
+                      onClick={(e) => handleCallSingleNumber(num, e)}
                       disabled={isLoading}
                       className="p-2.5 rounded-xl bg-emerald-950/60 border border-emerald-500/40 hover:bg-emerald-900/60 hover:border-emerald-400 disabled:opacity-60 transition-all flex flex-col justify-between text-left text-emerald-300 hover:text-white cursor-pointer group"
                     >
@@ -633,6 +639,7 @@ export default function AudioCallSimulatorModal({
                 Trigger automated cloud dialing to all 3 phones simultaneously via Twilio carrier line:
               </div>
               <button
+                type="button"
                 onClick={handlePhysicalCallDispatch}
                 disabled={physicalDispatchLoading}
                 className="w-full sm:w-auto shrink-0 px-4 py-2 rounded-lg bg-red-600 hover:bg-red-500 disabled:opacity-50 text-white font-semibold text-xs flex items-center justify-center gap-1.5 shadow-md shadow-red-600/20 cursor-pointer"

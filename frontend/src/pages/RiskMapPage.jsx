@@ -686,7 +686,7 @@ export default function RiskMapPage() {
 
                   <Tooltip direction="top" offset={[0, -6]} opacity={0.95}>
 
-                    <div className="font-sans text-[11px] font-semibold">
+                    <div className="font-sans text-[11px] font-semibold map-terrain-label">
 
                       {st.name} ({st.district}) &bull; <span style={{ color: fillColor }}>{st.risk} ({Math.round(st.prob * 100)}%)</span>
 
@@ -742,7 +742,7 @@ export default function RiskMapPage() {
 
         {/* 3. Top Floating Search & Multi-Select Risk Filter Toolbar */}
 
-        <div className="absolute top-4 left-4 right-4 z-[1000] flex flex-wrap items-center justify-between gap-3 pointer-events-none">
+        <div className="absolute top-4 left-4 right-4 z-20 flex flex-wrap items-center justify-between gap-3 pointer-events-none">
 
           {/* Search Box */}
 
@@ -910,7 +910,7 @@ export default function RiskMapPage() {
 
         {/* 4. Left Floating Map Controls */}
 
-        <div className="absolute top-20 left-4 z-[1000] flex flex-col gap-1.5 pointer-events-auto">
+        <div className="absolute top-20 left-4 z-20 flex flex-col gap-1.5 pointer-events-auto">
 
           <button
 
@@ -960,7 +960,7 @@ export default function RiskMapPage() {
 
         {/* 5. Bottom Left Map Legend */}
 
-        <div className="absolute bottom-4 left-4 z-[1000]">
+        <div className="absolute bottom-4 left-4 z-20">
 
           <MapLegendPanel />
 
@@ -972,7 +972,7 @@ export default function RiskMapPage() {
 
         {selectedLocation && (
 
-          <div className="absolute bottom-4 right-4 z-[1000] pointer-events-auto">
+          <div className="absolute bottom-4 right-4 z-10 pointer-events-auto">
 
             <SelectedLocationCard
 

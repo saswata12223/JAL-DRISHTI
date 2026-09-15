@@ -1,0 +1,69 @@
+feature_name,source,unit,spatial_resolution,temporal_resolution,description,observed_or_derived,availability,missingness,safe_for_training,leakage_classification
+event_id,Event Catalogue,Key/ID,Point/Catchment,Event/Window,Unique event or negative sample identifier,Observed,100%,0%,Metadata,AVAILABLE_AT_PREDICTION_TIME
+event_date,Event Catalogue,YYYY-MM-DD,Point/Catchment,Daily,Official event date or negative sample date,Observed,100%,0%,Metadata,AVAILABLE_AT_PREDICTION_TIME
+timestamp,NASA GPM / Control,ISO8601,0.1 deg,Hourly,UTC observation timestamp,Observed,100%,0%,Metadata,AVAILABLE_AT_PREDICTION_TIME
+latitude,Event Catalogue,degrees,Point,Static,Latitude coordinate,Observed,100%,0%,Spatial Key,AVAILABLE_AT_PREDICTION_TIME
+longitude,Event Catalogue,degrees,Point,Static,Longitude coordinate,Observed,100%,0%,Spatial Key,AVAILABLE_AT_PREDICTION_TIME
+district,GoI Administration,string,District,Static,Administrative district in Uttarakhand,Observed,100%,0%,Spatial Key,AVAILABLE_AT_PREDICTION_TIME
+river_catchment,CWC / HydroSHEDS,string,Basin,Static,River basin / tributary catchment,Observed,100%,0%,Spatial Key,AVAILABLE_AT_PREDICTION_TIME
+event_type,USDMA / GSI Audit,string,Point,Static,Hazard taxonomy type,Observed,100%,0%,Metadata,AVAILABLE_AT_PREDICTION_TIME
+flash_flood_target_eligible,Primary Evidence,boolean,Point,Static,Eligibility indicator for flash flood ML target,Observed,100%,0%,Metadata,AVAILABLE_AT_PREDICTION_TIME
+event_time_precision,Primary Evidence,string,Point,Static,Timing precision (EXACT_TIMESTAMP vs DATE_ONLY),Observed,100%,0%,Metadata,AVAILABLE_AT_PREDICTION_TIME
+coord_class,Primary Evidence,string,Point,Static,Coordinate provenance (DIRECT vs DERIVED),Observed,100%,0%,Metadata,AVAILABLE_AT_PREDICTION_TIME
+sample_class,Dataset Sampler,string,Point,Static,Sample classification (HISTORICAL_DISASTER_EVENT vs NEGATIVE_CONTROL),Observed,100%,0%,Metadata,AVAILABLE_AT_PREDICTION_TIME
+precipitation_mm,NASA GPM IMERG V07,mm,0.1 deg,30-min / 1-hr,Instantaneous half-hourly precipitation accumulation,Observed,100%,0%,YES,AVAILABLE_AT_PREDICTION_TIME
+rainfall_1h_mm,Derived from GPM,mm,0.1 deg,1-hr rolling,1-hour accumulated precipitation,Derived,100%,0%,YES,AVAILABLE_AT_PREDICTION_TIME
+rainfall_3h_mm,Derived from GPM,mm,0.1 deg,3-hr rolling,3-hour accumulated precipitation,Derived,100%,0%,YES,AVAILABLE_AT_PREDICTION_TIME
+rainfall_6h_mm,Derived from GPM,mm,0.1 deg,6-hr rolling,6-hour accumulated precipitation,Derived,100%,0%,YES,AVAILABLE_AT_PREDICTION_TIME
+rainfall_12h_mm,Derived from GPM,mm,0.1 deg,12-hr rolling,12-hour accumulated precipitation,Derived,100%,0%,YES,AVAILABLE_AT_PREDICTION_TIME
+rainfall_24h_mm,Derived from GPM,mm,0.1 deg,24-hr rolling,24-hour accumulated precipitation,Derived,100%,0%,YES,AVAILABLE_AT_PREDICTION_TIME
+rainfall_48h_mm,Derived from GPM,mm,0.1 deg,48-hr rolling,48-hour accumulated precipitation,Derived,100%,0%,YES,AVAILABLE_AT_PREDICTION_TIME
+rainfall_72h_mm,Derived from GPM,mm,0.1 deg,72-hr rolling,72-hour accumulated precipitation,Derived,100%,0%,YES,AVAILABLE_AT_PREDICTION_TIME
+max_rainfall_intensity_mmh,Derived from GPM,mm/h,0.1 deg,Window max,Maximum 1-hour precipitation intensity,Derived,100%,0%,YES,AVAILABLE_AT_PREDICTION_TIME
+rainfall_trend,Derived from GPM,mm,0.1 deg,3-hr rate,Precipitation acceleration trend (2*3h - 6h),Derived,100%,0%,YES,AVAILABLE_AT_PREDICTION_TIME
+rainfall_surge_ratio,Derived from GPM,ratio,0.1 deg,1h vs 24h avg,Rainfall surge ratio (1h / avg hourly 24h),Derived,100%,0%,YES,AVAILABLE_AT_PREDICTION_TIME
+antecedent_precipitation_index_mm,Derived from GPM,mm,0.1 deg,Daily decay,Antecedent Precipitation Index (API = sum(0.85^k * P_k)),Derived,100%,0%,YES,AVAILABLE_AT_PREDICTION_TIME
+surface_sm,NASA SMAP L4 V8,m3/m3,9 km,3-hr,Surface soil moisture (0-5 cm volumetric fraction),Observed/Modeled,61.4%,38.6%,YES,AVAILABLE_AT_PREDICTION_TIME
+rootzone_sm,NASA SMAP L4 V8,m3/m3,9 km,3-hr,Rootzone soil moisture (0-100 cm volumetric fraction),Observed/Modeled,61.4%,38.6%,YES,AVAILABLE_AT_PREDICTION_TIME
+official_soil_wetness_or_saturation,NASA SMAP L4 V8,fraction,9 km,3-hr,Official soil wetness/relative saturation layer,Observed/Modeled,0%,100%,UNAVAILABLE,AVAILABLE_AT_PREDICTION_TIME
+temperature_c,NOAA GFS / ERA5,deg C,0.25 deg,Hourly,Surface air temperature,Unavailable,0%,100%,UNAVAILABLE,AVAILABLE_AT_PREDICTION_TIME
+relative_humidity_pct,NOAA GFS / ERA5,%,0.25 deg,Hourly,Relative humidity,Unavailable,0%,100%,UNAVAILABLE,AVAILABLE_AT_PREDICTION_TIME
+surface_pressure_hpa,NOAA GFS / ERA5,hPa,0.25 deg,Hourly,Atmospheric surface pressure,Unavailable,0%,100%,UNAVAILABLE,AVAILABLE_AT_PREDICTION_TIME
+wind_speed_ms,NOAA GFS / ERA5,m/s,0.25 deg,Hourly,10m wind speed,Unavailable,0%,100%,UNAVAILABLE,AVAILABLE_AT_PREDICTION_TIME
+wind_direction_deg,NOAA GFS / ERA5,degrees,0.25 deg,Hourly,10m wind direction,Unavailable,0%,100%,UNAVAILABLE,AVAILABLE_AT_PREDICTION_TIME
+CAPE,NOAA GFS / ERA5,J/kg,0.25 deg,Hourly,Convective Available Potential Energy,Unavailable,0%,100%,UNAVAILABLE,AVAILABLE_AT_PREDICTION_TIME
+elevation_m,NASA SRTM DEM,meters,90 m,Static,Terrain elevation above MSL,Observed,100%,0%,YES,AVAILABLE_AT_PREDICTION_TIME
+slope_deg,Derived from SRTM,degrees,90 m,Static,Topographic slope angle,Derived,100%,0%,YES,AVAILABLE_AT_PREDICTION_TIME
+aspect_deg,Derived from SRTM,degrees,90 m,Static,Slope aspect direction (0-360),Derived,100%,0%,YES,AVAILABLE_AT_PREDICTION_TIME
+curvature,Derived from SRTM,m^-1,90 m,Static,Profile curvature,Derived,100%,0%,YES,AVAILABLE_AT_PREDICTION_TIME
+flow_accumulation,Derived from SRTM,cells,90 m,Static,Upstream flow accumulation cells,Derived,100%,0%,YES,AVAILABLE_AT_PREDICTION_TIME
+drainage_density,Derived from SRTM,km/km2,90 m,Static,Stream network drainage density,Derived,100%,0%,YES,AVAILABLE_AT_PREDICTION_TIME
+distance_to_stream_km,Derived from SRTM,km,90 m,Static,Distance to nearest river stream channel,Derived,100%,0%,YES,AVAILABLE_AT_PREDICTION_TIME
+topographic_wetness_index,Derived from SRTM,index,90 m,Static,Topographic Wetness Index (TWI = ln(a/tan b)),Derived,100%,0%,YES,AVAILABLE_AT_PREDICTION_TIME
+stream_power_index,Derived from SRTM,index,90 m,Static,Stream Power Index (SPI = a * tan b),Derived,100%,0%,YES,AVAILABLE_AT_PREDICTION_TIME
+catchment_id,HydroSHEDS / DEM,string,Basin,Static,HydroSHEDS sub-basin identifier,Derived,100%,0%,YES,AVAILABLE_AT_PREDICTION_TIME
+upstream_area_km2,HydroSHEDS / DEM,km2,Basin,Static,Total upstream drainage area,Derived,100%,0%,YES,AVAILABLE_AT_PREDICTION_TIME
+stream_order,Derived from DEM,integer,Basin,Static,Strahler stream order,Derived,100%,0%,YES,AVAILABLE_AT_PREDICTION_TIME
+landcover_class,ESA WorldCover 10m,integer,10 m,Static,ESA land cover class code,Observed,100%,0%,YES,AVAILABLE_AT_PREDICTION_TIME
+forest_fraction,ESA WorldCover 10m,fraction,100 m,Static,Tree cover area fraction (0-1),Derived,100%,0%,YES,AVAILABLE_AT_PREDICTION_TIME
+cropland_fraction,ESA WorldCover 10m,fraction,100 m,Static,Cropland area fraction (0-1),Derived,100%,0%,YES,AVAILABLE_AT_PREDICTION_TIME
+urban_fraction,ESA WorldCover 10m,fraction,100 m,Static,Built-up / urban area fraction (0-1),Derived,100%,0%,YES,AVAILABLE_AT_PREDICTION_TIME
+sand_fraction,SoilGrids / ISRIC,fraction,250 m,Static,Soil sand content fraction,Unavailable,0%,100%,UNAVAILABLE,AVAILABLE_AT_PREDICTION_TIME
+clay_fraction,SoilGrids / ISRIC,fraction,250 m,Static,Soil clay content fraction,Unavailable,0%,100%,UNAVAILABLE,AVAILABLE_AT_PREDICTION_TIME
+silt_fraction,SoilGrids / ISRIC,fraction,250 m,Static,Soil silt content fraction,Unavailable,0%,100%,UNAVAILABLE,AVAILABLE_AT_PREDICTION_TIME
+soil_depth_m,SoilGrids / ISRIC,meters,250 m,Static,Soil depth to bedrock,Unavailable,0%,100%,UNAVAILABLE,AVAILABLE_AT_PREDICTION_TIME
+bulk_density,SoilGrids / ISRIC,g/cm3,250 m,Static,Soil bulk density,Unavailable,0%,100%,UNAVAILABLE,AVAILABLE_AT_PREDICTION_TIME
+hydraulic_conductivity,SoilGrids / ISRIC,cm/hr,250 m,Static,Saturated hydraulic conductivity,Unavailable,0%,100%,UNAVAILABLE,AVAILABLE_AT_PREDICTION_TIME
+cwc_station_id,CWC / NWIC,string,Station,Static,Nearest CWC river gauging station ID,Unavailable,0%,100%,UNAVAILABLE,AVAILABLE_AT_PREDICTION_TIME
+cwc_station_distance_km,Derived Spatial,km,Point,Static,Distance to nearest CWC station,Unavailable,0%,100%,UNAVAILABLE,AVAILABLE_AT_PREDICTION_TIME
+water_level_m,CWC Telemetry,meters,Station,Hourly,River water gauge level,Unavailable,0%,100%,UNAVAILABLE,AVAILABLE_AT_PREDICTION_TIME
+discharge_cumecs,CWC Telemetry,m3/s,Station,Hourly,River discharge rate,Unavailable,0%,100%,UNAVAILABLE,AVAILABLE_AT_PREDICTION_TIME
+rate_of_rise_m_per_hr,CWC Telemetry,m/hr,Station,Hourly,Rate of water level rise,Unavailable,0%,100%,UNAVAILABLE,AVAILABLE_AT_PREDICTION_TIME
+warning_level_m,CWC Gauge Info,meters,Station,Static,Official gauge warning level threshold,Unavailable,0%,100%,UNAVAILABLE,AVAILABLE_AT_PREDICTION_TIME
+danger_level_m,CWC Gauge Info,meters,Station,Static,Official gauge danger level threshold,Unavailable,0%,100%,UNAVAILABLE,AVAILABLE_AT_PREDICTION_TIME
+HFL_m,CWC Gauge Info,meters,Station,Static,Historical Highest Flood Level,Unavailable,0%,100%,UNAVAILABLE,AVAILABLE_AT_PREDICTION_TIME
+flood_next_1h,Target Definition,binary/NULL,Point,1-hr lead,"Flash flood surge target in next 1 hour (1=event, 0=non-event, NULL=unknown)",Derived,17.7%,82.3%,TARGET_OUTCOME,NOT_AVAILABLE_AT_PREDICTION_TIME
+flood_next_3h,Target Definition,binary/NULL,Point,3-hr lead,"Flash flood surge target in next 3 hours (1=event, 0=non-event, NULL=unknown)",Derived,17.7%,82.3%,TARGET_OUTCOME,NOT_AVAILABLE_AT_PREDICTION_TIME
+flood_next_6h,Target Definition,binary/NULL,Point,6-hr lead,"Flash flood surge target in next 6 hours (1=event, 0=non-event, NULL=unknown)",Derived,17.7%,82.3%,TARGET_OUTCOME,NOT_AVAILABLE_AT_PREDICTION_TIME
+flood_next_12h,Target Definition,binary/NULL,Point,12-hr lead,"Flash flood surge target in next 12 hours (1=event, 0=non-event, NULL=unknown)",Derived,17.7%,82.3%,TARGET_OUTCOME,NOT_AVAILABLE_AT_PREDICTION_TIME
+flood_next_24h,Target Definition,binary/NULL,Point,24-hr lead,"Flash flood surge target in next 24 hours (1=event, 0=non-event, NULL=unknown)",Derived,17.7%,82.3%,TARGET_OUTCOME,NOT_AVAILABLE_AT_PREDICTION_TIME

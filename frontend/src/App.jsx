@@ -24,14 +24,14 @@ export default function App() {
       <Route element={<AppLayout />}>
         <Route path="dashboard" element={<DashboardPage />} />
         <Route path="immediate-actions" element={<ImmediateActionsPage />} />
-        <Route path="risk-map" element={<RiskMapPage />} />
+        <Route path="risk-map" element={<Navigate to="/dashboard" replace />} />
         <Route path="analytics" element={<AnalyticsPage />} />
         <Route path="monitoring" element={<StationMonitoringPage />} />
         <Route path="live-forecast" element={<LiveForecastPage />} />
         <Route path="flood-simulation" element={<FloodSimulationPage />} />
         <Route path="alerts" element={<AlertsManagementPage />} />
         <Route path="historical-events" element={<HistoricalEventsPage />} />
-        <Route path="model-intelligence" element={<ModelIntelligencePage />} />
+        <Route path="model-intelligence" element={<Navigate to="/analytics" replace />} />
         <Route path="about-terrain" element={<AboutTerrainPage />} />
       </Route>
 

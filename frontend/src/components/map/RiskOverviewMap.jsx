@@ -44,7 +44,7 @@ function MapControls() {
 
   return (
 
-    <div className="absolute top-4 right-4 z-[1000] flex flex-col gap-1.5 pointer-events-auto">
+    <div className="absolute top-6 right-6 z-10 flex flex-col gap-2 pointer-events-auto">
 
       <button
 
@@ -125,38 +125,23 @@ export default function RiskOverviewMap({ stations = DEFAULT_MAP_STATIONS, onSel
 
 
   return (
-
-    <div className="glass-panel-level1 rounded-2xl flex flex-col overflow-hidden h-full min-h-[500px] lg:min-h-[560px] relative font-sans border border-[#A5F1F7]/35 shadow-[0_10px_35px_rgba(16,42,46,0.06)]">
-
-
-
-      {/* 1. Floating Top-Left Translucent Light Glass Filter Pill */}
-
-      <div className="absolute top-4 left-4 z-[1000] bg-white/90 backdrop-blur-md border border-[#A5F1F7]/50 p-2.5 rounded-xl select-none flex flex-col gap-2 pointer-events-auto shadow-sm">
-
-        <div className="flex items-center gap-2">
-
-          <span className="w-2 h-2 rounded-full bg-[#102A2E] animate-pulse" />
-
-          <h2 className="text-[12px] font-bold text-[#102A2E] tracking-wide font-sans">
-
+    <div className="bg-white rounded-2xl flex flex-col overflow-hidden h-full min-h-[480px] lg:min-h-[520px] relative font-sans border border-slate-200 shadow-xs">
+      {/* 1. Floating Top-Left Translucent Light Filter Pill */}
+      <div className="absolute top-6 left-6 z-20 bg-white/95 backdrop-blur-md border border-slate-200/90 p-4 rounded-xl select-none flex flex-col gap-4 pointer-events-auto shadow-sm">
+        <div className="flex items-center gap-3">
+          <span className="w-2 h-2 rounded-full bg-slate-800 animate-pulse" />
+          <h2 className="text-[12px] font-bold text-slate-900 tracking-wide font-sans">
             Flood Risk Overview
-
           </h2>
-
-          <span className="text-[9.5px] font-bold text-[#102A2E] bg-[#A5F1F7] px-1.5 py-0.5 rounded border border-[#A5F1F7]">
-
+          <span className="text-[9.5px] font-bold text-cyan-900 bg-cyan-100 px-1.5 py-0.5 rounded border border-cyan-200">
             Uttarakhand
-
           </span>
-
         </div>
 
 
 
         {/* Floating Quick Filter Pills */}
-
-        <div className="flex items-center gap-1 pt-0.5">
+        <div className="flex items-center gap-2 pt-0.5">
 
           {['ALL', 'EXTREME', 'HIGH'].map((f) => (
 
@@ -310,7 +295,7 @@ export default function RiskOverviewMap({ stations = DEFAULT_MAP_STATIONS, onSel
 
                 <Tooltip direction="top" offset={[0, -6]} opacity={0.95}>
 
-                  <div className="font-sans text-[11px] text-[#102A2E] font-semibold">
+                  <div className="font-sans text-[11px] text-[#102A2E] font-semibold map-terrain-label">
 
                     {st.name} ({st.district}) &bull; <span style={{ color: fillColor, fontWeight: 700 }}>{st.risk}</span>
 
@@ -361,10 +346,8 @@ export default function RiskOverviewMap({ stations = DEFAULT_MAP_STATIONS, onSel
 
 
         {/* 3. Floating Glass Legend (Bottom Left) */}
-
-        <div className="absolute bottom-4 left-4 z-[1000] bg-white/90 backdrop-blur-md border border-[#A5F1F7]/50 px-3 py-2 rounded-xl select-none pointer-events-auto shadow-sm">
-
-          <span className="text-[9px] font-bold text-[#6B858A] uppercase tracking-wider block mb-1">
+        <div className="absolute bottom-6 left-6 z-20 bg-white/90 backdrop-blur-md border border-[#A5F1F7]/50 px-4 py-3 rounded-xl select-none pointer-events-auto shadow-sm">
+          <span className="text-[9.5px] font-bold text-[#6B858A] uppercase tracking-widest block mb-2">
 
             Risk Classification
 

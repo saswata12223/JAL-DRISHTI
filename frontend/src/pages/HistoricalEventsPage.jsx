@@ -52,24 +52,25 @@ function SeverityBadge({ severity }) {
   );
 }
 
-function KpiCard({ label, value, subtext, icon, accent }) {
+function KpiCard({ label, value, subtext, accent }) {
   const accentMap = {
-    red: { bubble: 'bg-red-500/15 text-red-500 border-red-500/25', value: 'text-red-500' },
-    orange: { bubble: 'bg-orange-500/15 text-orange-500 border-orange-500/25', value: 'text-orange-500' },
-    amber: { bubble: 'bg-amber-500/15 text-amber-500 border-amber-500/25', value: 'text-amber-500' },
-    sky: { bubble: 'bg-sky-500/15 text-sky-400 border-sky-500/25', value: 'text-app-text-primary' },
+    red: 'text-red-500',
+    orange: 'text-orange-500',
+    amber: 'text-amber-500',
+    sky: 'text-app-text-primary',
   };
-  const a = accentMap[accent] || accentMap.sky;
+  const color = accentMap[accent] || accentMap.sky;
   return (
-    <div className="bg-app-surface border border-app-border p-4 rounded-xl shadow-sm flex items-center gap-3.5 select-none">
-      <div className={`w-10 h-10 rounded-xl border flex items-center justify-center shrink-0 ${a.bubble}`}>
-        <span className="material-symbols-outlined text-[20px]">{icon}</span>
-      </div>
-      <div className="min-w-0">
-        <span className="text-[10.5px] font-bold text-app-text-muted uppercase tracking-wider block truncate">{label}</span>
-        <span className={`text-[22px] font-bold leading-tight font-mono tracking-tight ${a.value}`}>{value}</span>
-        <span className="text-[11px] text-app-text-secondary font-medium block truncate">{subtext}</span>
-      </div>
+    <div className="bg-app-surface border border-app-border/80 p-5 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 flex flex-col select-none group">
+      <span className="text-[10.5px] font-extrabold text-app-text-muted uppercase tracking-wider block truncate mb-1">
+        {label}
+      </span>
+      <span className={`text-[24px] font-bold leading-tight font-mono tracking-tight ${color}`}>
+        {value}
+      </span>
+      <span className="text-[11px] text-app-text-secondary font-medium block truncate mt-1">
+        {subtext}
+      </span>
     </div>
   );
 }
@@ -136,15 +137,9 @@ function EventList({ events, selectedId, onSelect }) {
               </div>
 
               <div className="col-span-12 lg:col-span-1 flex justify-end">
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onSelect && onSelect(event.id);
-                  }}
-                  className="text-[10px] font-semibold text-indigo-400 flex items-center gap-0.5 hover:underline"
-                >
-                  Inspect <span className="material-symbols-outlined text-[11px]">chevron_right</span>
-                </button>
+                <span className={`text-[10.5px] font-bold ${selected ? 'text-indigo-400' : 'text-app-text-muted group-hover:text-indigo-400'} transition-colors`}>
+                  Inspect
+                </span>
               </div>
             </div>
           );
@@ -173,86 +168,85 @@ function EventDetail({ event }) {
   const navigate = useNavigate();
   return (
     <PanelCard
-      icon="description"
       title="Event Detail"
       subtitle={event.eventId}
       badge={<SeverityBadge severity={event.severity} />}
     >
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-5">
+        {/* PRIMARY INFO */}
         <div>
-          <h2 className="text-[15px] font-bold text-app-text-primary">{event.eventName}</h2>
-          <p className="text-[11px] text-app-text-secondary mt-0.5">
-            {event.eventType} &bull; {formatDate(event.eventDate)}
+          <h2 className="text-[17px] font-bold text-app-text-primary">{event.eventName}</h2>
+          <p className="text-[11.5px] text-app-text-secondary font-medium mt-0.5">
+            {formatDate(event.eventDate)} &bull; {event.location}
           </p>
+          <div className="flex gap-2 mt-2">
+            <span className="px-2 py-0.5 rounded border border-app-border text-[10px] font-semibold text-app-text-secondary">
+              {event.eventType}
+            </span>
+            <SeverityBadge severity={event.severity} />
+          </div>
         </div>
 
-        <div className="flex flex-col">
-          <DetailRow label="Event ID" value={event.eventId} mono />
-          <DetailRow label="Date" value={formatDate(event.eventDate)} />
+        {/* PRIMARY MEASUREMENTS */}
+        <div className="grid grid-cols-2 gap-3 border-y border-app-border/40 py-3">
+          <div className="flex flex-col">
+            <span className="text-[10px] font-extrabold uppercase tracking-wider text-app-text-muted">Peak Rainfall</span>
+            <span className="text-[14px] font-bold font-mono text-app-text-primary mt-0.5">
+              {event.peakRainfallMm != null ? `${event.peakRainfallMm} mm` : '—'}
+            </span>
+            <span className="text-[10px] text-app-text-secondary mt-1">{event.rainfallInformation}</span>
+          </div>
+          <div className="flex flex-col">
+            <span className="text-[10px] font-extrabold uppercase tracking-wider text-app-text-muted">Peak Water Level</span>
+            <span className="text-[14px] font-bold font-mono text-app-text-primary mt-0.5">
+              {event.peakWaterLevelM != null ? `${event.peakWaterLevelM} m` : '—'}
+            </span>
+            <span className="text-[10px] text-app-text-secondary mt-1">{event.waterLevelInformation}</span>
+          </div>
+        </div>
+
+        {/* SUMMARY */}
+        <div className="flex flex-col gap-1.5">
+          <span className="text-[10px] font-extrabold uppercase tracking-wider text-app-text-muted">Summary</span>
+          <p className="text-[12px] text-app-text-primary font-medium leading-relaxed">{event.description}</p>
+        </div>
+
+        {/* SECONDARY METADATA */}
+        <div className="flex flex-col gap-0 pt-2">
           <DetailRow label="Duration" value={`${eventDurationDays(event)} day(s)`} mono />
           <DetailRow label="District(s)" value={event.districts.join(', ')} />
-          <DetailRow label="Location" value={event.location} />
           <DetailRow label="River Basin" value={event.riverBasin} />
-          <DetailRow label="Severity" value={event.severity} />
-          <DetailRow label="Peak Rainfall" value={event.peakRainfallMm != null ? `${event.peakRainfallMm} mm` : 'Not recorded (descriptive)'} mono />
-          <DetailRow label="Peak Water Level" value={event.peakWaterLevelM != null ? `${event.peakWaterLevelM} m` : 'Not recorded (descriptive)'} mono />
-          <DetailRow label="Data Source" value={event.source === 'LIVE_BACKEND' ? 'Live backend' : 'Canonical repository'} mono />
-          <DetailRow label="Confidence" value={event.confidence} mono />
+          <DetailRow label="Triggering Hazard" value={event.triggeringHazard} />
+          <DetailRow label="Affected Population" value={event.affectedPopulation ? event.affectedPopulation.toLocaleString() : '—'} mono />
+          <DetailRow label="Recorded Deaths" value={event.deaths || 0} mono />
         </div>
 
-        {/* Trigger hazard */}
-        <div className="bg-app-surface-elevated border border-app-border rounded-lg p-2.5">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-app-text-muted">Triggering Hazard</span>
-          <p className="text-[11px] text-app-text-secondary leading-snug mt-1">{event.triggeringHazard}</p>
-        </div>
-
-        {/* Rainfall / water level prose */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-          <div className="bg-app-surface-elevated border border-app-border rounded-lg p-2.5">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-app-text-muted">Rainfall</span>
-            <p className="text-[11px] text-app-text-secondary leading-snug mt-1">{event.rainfallInformation}</p>
+        {/* TECHNICAL / SOURCE METADATA */}
+        <details className="group border border-app-border/60 rounded-xl mt-2 bg-app-surface/50">
+          <summary className="text-[10.5px] font-bold text-app-text-muted uppercase tracking-wider cursor-pointer p-3 hover:text-app-text-primary transition-colors select-none flex items-center justify-between">
+            <span>Technical Metadata & Source</span>
+            <span className="material-symbols-outlined text-[14px] group-open:rotate-180 transition-transform">expand_more</span>
+          </summary>
+          <div className="flex flex-col px-4 pb-4 gap-0">
+            <DetailRow label="Event ID" value={event.eventId} mono />
+            <DetailRow label="Data Source" value={event.source === 'LIVE_BACKEND' ? 'Live backend' : 'Canonical repository'} mono />
+            <DetailRow label="Source Name" value={event.sourceName} />
+            <DetailRow label="Confidence" value={event.confidence} mono />
+            {event.sourceUrl && (
+              <div className="flex items-start justify-between gap-2 py-1.5 border-b border-app-border/50 last:border-0">
+                <span className="text-[10.5px] font-bold uppercase tracking-wider text-app-text-muted shrink-0">Source URL</span>
+                <a
+                  href={event.sourceUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-[11px] text-indigo-400 hover:underline break-all text-right"
+                >
+                  {event.sourceUrl}
+                </a>
+              </div>
+            )}
           </div>
-          <div className="bg-app-surface-elevated border border-app-border rounded-lg p-2.5">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-app-text-muted">Water Level</span>
-            <p className="text-[11px] text-app-text-secondary leading-snug mt-1">{event.waterLevelInformation}</p>
-          </div>
-        </div>
-
-        {/* Description */}
-        <div className="bg-app-surface-elevated border border-app-border rounded-lg p-2.5">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-app-text-muted">Summary</span>
-          <p className="text-[11px] text-app-text-primary leading-snug mt-1">{event.description}</p>
-        </div>
-
-        {/* Impact */}
-        <div className="grid grid-cols-2 gap-2">
-          <div className="bg-app-surface-elevated border border-app-border rounded-lg p-2.5 text-center">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-app-text-muted block">Deaths</span>
-            <span className="text-[20px] font-bold font-mono text-red-500">{event.deaths || 0}</span>
-          </div>
-          <div className="bg-app-surface-elevated border border-app-border rounded-lg p-2.5 text-center">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-app-text-muted block">Affected Population</span>
-            <span className="text-[20px] font-bold font-mono text-app-text-primary">
-              {event.affectedPopulation ? event.affectedPopulation.toLocaleString() : '—'}
-            </span>
-          </div>
-        </div>
-
-        {/* Source */}
-        <div className="flex flex-col gap-0.5">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-app-text-muted">Source</span>
-          <span className="text-[11px] font-semibold text-app-text-primary">{event.sourceName}</span>
-          {event.sourceUrl && (
-            <a
-              href={event.sourceUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="text-[10.5px] text-indigo-400 hover:underline break-all"
-            >
-              {event.sourceUrl}
-            </a>
-          )}
-        </div>
+        </details>
 
         {/* Navigation */}
         <div className="flex items-center gap-2 pt-1 border-t border-app-border/60">
@@ -367,70 +361,22 @@ function DistrictAnalysis({ byDistrict }) {
 }
 
 // ---------------------------------------------------------------------------
-// EVENT TIMELINE
-// ---------------------------------------------------------------------------
-function EventTimeline({ timeline, selectedId, onSelect }) {
-  const kindColor = {
-    Catastrophic: 'text-red-500',
-    Major: 'text-orange-500',
-    Moderate: 'text-amber-500',
-  };
-  return (
-    <PanelCard
-      icon="timeline"
-      title="Event Timeline"
-      subtitle="Chronological record — select to inspect"
-      badge={<span className="text-[11px] font-bold text-app-text-muted">{timeline.length} events</span>}
-    >
-      <div className="flex flex-col max-h-[380px] overflow-y-auto pr-1">
-        {timeline.map((event, i) => {
-          const selected = event.id === selectedId;
-          return (
-            <div
-              key={event.id}
-              onClick={() => onSelect && onSelect(event.id)}
-              className={`flex gap-2.5 cursor-pointer rounded-lg px-1 transition-all ${selected ? 'bg-indigo-500/10' : 'hover:bg-app-surface-hover'}`}
-            >
-              <div className="flex flex-col items-center">
-                <span className={`w-2 h-2 rounded-full mt-1.5 ${selected ? 'bg-indigo-400' : 'bg-app-text-muted'}`} />
-                {i < timeline.length - 1 && <span className="w-px flex-1 bg-app-border" />}
-              </div>
-              <div className="pb-2.5 flex-1 min-w-0">
-                <div className="flex items-center justify-between gap-2">
-                  <span className={`text-[10px] font-bold ${kindColor[event.severity] || 'text-app-text-muted'}`}>
-                    {formatDate(event.eventDate)} &bull; {event.primaryDistrictLabel}
-                  </span>
-                  <span className="text-[9.5px] font-mono text-app-text-muted shrink-0">{event.eventId}</span>
-                </div>
-                <p className={`text-[11px] truncate ${selected ? 'text-indigo-300 font-semibold' : 'text-app-text-secondary'}`}>
-                  {event.eventName}
-                </p>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    </PanelCard>
-  );
-}
 
 // ---------------------------------------------------------------------------
 // CURRENT vs HISTORICAL CONTEXT
 // ---------------------------------------------------------------------------
-function ComparisonCard({ label, current, historical, unit, icon }) {
+function ComparisonCard({ label, current, historical, unit }) {
   return (
-    <div className="bg-app-surface-elevated border border-app-border rounded-lg p-2.5 flex flex-col gap-1">
-      <span className="text-[10px] font-bold uppercase tracking-wider text-app-text-muted flex items-center gap-1">
-        <span className="material-symbols-outlined text-[12px]">{icon}</span> {label}
-      </span>
-      <div className="flex items-end justify-between">
+    <div className="bg-app-surface-elevated border border-app-border rounded-lg p-3 flex flex-col gap-1.5">
+      <span className="text-[10px] font-bold uppercase tracking-wider text-app-text-muted">{label}</span>
+      <div className="flex items-end justify-between mt-1">
         <div className="flex flex-col">
           <span className="text-[9.5px] text-app-text-muted">Current</span>
           <span className="text-[18px] font-bold font-mono text-indigo-300">
             {current != null ? `${current}${unit}` : '—'}
           </span>
         </div>
-        <span className="text-[13px] text-app-text-muted">vs</span>
+        <span className="text-[13px] text-app-text-muted mb-1 font-bold">vs</span>
         <div className="flex flex-col items-end">
           <span className="text-[9.5px] text-app-text-muted">Historic</span>
           <span className="text-[18px] font-bold font-mono text-app-text-primary">
@@ -467,14 +413,12 @@ function CurrentVsHistorical({ event }) {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
         <ComparisonCard
           label="Rainfall"
-          icon="water_drop"
           current={maxCurrentRain}
           historical={event.peakRainfallMm}
           unit=" mm"
         />
         <ComparisonCard
           label="Risk Probability"
-          icon="crisis_alert"
           current={Math.round(maxCurrentProb * 100)}
           historical={null}
           unit="%"
@@ -578,30 +522,30 @@ export default function HistoricalEventsPage() {
     'bg-app-surface-elevated border border-app-border rounded-lg px-2.5 py-1.5 text-app-text-primary outline-none focus:border-indigo-500/50 cursor-pointer text-[11.5px] font-medium';
 
   return (
-    <div className="flex flex-col gap-5 w-full">
+    <div className="flex flex-col gap-6 w-full font-sans">
       {/* 1. Page Header */}
-      <div className="flex flex-col gap-3.5">
+      <div className="flex flex-col gap-4">
         <div>
-          <h1 className="text-[17px] font-bold text-app-text-primary tracking-tight font-sans">
+          <h1 className="text-[19px] font-extrabold text-app-text-primary tracking-tight">
             HISTORICAL FLOOD EVENTS
           </h1>
-          <p className="text-[11.5px] font-medium text-app-text-secondary">
+          <p className="text-[12px] font-medium text-app-text-secondary mt-1">
             Documented flood-event records, trends and comparative intelligence (1970–2024)
           </p>
         </div>
 
         {/* Filter / Search Bar */}
-        <div className="bg-app-surface border border-app-border p-3 rounded-xl shadow-sm flex flex-wrap items-center justify-between gap-2.5 select-none">
-          <div className="flex flex-wrap items-center gap-2 text-[12px]">
+        <div className="bg-app-surface border border-app-border p-3.5 rounded-xl shadow-sm flex flex-wrap items-center justify-between gap-3 select-none">
+          <div className="flex flex-wrap items-center gap-2.5 text-[12px]">
             <div className="relative">
-              <span className="material-symbols-outlined text-[15px] text-app-text-muted absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none">
+              <span className="material-symbols-outlined text-[15px] text-app-text-muted absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
                 search
               </span>
               <input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search event / location / source..."
-                className="bg-app-surface-elevated border border-app-border rounded-lg pl-8 pr-2.5 py-1.5 text-app-text-primary outline-none focus:border-indigo-500/50 placeholder:text-app-text-muted text-[11.5px] font-medium w-56"
+                className="bg-app-surface-elevated border border-app-border rounded-lg pl-9 pr-3 py-1.5 text-app-text-primary outline-none focus:border-indigo-500/50 placeholder:text-app-text-muted text-[11.5px] font-medium w-64"
               />
             </div>
 
@@ -635,31 +579,29 @@ export default function HistoricalEventsPage() {
 
           <button
             onClick={handleReset}
-            className="px-3 py-1.5 rounded-lg bg-app-surface-elevated hover:bg-app-surface-hover text-app-text-muted hover:text-app-text-primary border border-app-border transition-colors text-[11.5px] font-semibold flex items-center gap-1 cursor-pointer"
+            className="px-3.5 py-1.5 rounded-lg bg-app-surface-elevated hover:bg-app-surface-hover text-app-text-muted hover:text-app-text-primary border border-app-border transition-colors text-[11.5px] font-semibold flex items-center gap-1.5 cursor-pointer"
           >
-            <span className="material-symbols-outlined text-[14px]">restart_alt</span>
+            <span className="material-symbols-outlined text-[15px]">restart_alt</span>
             Reset Filters
           </button>
         </div>
       </div>
 
       {/* 2. Summary KPI Row */}
-      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-        <KpiCard label="Total Events" value={kpis.totalEvents} subtext="Documented 1970–2024" icon="history" accent="sky" />
-        <KpiCard label="Catastrophic" value={kpis.criticalExtreme} subtext="Extreme severity events" icon="crisis_alert" accent="red" />
-        <KpiCard label="Most Affected" value={kpis.mostAffectedDistrict} subtext={`${kpis.mostAffectedCount} documented events`} icon="place" accent="orange" />
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-5 gap-5">
+        <KpiCard label="Total Events" value={kpis.totalEvents} subtext="Documented 1970–2024" accent="sky" />
+        <KpiCard label="Catastrophic" value={kpis.criticalExtreme} subtext="Extreme severity events" accent="red" />
+        <KpiCard label="Most Affected" value={kpis.mostAffectedDistrict} subtext={`${kpis.mostAffectedCount} documented events`} accent="orange" />
         <KpiCard
           label="Highest Rainfall"
           value={kpis.maxRainfallValue != null ? `${kpis.maxRainfallValue} mm` : '—'}
           subtext={kpis.maxRainfallEvent ? kpis.maxRainfallEvent.eventId : ''}
-          icon="water_drop"
           accent="sky"
         />
         <KpiCard
           label="Peak Water Level"
           value={kpis.maxWaterLevelValue != null ? `${kpis.maxWaterLevelValue} m` : 'n/a'}
           subtext={kpis.maxWaterLevelEvent ? kpis.maxWaterLevelEvent.eventId : 'descriptive records only'}
-          icon="waves"
           accent="orange"
         />
       </div>
@@ -673,7 +615,7 @@ export default function HistoricalEventsPage() {
           {selectedEvent ? (
             <EventDetail event={selectedEvent} />
           ) : (
-            <PanelCard icon="info" title="Event Detail" subtitle="No event selected">
+            <PanelCard title="Event Detail" subtitle="No event selected">
               <p className="text-[12px] text-app-text-muted py-6 text-center">
                 No historical events match the current filters. Adjust or reset the filters above.
               </p>
@@ -686,14 +628,9 @@ export default function HistoricalEventsPage() {
       <EventCharts byYear={byYear} bySeverity={bySeverity} />
 
       {/* 5. District Analysis + Current vs Historical */}
-      <div className="grid grid-cols-1 xl:grid-cols-5 gap-5">
-        <div className="xl:col-span-3">
-          <EventTimeline timeline={timeline} selectedId={selectedId} onSelect={setSelectedId} />
-        </div>
-        <div className="xl:col-span-2 flex flex-col gap-5">
-          <DistrictAnalysis byDistrict={byDistrict} />
-          {selectedEvent && <CurrentVsHistorical event={selectedEvent} />}
-        </div>
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
+        <DistrictAnalysis byDistrict={byDistrict} />
+        {selectedEvent && <CurrentVsHistorical event={selectedEvent} />}
       </div>
     </div>
   );

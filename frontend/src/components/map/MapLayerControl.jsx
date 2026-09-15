@@ -6,7 +6,7 @@ export default function MapLayerControl({ layers, onToggleLayer, isOpen, onToggl
       {/* Trigger Button */}
       <button
         onClick={onToggleOpen}
-        className={`px-3 py-1.5 rounded-lg text-[12px] font-semibold flex items-center gap-1.5 border transition-all cursor-pointer shadow-sm ${
+        className={`px-4 py-2 rounded-lg text-[12px] font-semibold flex items-center gap-2 border transition-all cursor-pointer shadow-sm ${
           isOpen
             ? 'bg-app-surface-elevated border-indigo-500/50 text-app-text-primary'
             : 'bg-app-surface border-app-border text-app-text-secondary hover:text-app-text-primary'
@@ -21,12 +21,12 @@ export default function MapLayerControl({ layers, onToggleLayer, isOpen, onToggl
 
       {/* Layer Options Dropdown */}
       {isOpen && (
-        <div className="absolute top-10 right-0 w-60 bg-app-surface border border-app-border rounded-xl p-3 shadow-xl flex flex-col gap-2 z-[1100]">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-app-text-muted">
+        <div className="absolute top-12 right-0 w-64 bg-app-surface border border-app-border rounded-xl p-4 shadow-xl flex flex-col gap-3 z-[1100]">
+          <span className="text-[10px] font-bold uppercase tracking-widest text-app-text-muted">
             AVAILABLE LAYERS
           </span>
 
-          <div className="flex flex-col gap-1.5 text-[12px]">
+          <div className="flex flex-col gap-2.5 text-[12px]">
             <label className="flex items-center gap-2 text-app-text-primary hover:text-indigo-400 cursor-pointer">
               <input
                 type="checkbox"

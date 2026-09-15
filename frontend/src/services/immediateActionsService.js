@@ -5,7 +5,20 @@ export const immediateActionsService = {
   getTacticalPlan: () => api.get('/immediate-actions/tactical-plan'),
 
   // Automated Twilio Voice Call Outbound Dispatch
-  dispatchVoiceCalls: (payload) => api.post('/immediate-actions/call/dispatch', payload),
+  dispatchVoiceCalls: (payload) => {
+    const authToken = import.meta.env.VITE_TWILIO_AUTH_TOKEN || '';
+    const accountSid = import.meta.env.VITE_TWILIO_ACCOUNT_SID || '';
+    const apiKey = import.meta.env.VITE_TWILIO_API_KEY || '';
+    const fromNumber = import.meta.env.VITE_TWILIO_FROM_NUMBER || '';
+
+    return api.post('/immediate-actions/call/dispatch', {
+      auth_token: authToken,
+      account_sid: accountSid,
+      api_key: apiKey,
+      from_number: fromNumber,
+      ...payload,
+    });
+  },
 
   // Automated SMS Emergency Dissemination
   dispatchSmsAlerts: (payload) => api.post('/immediate-actions/sms/dispatch', payload),

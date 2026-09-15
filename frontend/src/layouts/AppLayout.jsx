@@ -42,7 +42,7 @@ export default function AppLayout() {
         lastUpdated={lastUpdated}
       />
       <div className="flex-1 pt-[82px] flex flex-col w-full">
-        <main className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 flex flex-col gap-6 pb-20 lg:pb-8">
+        <main className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 flex flex-col gap-8 pb-20 lg:pb-10">
           <Outlet context={{ summary, dataQuality }} />
           <Footer />
         </main>
