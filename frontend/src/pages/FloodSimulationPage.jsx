@@ -10,8 +10,12 @@ import {
   CartesianGrid,
 } from 'recharts';
 import HimalayanValleyScene from '../components/simulation/HimalayanValleyScene';
+import FloodForecastCard from '../components/monitoring/FloodForecastCard';
+import Esp32CamEvidence from '../components/monitoring/Esp32CamEvidence';
+import RainfallHistoryTrendChart from '../components/charts/RainfallHistoryTrendChart';
 import stationsService from '../services/stationsService';
 import hardwareService from '../services/hardwareService';
+import floodForecastService from '../services/floodForecastService';
 import { createTimer } from 'animejs';
 
 // 7 Approved Scenario Stages Across 30 Mins Timeline
@@ -127,7 +131,7 @@ const LOCATIONS = [
 
 export default function FloodSimulationPage() {
   // Mode selection: 'DEMONSTRATION' vs 'LIVE_HARDWARE'
-  const [mode, setMode] = useState('DEMONSTRATION');
+  const mode = 'LIVE_HARDWARE';
   const [sendDemoAlertToHw, setSendDemoAlertToHw] = useState(false);
   
   const [selectedLocIndex, setSelectedLocIndex] = useState(0);
@@ -142,6 +146,11 @@ export default function FloodSimulationPage() {
   const [hwError, setHwError] = useState(null);
   const [buzzerMessage, setBuzzerMessage] = useState(null);
   const [simulatingEvent, setSimulatingEvent] = useState(false);
+
+  // ML Flood Forecasting State
+  const [liveForecast, setLiveForecast] = useState(null);
+  const [forecastLoading, setForecastLoading] = useState(false);
+  const [rainfallHistory, setRainfallHistory] = useState([]);
 
   const timelineRef = useRef(null);
   const maxDurationMs = 30000; // 30 seconds maps to 30 mins scenario time
@@ -197,11 +206,36 @@ export default function FloodSimulationPage() {
     }
   }, []);
 
+  // ML Flood Forecast polling (3-second interval)
+  const fetchForecast = useCallback(async () => {
+    try {
+      setForecastLoading(true);
+      const [fcRes, histRes] = await Promise.allSettled([
+        floodForecastService.getLatestForecast('ARDUINO_UNO_001'),
+        floodForecastService.getRainfallHistory(30),
+      ]);
+      if (fcRes.status === 'fulfilled' && fcRes.value?.data) {
+        setLiveForecast(fcRes.value.data);
+      }
+      if (histRes.status === 'fulfilled' && histRes.value?.data) {
+        setRainfallHistory(histRes.value.data);
+      }
+    } catch (err) {
+      console.warn('[FloodSimulationPage] Flood forecast poll failed:', err);
+    } finally {
+      setForecastLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
     fetchHwStatus();
-    const interval = setInterval(fetchHwStatus, 3000);
+    fetchForecast();
+    const interval = setInterval(() => {
+      fetchHwStatus();
+      fetchForecast();
+    }, 3000);
     return () => clearInterval(interval);
-  }, [fetchHwStatus]);
+  }, [fetchHwStatus, fetchForecast]);
 
   // Load locations dynamically from backend stations
   useEffect(() => {
@@ -372,411 +406,138 @@ export default function FloodSimulationPage() {
 
   return (
     <div className="flex flex-col gap-3 w-full font-sans select-none">
-      {/* 0. Page Header with Mode Selector */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 border-b border-[rgba(16,42,46,0.08)] pb-2.5">
-        <div>
-          <div className="flex flex-wrap items-center gap-2">
-            <h1 className="text-[18px] font-bold text-[#102A2E] tracking-tight font-sans flex items-center gap-2">
-              <span className="material-symbols-outlined text-[#0C6E78] text-[22px]">
-                water_do
-              </span>
-              REAL-TIME FLOOD DIGITAL TWIN
-            </h1>
-            <span
-              className={`text-[10px] font-semibold px-2 py-0.5 rounded border uppercase tracking-wider ${
-                mode === 'LIVE_HARDWARE'
-                  ? 'bg-emerald-500/15 text-emerald-700 border-emerald-500/30 animate-pulse'
-                  : 'bg-[#A5F1F7]/40 text-[#102A2E] border-[#A5F1F7]'
-              }`}
-            >
-              {mode === 'LIVE_HARDWARE' ? 'LIVE HARDWARE' : 'DEMONSTRATION SCENARIO'}
-            </span>
-          </div>
-          <p className="text-[11.5px] text-[#5F777C] mt-0.5">
-            Complete Jal Drishti workflow: ESP32 Sensors &rarr; Telemetry &rarr; ML/Physics Engine &rarr; Actuator Buzzer
-          </p>
-        </div>
-
-        {/* Controls: Mode Switcher & Location Selector */}
-        <div className="flex flex-wrap items-center gap-2.5">
-          {/* Mode Switcher Buttons */}
-          <div className="flex items-center glass-panel-level2 p-1 rounded-lg bg-white/80 border border-[rgba(16,42,46,0.08)]">
-            <button
-              onClick={() => setMode('DEMONSTRATION')}
-              className={`px-2.5 py-1 text-[11px] font-semibold rounded transition-all cursor-pointer ${
-                mode === 'DEMONSTRATION'
-                  ? 'bg-[#A5F1F7] text-[#102A2E] border border-[#A5F1F7] shadow-xs'
-                  : 'text-[#5F777C] hover:text-[#102A2E]'
-              }`}
-            >
-              DEMO SCENARIO
-            </button>
-            <button
-              onClick={() => setMode('LIVE_HARDWARE')}
-              className={`px-2.5 py-1 text-[11px] font-semibold rounded transition-all cursor-pointer flex items-center gap-1.5 ${
-                mode === 'LIVE_HARDWARE'
-                  ? 'bg-emerald-500/20 text-emerald-800 border border-emerald-500/40 shadow-xs'
-                  : 'text-[#5F777C] hover:text-[#102A2E]'
-              }`}
-            >
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
+      {/* Title & Status */}
+      <div className="flex flex-wrap items-center justify-between gap-4 mb-3">
+        <div className="flex flex-col">
+          <h1 className="text-[17px] font-bold text-[#102A2E] tracking-tight uppercase flex items-center gap-2">
+            <span className="material-symbols-outlined text-[20px] text-[#0C6E78]">water_drop</span>
+            REAL-TIME FLOOD DIGITAL TWIN
+            <span className="text-[9.5px] font-semibold text-emerald-800 bg-emerald-500/20 px-2 py-0.5 rounded-full border border-emerald-500/30">
               LIVE HARDWARE
-            </button>
-          </div>
-
-          {/* Location Dropdown */}
-          <div className="flex items-center gap-2 glass-panel-level2 px-3 py-1 rounded-lg bg-white/80 border border-[rgba(16,42,46,0.08)]">
-            <span className="material-symbols-outlined text-[#102A2E] text-[16px]">
-              location_on
             </span>
-            <select
-              value={selectedLocIndex}
-              onChange={(e) => setSelectedLocIndex(Number(e.target.value))}
-              className="bg-transparent text-[11.5px] font-semibold text-[#102A2E] outline-none cursor-pointer font-sans"
-            >
-              {locations.map((loc, idx) => (
-                <option key={idx} value={idx} className="bg-white text-[#102A2E]">
-                  {loc.name}
-                </option>
-              ))}
-            </select>
-          </div>
+          </h1>
+          <span className="text-[11.5px] text-[#5F777C] font-medium ml-7 mt-0.5 tracking-wide">
+            Complete Jal Drishti workflow: ESP32 Sensors → Telemetry → ML/Physics Engine → Actuator Buzzer
+          </span>
         </div>
+
       </div>
 
       {/* 1. Main Central Split: Hero Simulation Scene + Right Operational Panel */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-3.5">
         {/* Left 8 Cols: Hero Environmental Scene + Controls */}
         <div className="lg:col-span-8 flex flex-col gap-3">
-          {/* Hero Scene Component */}
-          <HimalayanValleyScene
-            stageIndex={currentMetrics.index || 0}
-            progressFraction={progressFraction}
-            currentMetrics={currentMetrics}
+          {/* ESP32-CAM Feed (Replaces Himalayan Valley) */}
+          <Esp32CamEvidence 
+            className="w-full min-h-[400px]"
+            cameraDetails={
+              mode === 'DEMONSTRATION' 
+                ? {
+                    brightness: currentMetrics.waterLevelM > 3.0 ? 85 : 120,
+                    dark_cloud_score: currentMetrics.rainfallMmH > 50 ? 80 : 20,
+                    visual_rain_score: currentMetrics.rainfallMmH > 0 ? Math.min(100, currentMetrics.rainfallMmH) : 0,
+                    connected: true
+                  }
+                : liveForecast?.components?.camera_details 
+                  ? liveForecast.components.camera_details
+                  : { connected: false }
+            } 
           />
 
-          {/* Timeline Playback Controls Bar */}
-          <div className="glass-panel-level1 p-3 rounded-xl flex flex-col gap-2.5">
-            <div className="flex flex-wrap items-center justify-between gap-2.5">
-              {/* Play / Pause / Reset Buttons */}
-              <div className="flex items-center gap-1.5">
-                <button
-                  onClick={handlePlayPause}
-                  disabled={mode === 'LIVE_HARDWARE'}
-                  className={`px-3 py-1.5 text-[12px] font-bold flex items-center gap-1 transition-all rounded-lg border ${
-                    mode === 'LIVE_HARDWARE'
-                      ? 'bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed'
-                      : 'bg-[#A5F1F7] hover:bg-[#8BE5EC] text-[#102A2E] border-[#A5F1F7] cursor-pointer shadow-xs active:scale-98'
-                  }`}
-                >
-                  <span className="material-symbols-outlined text-[18px]">
-                    {isPlaying ? 'pause' : 'play_arrow'}
-                  </span>
-                  <span>{isPlaying ? 'PAUSE' : 'PLAY SCENARIO'}</span>
-                </button>
-
-                <button
-                  onClick={handleReset}
-                  disabled={mode === 'LIVE_HARDWARE'}
-                  className="p-1.5 bg-white text-[#102A2E] border border-[rgba(16,42,46,0.12)] hover:bg-[#F2FAFB] rounded-lg transition-all cursor-pointer disabled:opacity-40 shadow-xs"
-                  title="Reset Timeline"
-                >
-                  <span className="material-symbols-outlined text-[18px]">restart_alt</span>
-                </button>
-              </div>
-
-              {/* Current Time Display */}
-              <div className="text-center font-mono">
-                <span className="text-[9.5px] font-bold text-[#5F777C] uppercase tracking-wider block">
-                  {mode === 'LIVE_HARDWARE' ? 'LIVE SENSOR TIME' : 'SCENARIO TIME'}
-                </span>
-                <span className="text-[16px] font-bold text-[#102A2E]">
-                  {mode === 'LIVE_HARDWARE'
-                    ? (hwStatus?.latest_telemetry?.timestamp_display || '12:04:18 IST')
-                    : `${currentMetrics.time} / 30:00 MIN`}
-                </span>
-              </div>
-
-              {/* Speed Buttons / Demo Hardware Alert Toggle */}
-              <div className="flex items-center gap-2">
-                {mode === 'DEMONSTRATION' ? (
-                  <div className="flex items-center gap-2.5">
-                    <label className="flex items-center gap-1.5 text-[10.5px] font-semibold text-[#102A2E] cursor-pointer bg-white border border-[rgba(16,42,46,0.08)] px-2.5 py-1 rounded shadow-xs">
-                      <input
-                        type="checkbox"
-                        checked={sendDemoAlertToHw}
-                        onChange={(e) => setSendDemoAlertToHw(e.target.checked)}
-                        className="accent-[#102A2E] rounded cursor-pointer"
-                      />
-                      <span>SEND DEMO ALERT TO HARDWARE</span>
-                    </label>
-
-                    <div className="flex items-center gap-0.5 bg-white border border-[rgba(16,42,46,0.08)] p-0.5 rounded-lg shadow-xs">
-                      {[0.5, 1, 2, 4].map((sp) => (
-                        <button
-                          key={sp}
-                          onClick={() => setSpeed(sp)}
-                          className={`px-2 py-0.5 text-[10.5px] font-mono font-bold rounded transition-all cursor-pointer ${
-                            speed === sp
-                              ? 'bg-[#A5F1F7] text-[#102A2E]'
-                              : 'text-[#5F777C] hover:text-[#102A2E]'
-                          }`}
-                        >
-                          {sp}x
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                ) : (
-                  <span className="text-[10.5px] font-bold text-emerald-800 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20 flex items-center gap-1.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
-                    LIVE SENSOR STREAM
-                  </span>
-                )}
-              </div>
-            </div>
-
-            {/* Scrubbable Timeline Slider */}
-            {mode === 'DEMONSTRATION' && (
-              <div className="flex items-center gap-2">
-                <input
-                  type="range"
-                  min="0"
-                  max={maxDurationMs}
-                  value={currentTimeMs}
-                  onChange={handleSeek}
-                  className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-[#102A2E]"
-                />
-              </div>
-            )}
-          </div>
-
-          {/* 7 Stage Selector Cards Grid (Always Visible, 7 Columns on Desktop) */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-1.5">
-            {SCENARIO_STAGES.map((stg, i) => {
-              const isActive = i === currentMetrics.index;
-              let borderStyle = 'border-[rgba(16,42,46,0.08)] text-[#5F777C] hover:text-[#102A2E] hover:bg-[#F2FAFB]';
-
-              if (isActive) {
-                if (stg.riskClass === 'EXTREME') borderStyle = 'border-red-500 bg-red-500/15 text-red-700 font-bold shadow-xs';
-                else if (stg.riskClass === 'HIGH') borderStyle = 'border-orange-500 bg-orange-500/15 text-orange-700 font-bold shadow-xs';
-                else if (stg.riskClass === 'WARNING') borderStyle = 'border-amber-500 bg-amber-500/15 text-amber-700 font-bold shadow-xs';
-                else if (stg.riskClass === 'WATCH') borderStyle = 'border-blue-500 bg-blue-500/15 text-blue-700 font-bold shadow-xs';
-                else borderStyle = 'border-[#A5F1F7] bg-[#A5F1F7]/40 text-[#102A2E] font-bold shadow-xs';
-              }
-
-              return (
-                <button
-                  key={i}
-                  onClick={() => handleStageClick(i)}
-                  disabled={mode === 'LIVE_HARDWARE'}
-                  className={`glass-panel-level1 p-2 rounded-lg border flex flex-col items-center text-center justify-center gap-0.5 transition-all cursor-pointer h-[66px] ${borderStyle}`}
-                >
-                  <span className="text-[9.5px] font-mono font-semibold tracking-wider opacity-80">
-                    {stg.time}
-                  </span>
-                  <span className="text-[11px] font-bold tracking-tight leading-tight truncate w-full">
-                    {stg.title}
-                  </span>
-                  <span className="text-[9px] font-semibold tracking-wide uppercase opacity-75">
-                    {stg.riskClass}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Operational Event Timeline Feed */}
-          <div className="glass-panel-level1 p-3 rounded-xl flex flex-col gap-1.5 font-sans">
-            <div className="flex items-center justify-between border-b border-[rgba(16,42,46,0.08)] pb-1.5">
-              <h3 className="text-[11px] font-semibold text-[#102A2E] uppercase tracking-wider flex items-center gap-1.5">
-                <span className="material-symbols-outlined text-[#102A2E] text-[16px]">
-                  format_list_bulleted
-                </span>
-                Operational Event Feed
-              </h3>
-              <span className="text-[10px] font-mono text-[#5F777C]">
-                {mode === 'LIVE_HARDWARE' ? 'LIVE STREAM' : 'SIMULATED FEED'}
-              </span>
-            </div>
-
-            <div className="flex flex-col gap-1 max-h-[85px] overflow-y-auto custom-scrollbar pr-1">
-              {(hwStatus?.event_timeline || []).length > 0 ? (
-                hwStatus.event_timeline.slice(0, 5).map((evt, idx) => (
-                  <div key={idx} className="flex items-center justify-between text-[10.5px] bg-[#F2FAFB] p-1.5 rounded border border-[rgba(16,42,46,0.08)]">
-                    <div className="flex items-center gap-2 truncate">
-                      <span className="font-mono text-[#102A2E] font-semibold text-[10px]">{evt.timestamp}</span>
-                      <span className="text-[#102A2E] font-normal truncate">{evt.message}</span>
-                    </div>
-                    {evt.is_simulated ? (
-                      <span className="text-[9px] text-[#5F777C] font-mono uppercase shrink-0">SIM</span>
-                    ) : (
-                      <span className="text-[9px] text-emerald-600 font-mono uppercase shrink-0 font-bold">HW</span>
-                    )}
-                  </div>
-                ))
-              ) : (
-                <div className="text-[11px] text-[#5F777C] italic p-1.5">
-                  No events logged yet. Sensor updates and buzzer dispatches will appear here.
+          {/* Live Readings Grid (Replaces Timeline) */}
+          {(() => {
+            const demoReadings = {
+              rain_raw: currentMetrics.rainfallMmH > 80 ? 100 : currentMetrics.rainfallMmH > 40 ? 300 : 800,
+              rain_level: currentMetrics.rainfallMmH > 80 ? 'VERY HEAVY' : currentMetrics.rainfallMmH > 40 ? 'MODERATE' : 'NO RAIN',
+              rain_intensity: currentMetrics.rainfallMmH,
+              soil_raw: currentMetrics.runoffMm > 100 ? 250 : 500,
+              soil_moisture: currentMetrics.runoffMm > 100 ? 95 : 45,
+              alert: currentMetrics.riskClass === 'EXTREME' || currentMetrics.riskClass === 'HIGH'
+            };
+            const readings = mode === 'DEMONSTRATION' ? demoReadings : liveForecast?.components?.readings || {};
+            const cameraDetails = mode === 'DEMONSTRATION' ? { connected: true } : liveForecast?.components?.camera_details || { connected: false };
+            
+            return (
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                <div className="glass-panel-level1 p-4 rounded-xl flex flex-col items-center justify-center text-center border border-[rgba(16,42,46,0.1)] shadow-sm bg-white/90">
+                  <h2 className="text-[12px] font-bold text-[#5F777C] uppercase tracking-wider">Rain Sensor</h2>
+                  <div className="text-[32px] font-bold text-[#102A2E] mt-2 font-mono">{readings.rain_raw ?? '--'}</div>
+                  <p className="text-[10px] text-[#5F777C] mt-1">Raw Sensor Value</p>
                 </div>
-              )}
-            </div>
-          </div>
+                <div className="glass-panel-level1 p-4 rounded-xl flex flex-col items-center justify-center text-center border border-[rgba(16,42,46,0.1)] shadow-sm bg-white/90">
+                  <h2 className="text-[12px] font-bold text-[#5F777C] uppercase tracking-wider">Rain Level</h2>
+                  <div className="text-[22px] font-bold text-[#0C6E78] mt-2">{readings.rain_level || 'WAITING...'}</div>
+                </div>
+                <div className="glass-panel-level1 p-4 rounded-xl flex flex-col items-center justify-center text-center border border-[rgba(16,42,46,0.1)] shadow-sm bg-white/90">
+                  <h2 className="text-[12px] font-bold text-[#5F777C] uppercase tracking-wider">Rain Intensity</h2>
+                  <div className="text-[32px] font-bold text-[#102A2E] mt-2 font-mono">{readings.rain_intensity ?? '--'}%</div>
+                </div>
+                <div className="glass-panel-level1 p-4 rounded-xl flex flex-col items-center justify-center text-center border border-[rgba(16,42,46,0.1)] shadow-sm bg-white/90">
+                  <h2 className="text-[12px] font-bold text-[#5F777C] uppercase tracking-wider">Soil Moisture</h2>
+                  <div className="text-[32px] font-bold text-[#102A2E] mt-2 font-mono">{readings.soil_moisture ?? '--'}%</div>
+                  <p className="text-[10px] text-[#5F777C] mt-1">Raw: {readings.soil_raw ?? '--'}</p>
+                </div>
+                <div className="glass-panel-level1 p-4 rounded-xl flex flex-col items-center justify-center text-center border border-[rgba(16,42,46,0.1)] shadow-sm bg-white/90">
+                  <h2 className="text-[12px] font-bold text-[#5F777C] uppercase tracking-wider">Arduino Alert</h2>
+                  <div className={`text-[18px] font-bold mt-2 ${readings.alert ? 'text-red-600' : 'text-emerald-600'}`}>
+                    {readings.alert ? 'HEAVY RAIN ALERT' : 'NO ALERT'}
+                  </div>
+                </div>
+                <div className="glass-panel-level1 p-4 rounded-xl flex flex-col items-center justify-center text-center border border-[rgba(16,42,46,0.1)] shadow-sm bg-white/90">
+                  <h2 className="text-[12px] font-bold text-[#5F777C] uppercase tracking-wider">Data Status</h2>
+                  <div className="text-[12px] font-bold mt-2 flex flex-col gap-1 w-full px-2">
+                    <div className="flex justify-between w-full">
+                      <span className="text-[#5F777C]">Arduino:</span>
+                      <span className={mode === 'DEMONSTRATION' || hwStatus?.esp32_status === 'CONNECTED' ? 'text-emerald-600' : 'text-amber-600'}>
+                        {mode === 'DEMONSTRATION' ? 'CONNECTED' : hwStatus?.esp32_status || 'CONNECTING...'}
+                      </span>
+                    </div>
+                    <div className="flex justify-between w-full">
+                      <span className="text-[#5F777C]">Camera:</span>
+                      <span className={cameraDetails?.connected ? 'text-emerald-600' : 'text-amber-600'}>
+                        {cameraDetails?.connected ? 'CONNECTED' : 'CONNECTING...'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
         </div>
 
         {/* Right 4 Cols: Live Telemetry, Actuator Control, and Charts */}
         <div className="lg:col-span-4 flex flex-col gap-3">
           
-          {/* 1. LIVE SENSOR TELEMETRY PANEL */}
-          <div className="glass-panel-level1 p-3 rounded-xl flex flex-col gap-2.5 font-sans">
-            <div className="flex items-center justify-between border-b border-teal-500/10 pb-2">
-              <div className="flex items-center gap-1.5">
-                <span className="material-symbols-outlined text-cyan-400 text-[18px]">
-                  sensors
-                </span>
-                <h3 className="text-[12.5px] font-semibold text-slate-200 tracking-wide">
-                  Live Sensor Telemetry
-                </h3>
-              </div>
 
-              <span
-                className={`text-[9.5px] font-semibold px-2 py-0.5 rounded border uppercase ${
-                  hwStatus?.esp32_status === 'CONNECTED'
-                    ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30'
-                    : 'bg-amber-500/15 text-amber-400 border-amber-500/30'
-                }`}
-              >
-                {hwStatus?.esp32_status || 'CONNECTED'}
-              </span>
-            </div>
 
-            {/* Telemetry Metrics Grid */}
-            <div className="grid grid-cols-2 gap-2">
-              <div className="bg-[#F2FAFB] border border-[rgba(16,42,46,0.08)] p-2 rounded-lg">
-                <span className="text-[9px] font-semibold text-[#5F777C] uppercase block">
-                  Water Level
-                </span>
-                <span className="text-[15px] font-bold text-[#102A2E] font-mono">
-                  {currentMetrics.waterLevelM} m
-                </span>
-              </div>
+          {/* 1.5 REAL-TIME ML FLOOD FORECAST CARD */}
+          <FloodForecastCard 
+            forecast={mode === 'DEMONSTRATION' ? {
+              status: 'VALID',
+              is_sufficient: true,
+              flood_probability: currentMetrics.riskClass === 'EXTREME' ? 0.95 : currentMetrics.riskClass === 'HIGH' ? 0.8 : currentMetrics.riskClass === 'WARNING' ? 0.6 : 0.2,
+              risk_level: currentMetrics.riskClass,
+              forecast_horizon: '15-30 min',
+              model_confidence: 85.5,
+              current_rain_intensity: currentMetrics.rainfallMmH,
+              rainfall_trend: currentMetrics.levelChangeM.startsWith('+') ? 'RISING' : 'STEADY',
+              components: {
+                rain: Math.min(100, currentMetrics.rainfallMmH),
+                soil: Math.min(100, currentMetrics.runoffMm),
+                rain_trend: currentMetrics.levelChangeM.startsWith('+') ? 1 : 0,
+                soil_trend: currentMetrics.runoffMm > 50 ? 1 : 0,
+                camera: currentMetrics.waterLevelM > 4.0 ? 80 : 0,
+                external_water: currentMetrics.waterLevelM > 3.0 ? 1 : 0,
+                soil_rise: currentMetrics.waterLevelM > 4.5 ? 1 : 0
+              },
+              reason: currentMetrics.description
+            } : liveForecast} 
+            loading={mode === 'DEMONSTRATION' ? false : forecastLoading} 
+          />
 
-              <div className="bg-[#F2FAFB] border border-[rgba(16,42,46,0.08)] p-2 rounded-lg">
-                <span className="text-[9px] font-semibold text-[#5F777C] uppercase block">
-                  Rate of Rise
-                </span>
-                <span className="text-[12px] font-bold text-amber-600 font-mono block mt-0.5">
-                  {hwStatus?.rate_of_rise || currentMetrics.levelChangeM || 'STABLE'}
-                </span>
-              </div>
-
-              <div className="bg-[#F2FAFB] border border-[rgba(16,42,46,0.08)] p-2 rounded-lg">
-                <span className="text-[9px] font-semibold text-[#5F777C] uppercase block">
-                  Rainfall Rate
-                </span>
-                <span className="text-[15px] font-bold text-[#102A2E] font-mono">
-                  {currentMetrics.rainfallMmH} mm/h
-                </span>
-              </div>
-
-              <div className="bg-[#F2FAFB] border border-[rgba(16,42,46,0.08)] p-2 rounded-lg">
-                <span className="text-[9px] font-semibold text-[#5F777C] uppercase block">
-                  Accum Rain
-                </span>
-                <span className="text-[15px] font-bold text-[#102A2E] font-mono">
-                  {hwStatus?.latest_telemetry?.rainfall_accum_mm || Math.round(currentMetrics.rainfallMmH * 1.4)} mm
-                </span>
-              </div>
-            </div>
-
-            {/* Hardware Status Summary Lines */}
-            <div className="flex flex-col gap-1 text-[10.5px] border-t border-teal-500/10 pt-2 text-slate-300">
-              <div className="flex justify-between">
-                <span className="text-slate-400">Sensor Node:</span>
-                <span className="font-semibold text-emerald-400">{hwStatus?.sensor_status || 'ONLINE'}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-slate-400">Telemetry Sync:</span>
-                <span className="font-mono text-cyan-300">{hwStatus?.latest_telemetry?.timestamp_display || '12:04:18 IST'}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-slate-400">Data Quality:</span>
-                <span className="font-semibold text-emerald-400">{hwStatus?.data_quality || 'GOOD (100%)'}</span>
-              </div>
-            </div>
-          </div>
-
-          {/* 2. EMERGENCY ACTUATOR (PHYSICAL BUZZER) PANEL */}
-          <div className="glass-panel-level1 p-3 rounded-xl flex flex-col gap-2 font-sans">
-            <div className="flex items-center justify-between border-b border-teal-500/10 pb-2">
-              <div className="flex items-center gap-1.5">
-                <span className="material-symbols-outlined text-red-400 text-[18px]">
-                  campaign
-                </span>
-                <h3 className="text-[12.5px] font-semibold text-slate-200 tracking-wide">
-                  Emergency Actuator
-                </h3>
-              </div>
-
-              <span
-                className={`text-[9.5px] font-semibold px-2 py-0.5 rounded border uppercase ${
-                  hwStatus?.buzzer_state === 'ALERTING'
-                    ? 'bg-red-500/20 text-red-400 border-red-500/40 animate-pulse'
-                    : hwStatus?.buzzer_state === 'ARMED'
-                    ? 'bg-amber-500/20 text-amber-400 border-amber-500/40'
-                    : 'bg-slate-800/80 text-slate-300 border-slate-700'
-                }`}
-              >
-                BUZZER: {hwStatus?.buzzer_state || 'STANDBY'}
-              </span>
-            </div>
-
-            <div className="flex flex-col gap-1 text-[10.5px]">
-              <div className="flex justify-between">
-                <span className="text-slate-400">Last Command:</span>
-                <span className="font-mono text-amber-300 font-semibold">{hwStatus?.last_buzzer_command || 'NONE'}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-slate-400">Acknowledgement:</span>
-                {hwStatus?.ack_received ? (
-                  <span className="font-semibold text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20 text-[9.5px]">
-                    ACK RECEIVED
-                  </span>
-                ) : (
-                  <span className="font-semibold text-slate-400">STANDBY</span>
-                )}
-              </div>
-            </div>
-
-            {buzzerMessage && (
-              <div className="text-[10px] font-semibold text-cyan-300 bg-cyan-500/10 p-1.5 rounded border border-cyan-500/30">
-                {buzzerMessage}
-              </div>
-            )}
-
-            {/* Hardware Actuator Action Buttons */}
-            <div className="flex items-center gap-2 mt-0.5">
-              <button
-                onClick={handleTestBuzzer}
-                className="flex-1 py-1.5 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 rounded-lg text-[11px] font-semibold flex items-center justify-center gap-1 transition-all cursor-pointer"
-              >
-                <span className="material-symbols-outlined text-[15px]">notifications_active</span>
-                <span>TEST BUZZER</span>
-              </button>
-
-              <button
-                onClick={handleTriggerSimulatedFlood}
-                disabled={simulatingEvent}
-                className="flex-1 py-1.5 bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-500/40 rounded-lg text-[11px] font-semibold flex items-center justify-center gap-1 transition-all cursor-pointer disabled:opacity-50"
-              >
-                <span className="material-symbols-outlined text-[15px]">warning</span>
-                <span>{simulatingEvent ? 'SIMULATING...' : 'TRIGGER FLOOD'}</span>
-              </button>
-            </div>
-          </div>
 
           {/* 3. Operational Risk Status Card */}
-          <div className="glass-panel-level1 p-3 rounded-xl flex flex-col gap-1.5 font-sans">
+          <div className="glass-panel-level1 p-3 rounded-xl flex flex-col gap-1.5 font-sans bg-white/90 border border-[rgba(16,42,46,0.1)] shadow-sm">
             <div className="flex items-center justify-between border-b border-[rgba(16,42,46,0.08)] pb-1.5">
               <div>
                 <span className="text-[9.5px] font-bold text-[#5F777C] uppercase tracking-wider block">
@@ -811,15 +572,15 @@ export default function FloodSimulationPage() {
           </div>
 
           {/* 4. Precipitation & Runoff Outlook Chart (Recharts) */}
-          <div className="glass-panel-level1 p-3 rounded-xl flex flex-col gap-1.5 font-sans">
+          <div className="glass-panel-level1 p-3 rounded-xl flex flex-col gap-1.5 font-sans bg-white/90 border border-[rgba(16,42,46,0.1)] shadow-sm">
             <div className="flex items-center justify-between">
-              <h3 className="text-[11px] font-semibold text-slate-200 uppercase tracking-wider flex items-center gap-1.5">
-                <span className="material-symbols-outlined text-cyan-400 text-[16px]">
+              <h3 className="text-[11px] font-bold text-[#102A2E] uppercase tracking-wider flex items-center gap-1.5">
+                <span className="material-symbols-outlined text-[#0C6E78] text-[16px]">
                   area_chart
                 </span>
                 Rainfall & Runoff Outlook
               </h3>
-              <span className="text-[10px] font-mono text-slate-400">00:00 – 30:00 Mins</span>
+              <span className="text-[10px] font-mono text-[#5F777C]">00:00 – 30:00 Mins</span>
             </div>
 
             <div className="w-full h-[120px] mt-0.5">
@@ -847,6 +608,16 @@ export default function FloodSimulationPage() {
 
         </div>
       </div>
+
+      {/* 2. Full-Width Historical Rainfall & ML Forecast Trend Chart */}
+      <RainfallHistoryTrendChart
+        historyData={rainfallHistory}
+        currentIntensity={
+          liveForecast?.features?.current_intensity !== undefined
+            ? Math.round(liveForecast.features.current_intensity * 100)
+            : (hwStatus?.latest_telemetry?.rainfall_mm_h || 0)
+        }
+      />
     </div>
   );
 }

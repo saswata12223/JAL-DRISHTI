@@ -148,9 +148,29 @@ class HardwareTelemetryService:
                     self.last_buzzer_command = "NONE"
             self.log_event("TELEMETRY", f"Telemetry updated: Water {water_level_m:.2f}m, Rain {rainfall_mm_h:.1f}mm/h, Risk: NORMAL", is_simulated)
 
+        # Ingest into Flood Forecasting ML Service
+        raw_rain_adc = payload.get("raw_rain_value")
+        if raw_rain_adc is None:
+            raw_rain_adc = payload.get("rain_sensor")
+        if raw_rain_adc is None:
+            # Derive plausible ADC (1023=dry, 0=wet) from rainfall_mm_h proxy if raw ADC omitted
+            intensity_approx = min(1.0, rainfall_mm_h / 80.0)
+            raw_rain_adc = round(1023.0 * (1.0 - intensity_approx), 1)
+
+        from app.services.raintest_forecasting_service import RainTestForecastingService
+        forecast_service = RainTestForecastingService.get_instance()
+        forecast_summary = forecast_service.ingest_sensor_reading(
+            raw_sensor_value=float(raw_rain_adc),
+            water_level_m=water_level_m,
+            timestamp_epoch=entry["timestamp_epoch"],
+            is_simulated=is_simulated,
+            soil_raw=payload.get("soil_raw")
+        )
+
         return {
             "telemetry": entry,
             "risk_decision": risk_res.model_dump() if hasattr(risk_res, 'model_dump') else getattr(risk_res, '__dict__', risk_res),
+            "flood_forecast": forecast_summary.model_dump(),
             "buzzer_state": self.buzzer_state,
             "last_buzzer_command": self.last_buzzer_command,
             "ack_received": self.ack_received,
@@ -189,10 +209,15 @@ class HardwareTelemetryService:
 
     def get_live_status(self) -> Dict[str, Any]:
         now_epoch = datetime.now(timezone.utc).timestamp()
+        from app.services.raintest_forecasting_service import RainTestForecastingService
+        forecast_service = RainTestForecastingService.get_instance()
+        live_forecast = forecast_service.get_live_forecast().model_dump()
+
         if not self.telemetry_history:
             return {
                 "hardware_mode": "DEMONSTRATION SCENARIO",
                 "sensor_status": "OFFLINE",
+                "arduino_status": "DISCONNECTED",
                 "esp32_status": "OFFLINE",
                 "data_quality": "NO_DATA",
                 "data_age_seconds": 999,
@@ -201,6 +226,7 @@ class HardwareTelemetryService:
                 "buzzer_state": "OFFLINE",
                 "last_buzzer_command": self.last_buzzer_command,
                 "ack_received": self.ack_received,
+                "flood_forecast": live_forecast,
                 "event_timeline": self.event_timeline[:20],
             }
 
@@ -210,19 +236,23 @@ class HardwareTelemetryService:
         if data_age < 15:
             sensor_status = "ONLINE"
             esp32_status = "CONNECTED"
+            arduino_status = "CONNECTED"
             data_quality = "GOOD"
         elif data_age < 45:
             sensor_status = "STALE"
             esp32_status = "CONNECTED"
+            arduino_status = "CONNECTED"
             data_quality = "STALE"
         else:
             sensor_status = "OFFLINE"
             esp32_status = "OFFLINE"
+            arduino_status = "DISCONNECTED"
             data_quality = "DEGRADED"
 
         return {
             "hardware_mode": "LIVE HARDWARE" if latest and not latest.get("is_simulated", False) else "DEMONSTRATION SCENARIO",
             "sensor_status": sensor_status,
+            "arduino_status": arduino_status,
             "esp32_status": esp32_status,
             "data_quality": data_quality,
             "data_age_seconds": data_age,
@@ -233,5 +263,6 @@ class HardwareTelemetryService:
             "ack_received": self.ack_received,
             "last_command_timestamp": self.last_command_timestamp,
             "last_ack_timestamp": self.last_ack_timestamp,
+            "flood_forecast": live_forecast,
             "event_timeline": self.event_timeline[:20],
         }

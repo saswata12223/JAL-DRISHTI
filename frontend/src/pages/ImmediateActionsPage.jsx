@@ -335,7 +335,8 @@ export default function ImmediateActionsPage() {
 
   // Call single physical handset via Twilio API
   const handleCallSingleHandset = async (num, e) => {
-    if (e) e.preventDefault();
+    if (e && e.preventDefault) e.preventDefault();
+    if (e && e.stopPropagation) e.stopPropagation();
     const clean = num.replace(/\s+/g, '');
     const fullNum = clean.startsWith('+') ? clean : `+91${clean}`;
     setSingleCallLoading((prev) => ({ ...prev, [clean]: true }));
@@ -348,12 +349,13 @@ export default function ImmediateActionsPage() {
         severity: 'CRITICAL',
       });
       const dispatch = res?.data?.dispatches?.[0];
+      const isSuccess = dispatch?.status === 'LIVE_CALL_RINGING' || dispatch?.status === 'QUEUED' || dispatch?.status === 'DISPATCHED';
       setSingleCallResult((prev) => ({
         ...prev,
         [clean]: {
-          success: true,
-          status: dispatch?.status || 'LIVE_CALL_RINGING',
-          sid: dispatch?.call_sid || dispatch?.call_id || 'CA-TWILIO-OK',
+          success: isSuccess,
+          status: dispatch?.status || (isSuccess ? 'LIVE_CALL_RINGING' : 'Failed'),
+          sid: dispatch?.call_sid || dispatch?.call_id || (isSuccess ? 'CA-TWILIO-OK' : null),
           timestamp: new Date().toLocaleTimeString(),
         },
       }));
@@ -362,7 +364,8 @@ export default function ImmediateActionsPage() {
         ...prev,
         [clean]: {
           success: false,
-          message: 'Twilio Gateway Dispatch Failed',
+          status: 'Twilio Gateway Dispatch Failed',
+          message: err?.response?.data?.message || err.message || 'Twilio Gateway Dispatch Failed',
         },
       }));
     } finally {
@@ -372,7 +375,8 @@ export default function ImmediateActionsPage() {
 
   // Call all 3 physical handsets via Twilio simultaneously
   const handleCallAllHandsets = async (e) => {
-    if (e) e.preventDefault();
+    if (e && e.preventDefault) e.preventDefault();
+    if (e && e.stopPropagation) e.stopPropagation();
     setAllCallsLoading(true);
     setAllCallsResult(null);
     try {
@@ -386,10 +390,11 @@ export default function ImmediateActionsPage() {
       // Also update individual states
       res?.data?.dispatches?.forEach((d) => {
         const clean = d.phone_number.replace('+91', '').replace('+', '');
+        const isSuccess = d.status === 'LIVE_CALL_RINGING' || d.status === 'QUEUED' || d.status === 'DISPATCHED';
         setSingleCallResult((prev) => ({
           ...prev,
           [clean]: {
-            success: true,
+            success: isSuccess,
             status: d.status || 'LIVE_CALL_RINGING',
             sid: d.call_sid || d.call_id || 'CA-TWILIO-OK',
             timestamp: new Date().toLocaleTimeString(),
@@ -397,7 +402,7 @@ export default function ImmediateActionsPage() {
         }));
       });
     } catch (err) {
-      setAllCallsResult({ success: false, message: 'Twilio Broadcast Error' });
+      setAllCallsResult({ success: false, message: err?.response?.data?.message || err.message || 'Twilio Broadcast Error' });
     } finally {
       setAllCallsLoading(false);
     }
@@ -1164,7 +1169,11 @@ export default function ImmediateActionsPage() {
                         </button>
 
                         <button
-                          onClick={() => startTabCallSimulation(idx, tabSimLang)}
+                          type="button"
+                          onClick={(e) => {
+                            if (e && e.preventDefault) e.preventDefault();
+                            startTabCallSimulation(idx, tabSimLang);
+                          }}
                           className="w-full py-1.5 px-2.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-semibold flex items-center justify-center gap-1 transition-colors cursor-pointer"
                         >
                           <span className="material-symbols-outlined text-xs text-red-600">play_circle</span>
@@ -1183,7 +1192,7 @@ export default function ImmediateActionsPage() {
                 </div>
                 <button
                   type="button"
-                  onClick={handleCallAllHandsets}
+                  onClick={(e) => handleCallAllHandsets(e)}
                   disabled={allCallsLoading}
                   className="w-full sm:w-auto shrink-0 px-4 py-2.5 rounded-xl bg-red-600 hover:bg-red-500 disabled:opacity-60 text-white font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-md shadow-red-600/30 transition-all active:scale-98 cursor-pointer"
                 >

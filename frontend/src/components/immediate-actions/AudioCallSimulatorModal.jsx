@@ -246,6 +246,9 @@ export default function AudioCallSimulatorModal({
     }
   };
 
+  const togglePlayPause = () => toggleAudioPlayPause();
+  const replayVoice = () => playPrerecordedVoice(activeLang);
+
   // Switch Language directly
   const handleSelectLanguage = (langId) => {
     setActiveLang(langId);
@@ -257,7 +260,8 @@ export default function AudioCallSimulatorModal({
 
   // Trigger Live Twilio Dispatch (Backend Integration)
   const handlePhysicalCallDispatch = async (e) => {
-    if (e) e.preventDefault();
+    if (e && e.preventDefault) e.preventDefault();
+    if (e && e.stopPropagation) e.stopPropagation();
     setPhysicalDispatchLoading(true);
     setDispatchResult(null);
     try {
@@ -280,7 +284,7 @@ export default function AudioCallSimulatorModal({
     } catch (err) {
       setDispatchResult({
         success: false,
-        message: 'Could not connect to backend Twilio dispatch service.',
+        message: err.message || 'Could not connect to backend Twilio dispatch service.',
       });
     } finally {
       setPhysicalDispatchLoading(false);
@@ -292,7 +296,8 @@ export default function AudioCallSimulatorModal({
 
   // Trigger individual handset call via Twilio
   const handleCallSingleNumber = async (num, e) => {
-    if (e) e.preventDefault();
+    if (e && e.preventDefault) e.preventDefault();
+    if (e && e.stopPropagation) e.stopPropagation();
     const clean = num.replace(/\s+/g, '');
     const fullNum = clean.startsWith('+') ? clean : `+91${clean}`;
     setIndividualLoading((prev) => ({ ...prev, [clean]: true }));
@@ -314,12 +319,13 @@ export default function AudioCallSimulatorModal({
       });
       const data = await response.json();
       const dispatch = data?.data?.dispatches?.[0];
+      const isSuccess = dispatch?.status === 'LIVE_CALL_RINGING' || dispatch?.status === 'QUEUED' || dispatch?.status === 'DISPATCHED';
       setIndividualStatus((prev) => ({
         ...prev,
         [clean]: {
-          success: true,
-          status: dispatch?.status || 'LIVE_CALL_RINGING',
-          sid: dispatch?.call_sid || dispatch?.call_id || 'CA-TWILIO-OK',
+          success: isSuccess,
+          status: dispatch?.status || (isSuccess ? 'LIVE_CALL_RINGING' : 'Failed'),
+          sid: dispatch?.call_sid || dispatch?.call_id || (isSuccess ? 'CA-TWILIO-OK' : null),
         },
       }));
     } catch (err) {
@@ -327,7 +333,8 @@ export default function AudioCallSimulatorModal({
         ...prev,
         [clean]: {
           success: false,
-          message: 'Twilio call failed',
+          status: 'Twilio call failed',
+          message: err.message || 'Twilio call failed',
         },
       }));
     } finally {
@@ -359,7 +366,9 @@ export default function AudioCallSimulatorModal({
             </div>
           </div>
           <button
-            onClick={() => {
+            type="button"
+            onClick={(e) => {
+              if (e && e.preventDefault) e.preventDefault();
               stopAllAudio();
               onClose();
             }}
@@ -387,8 +396,12 @@ export default function AudioCallSimulatorModal({
                 const isSelected = activeLang === s.id;
                 return (
                   <button
+                    type="button"
                     key={s.id}
-                    onClick={() => handleSelectLanguage(s.id)}
+                    onClick={(e) => {
+                      if (e && e.preventDefault) e.preventDefault();
+                      handleSelectLanguage(s.id);
+                    }}
                     className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
                       isSelected
                         ? 'bg-red-500/15 border-red-500 text-white shadow-md shadow-red-500/10 ring-1 ring-red-500'
@@ -433,8 +446,10 @@ export default function AudioCallSimulatorModal({
             <div className="flex items-center gap-2 mb-3">
               {defaultNumbers.map((num, idx) => (
                 <button
+                  type="button"
                   key={num}
-                  onClick={() => {
+                  onClick={(e) => {
+                    if (e && e.preventDefault) e.preventDefault();
                     setActiveNumberIndex(idx);
                     if (callState !== 'IDLE') {
                       stopAllAudio();
@@ -453,66 +468,53 @@ export default function AudioCallSimulatorModal({
             </div>
 
             {/* Call State Display */}
-            <div className="my-2 w-full max-w-md">
+            <div className="w-full max-w-sm bg-slate-900/90 rounded-xl p-4 border border-slate-800 my-2">
+              <div className="text-xs font-mono text-slate-400 mb-1">Incoming Alert Call</div>
+              <div className="text-xl font-bold font-mono text-white mb-2">+91 {currentNumber}</div>
+
               {callState === 'IDLE' && (
-                <div className="space-y-1 py-2">
-                  <div className="text-base font-bold text-white tracking-wide">
-                    Simulate Call to Handset: +91 {currentNumber}
-                  </div>
-                  <div className="text-xs text-slate-400">
-                    Click "Play Spoken Voice Simulation" to hear the prerecorded emergency warning in {activeScript.name}.
-                  </div>
+                <div className="text-xs text-slate-400 py-3 flex items-center justify-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-slate-500" />
+                  <span>Line Ready • Click below to test voice warning</span>
                 </div>
               )}
 
               {callState === 'RINGING' && (
-                <div className="space-y-1 py-2 animate-pulse">
-                  <div className="text-base font-bold text-amber-400 flex items-center justify-center gap-2">
-                    <span className="material-symbols-outlined animate-spin text-lg">ring_volume</span>
-                    <span>Handset Ringing... (+91 {currentNumber})</span>
+                <div className="space-y-2 py-2">
+                  <div className="flex items-center justify-center gap-2 text-emerald-400 text-sm font-semibold animate-pulse">
+                    <span className="material-symbols-outlined text-base">phone_in_talk</span>
+                    <span>Ringing Recipient Handset...</span>
                   </div>
-                  <div className="text-xs text-amber-300/80">
-                    Connecting audio carrier line in browser...
-                  </div>
+                  <div className="text-[11px] text-slate-400">Connecting to citizen cell terminal</div>
                 </div>
               )}
 
               {callState === 'CONNECTED' && (
                 <div className="space-y-2.5 py-1">
-                  <div className="text-base font-bold text-emerald-400 flex items-center justify-center gap-2">
-                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping" />
-                    <span>Call Connected • Speaking Warning ({activeScript.name})</span>
-                  </div>
-
-                  {/* Equalizer Audio Waves */}
-                  <div className="flex items-center justify-center gap-1.5 h-10 my-1">
-                    {[16, 32, 48, 24, 40, 52, 28, 44, 20, 36, 50, 22].map((height, i) => (
-                      <div
-                        key={i}
-                        className={`w-1.5 bg-gradient-to-t from-red-600 to-amber-400 rounded-full transition-all ${
-                          isPlayingAudio ? 'animate-bounce' : 'opacity-40'
-                        }`}
-                        style={{
-                          height: isPlayingAudio ? `${height}px` : '10px',
-                          animationDelay: `${i * 0.07}s`,
-                          animationDuration: '0.6s',
-                        }}
-                      />
-                    ))}
+                  <div className="flex items-center justify-between text-xs text-emerald-400 font-mono">
+                    <span className="flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+                      CALL CONNECTED
+                    </span>
+                    <span>{activeScript.name}</span>
                   </div>
 
                   {/* Audio Progress Bar */}
-                  <div className="w-full bg-slate-800 rounded-full h-2 overflow-hidden border border-slate-700">
+                  <div className="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
                     <div
-                      className="bg-gradient-to-r from-red-500 to-emerald-400 h-full transition-all duration-200"
+                      className="bg-red-500 h-full transition-all duration-200"
                       style={{ width: `${audioProgress}%` }}
                     />
                   </div>
 
-                  {/* Live Controls */}
-                  <div className="flex items-center justify-center gap-3 pt-1">
+                  {/* Audio Controls */}
+                  <div className="flex items-center justify-between pt-1">
                     <button
-                      onClick={toggleAudioPlayPause}
+                      type="button"
+                      onClick={(e) => {
+                        if (e && e.preventDefault) e.preventDefault();
+                        togglePlayPause();
+                      }}
                       className="px-3 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 flex items-center gap-1 cursor-pointer"
                     >
                       <span className="material-symbols-outlined text-sm">
@@ -520,8 +522,13 @@ export default function AudioCallSimulatorModal({
                       </span>
                       <span>{isPlayingAudio ? 'Pause' : 'Resume'}</span>
                     </button>
+
                     <button
-                      onClick={() => playPrerecordedVoice(activeLang)}
+                      type="button"
+                      onClick={(e) => {
+                        if (e && e.preventDefault) e.preventDefault();
+                        replayVoice();
+                      }}
                       className="px-3 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 flex items-center gap-1 cursor-pointer"
                     >
                       <span className="material-symbols-outlined text-sm">replay</span>
@@ -548,7 +555,11 @@ export default function AudioCallSimulatorModal({
             <div className="mt-3 flex flex-wrap items-center justify-center gap-3">
               {callState === 'IDLE' || callState === 'ENDED' ? (
                 <button
-                  onClick={startCallSimulation}
+                  type="button"
+                  onClick={(e) => {
+                    if (e && e.preventDefault) e.preventDefault();
+                    startCallSimulation();
+                  }}
                   className="px-6 py-2.5 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold text-xs uppercase tracking-wider flex items-center gap-2 shadow-lg shadow-red-600/30 transition-all active:scale-95 cursor-pointer"
                 >
                   <span className="material-symbols-outlined text-lg">play_arrow</span>
@@ -556,7 +567,9 @@ export default function AudioCallSimulatorModal({
                 </button>
               ) : (
                 <button
-                  onClick={() => {
+                  type="button"
+                  onClick={(e) => {
+                    if (e && e.preventDefault) e.preventDefault();
                     stopAllAudio();
                     setCallState('ENDED');
                   }}
@@ -640,7 +653,7 @@ export default function AudioCallSimulatorModal({
               </div>
               <button
                 type="button"
-                onClick={handlePhysicalCallDispatch}
+                onClick={(e) => handlePhysicalCallDispatch(e)}
                 disabled={physicalDispatchLoading}
                 className="w-full sm:w-auto shrink-0 px-4 py-2 rounded-lg bg-red-600 hover:bg-red-500 disabled:opacity-50 text-white font-semibold text-xs flex items-center justify-center gap-1.5 shadow-md shadow-red-600/20 cursor-pointer"
               >
@@ -690,7 +703,9 @@ export default function AudioCallSimulatorModal({
             <span>USDMA SEOC Emergency Communications Terminal</span>
           </div>
           <button
-            onClick={() => {
+            type="button"
+            onClick={(e) => {
+              if (e && e.preventDefault) e.preventDefault();
               stopAllAudio();
               onClose();
             }}

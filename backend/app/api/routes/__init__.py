@@ -14,6 +14,7 @@ from app.api.routes.risk import router as risk_router
 from app.api.routes.weather import router as weather_router
 from app.api.routes.hardware import router as hardware_router
 from app.api.routes.immediate_actions import router as immediate_actions_router
+from app.api.routes.flood_forecasting import router as flood_forecasting_router
 
 api_router = APIRouter()
 
@@ -27,6 +28,7 @@ api_router.include_router(risk_router)
 api_router.include_router(weather_router)
 api_router.include_router(hardware_router)
 api_router.include_router(immediate_actions_router)
+api_router.include_router(flood_forecasting_router)
 
 __all__ = ["api_router"]
 

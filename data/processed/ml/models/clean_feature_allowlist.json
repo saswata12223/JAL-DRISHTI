@@ -1,465 +1,233 @@
 {
-
   "title": "Jal Drishti ML Phase 2 Clean Feature Allowlist & Target Leakage Control",
-
   "version": "2.0.0",
-
   "target_variable": "flood_event_label",
-
   "prohibited_metadata_fields": [
-
     "sample_id",
-
     "sample_type",
-
     "spatial_id",
-
     "timestamp_utc",
-
     "district",
-
     "major_basin",
-
     "historical_event_id",
-
     "flood_event_type",
-
     "severity_category",
-
     "label_confidence",
-
     "split_group",
-
     "split_rationale",
-
     "official_flood_status",
-
     "official_alert_stage"
-
   ],
-
   "clean_predictors": [
-
     {
-
       "feature": "rainfall_30min_mm",
-
       "group": "RAINFALL",
-
       "description": "30-minute accumulated precipitation depth (mm)"
-
     },
-
     {
-
       "feature": "rainfall_1h_mm",
-
       "group": "RAINFALL",
-
       "description": "1-hour accumulated precipitation depth (mm)"
-
     },
-
     {
-
       "feature": "rainfall_3h_mm",
-
       "group": "RAINFALL",
-
       "description": "3-hour accumulated precipitation depth (mm)"
-
     },
-
     {
-
       "feature": "max_rainfall_intensity_mmh",
-
       "group": "RAINFALL",
-
       "description": "Peak half-hourly rainfall intensity (mm/h)"
-
     },
-
     {
-
       "feature": "mean_rainfall_intensity_mmh",
-
       "group": "RAINFALL",
-
       "description": "Mean rainfall intensity in window (mm/h)"
-
     },
-
     {
-
       "feature": "rainfall_trend",
-
       "group": "RAINFALL",
-
       "description": "Temporal intensity acceleration derivative"
-
     },
-
     {
-
       "feature": "rainfall_surge_ratio",
-
       "group": "RAINFALL",
-
       "description": "Convective pulse ratio (max/mean intensity)"
-
     },
-
     {
-
       "feature": "effective_precipitation_mm",
-
       "group": "RAINFALL",
-
       "description": "Saturation-scaled effective precipitation (mm)"
-
     },
-
     {
-
       "feature": "antecedent_precipitation_index_mm",
-
       "group": "RAINFALL",
-
       "description": "Antecedent Precipitation Index (k=0.85)"
-
     },
-
     {
-
       "feature": "ambient_temperature_c",
-
       "group": "WEATHER",
-
       "description": "Ambient surface temperature (\u00b0C)"
-
     },
-
     {
-
       "feature": "relative_humidity_pct",
-
       "group": "WEATHER",
-
       "description": "Relative humidity (%)"
-
     },
-
     {
-
       "feature": "surface_pressure_hpa",
-
       "group": "WEATHER",
-
       "description": "Surface atmospheric pressure (hPa)"
-
     },
-
     {
-
       "feature": "wind_speed_ms",
-
       "group": "WEATHER",
-
       "description": "Wind speed (m/s)"
-
     },
-
     {
-
       "feature": "surface_soil_moisture_vol",
-
       "group": "SOIL",
-
       "description": "SMAP 0-5cm volumetric surface soil moisture (fraction)"
-
     },
-
     {
-
       "feature": "rootzone_soil_moisture_vol",
-
       "group": "SOIL",
-
       "description": "SMAP 0-100cm volumetric rootzone soil moisture (fraction)"
-
     },
-
     {
-
       "feature": "profile_soil_moisture_vol",
-
       "group": "SOIL",
-
       "description": "SMAP full profile soil moisture (fraction)"
-
     },
-
     {
-
       "feature": "soil_saturation_index",
-
       "group": "SOIL",
-
       "description": "Depth-weighted Soil Saturation Index (SSI)"
-
     },
-
     {
-
       "feature": "elevation_m",
-
       "group": "TERRAIN",
-
       "description": "SRTM DEM surface elevation (m)"
-
     },
-
     {
-
       "feature": "slope_deg",
-
       "group": "TERRAIN",
-
       "description": "Terrain slope angle (degrees)"
-
     },
-
     {
-
       "feature": "flow_accumulation_cells",
-
       "group": "TERRAIN",
-
       "description": "D8 upstream contributing drainage area (cells)"
-
     },
-
     {
-
       "feature": "drainage_network_indicator",
-
       "group": "TERRAIN",
-
       "description": "Drainage channel binary mask (0/1)"
-
     },
-
     {
-
       "feature": "topographic_wetness_index",
-
       "group": "TERRAIN",
-
       "description": "Topographic Wetness Index (TWI)"
-
     },
-
     {
-
       "feature": "stream_power_index",
-
       "group": "TERRAIN",
-
       "description": "Stream Power Index (SPI)"
-
     },
-
     {
-
       "feature": "sediment_transport_index",
-
       "group": "TERRAIN",
-
       "description": "Sediment Transport Index (STI)"
-
     },
-
     {
-
       "feature": "topographic_runoff_potential",
-
       "group": "TERRAIN",
-
       "description": "Topographic Runoff Potential (TRP)"
-
     },
-
     {
-
       "feature": "flash_flood_susceptibility_index",
-
       "group": "TERRAIN",
-
       "description": "Multi-criteria Flash Flood Susceptibility Index"
-
     },
-
     {
-
       "feature": "landcover_class",
-
       "group": "HYDROLOGY",
-
       "description": "ESA WorldCover LULC categorical class code"
-
     },
-
     {
-
       "feature": "runoff_coefficient",
-
       "group": "HYDROLOGY",
-
       "description": "Surface runoff fraction [0-1]"
-
     },
-
     {
-
       "feature": "mannings_roughness_n",
-
       "group": "HYDROLOGY",
-
       "description": "Manning's surface hydraulic roughness coefficient n"
-
     },
-
     {
-
       "feature": "scs_potential_retention_s_mm",
-
       "group": "PHYSICS",
-
       "description": "SCS-CN potential maximum retention S (mm)"
-
     },
-
     {
-
       "feature": "scs_initial_abstraction_ia_mm",
-
       "group": "PHYSICS",
-
       "description": "SCS-CN initial abstraction Ia (mm)"
-
     },
-
     {
-
       "feature": "scs_direct_runoff_q_mm",
-
       "group": "PHYSICS",
-
       "description": "SCS-CN direct surface runoff depth Q (mm)"
-
     },
-
     {
-
       "feature": "scs_peak_runoff_potential",
-
       "group": "PHYSICS",
-
       "description": "Kinematic wave peak runoff potential"
-
     },
-
     {
-
       "feature": "nearest_cwc_station_dist_km",
-
       "group": "CWC",
-
       "description": "Distance to nearest CWC river gauge station (km)"
-
     },
-
     {
-
       "feature": "warning_level_m",
-
       "group": "CWC",
-
       "description": "CWC station Warning Level threshold (m)"
-
     },
-
     {
-
       "feature": "danger_level_m",
-
       "group": "CWC",
-
       "description": "CWC station Danger Level threshold (m)"
-
     },
-
     {
-
       "feature": "hfl_m",
-
       "group": "CWC",
-
       "description": "CWC station Historical Highest Flood Level (m)"
-
     },
-
     {
-
       "feature": "gauge_datum_msl_m",
-
       "group": "CWC",
-
       "description": "CWC station gauge datum above MSL (m)"
-
     },
-
     {
-
       "feature": "soil_moisture_missing",
-
       "group": "MISSINGNESS",
-
       "description": "Binary indicator (1 if soil moisture was unmonitored)"
-
     },
-
     {
-
       "feature": "rainfall_missing",
-
       "group": "MISSINGNESS",
-
       "description": "Binary indicator (1 if station rain was unmonitored)"
-
     },
-
     {
-
       "feature": "weather_missing",
-
       "group": "MISSINGNESS",
-
       "description": "Binary indicator (1 if station weather was unmonitored)"
-
     },
-
     {
-
       "feature": "water_level_missing",
-
       "group": "MISSINGNESS",
-
       "description": "Binary indicator (1 if river gauge level was unmonitored)"
-
     }
-
   ]
-
 }

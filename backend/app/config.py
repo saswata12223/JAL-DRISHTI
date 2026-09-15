@@ -60,6 +60,11 @@ class Settings(BaseSettings):
     DEFAULT_LAT: float = 30.0668
     DEFAULT_LON: float = 79.0193
 
+    # Twilio Configuration
+    TWILIO_ACCOUNT_SID: str = Field(default="your_twilio_account_sid_here", alias="TWILIO_ACCOUNT_SID")
+    TWILIO_AUTH_TOKEN: str = Field(default="your_twilio_auth_token_here", alias="TWILIO_AUTH_TOKEN")
+    TWILIO_FROM_NUMBER: str = Field(default="+16365470791", alias="TWILIO_FROM_NUMBER")
+
     # CORS
     CORS_ORIGINS: List[str] = ["*"]
 

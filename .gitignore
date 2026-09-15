@@ -81,6 +81,7 @@ data/backup_august_2026/
 # Generated ML transient datasets, caches & experimental outputs
 
 data/processed/ml/rolling/
+!data/processed/ml/rolling/rolling_features_latest.parquet
 
 data/processed/ml/nowcast/
 
@@ -89,6 +90,7 @@ data/processed/ml/validation/
 data/processed/ml/insat3dr/
 
 data/processed/ml/*.parquet
+!data/processed/ml/flood_ml_features_clean.parquet
 
 data/processed/ml/*.csv
 

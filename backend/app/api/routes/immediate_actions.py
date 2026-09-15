@@ -13,13 +13,14 @@ from fastapi import APIRouter, HTTPException, Query, status
 from pydantic import BaseModel, Field
 
 from app.schemas.common import APIResponse
+from app.config import settings
 
 router = APIRouter(prefix="/immediate-actions", tags=["Immediate Actions & Emergency Response"])
 
-# Twilio configuration credentials (loaded from environment variables)
-DEFAULT_TWILIO_ACCOUNT_SID = os.getenv("TWILIO_ACCOUNT_SID", "")
-DEFAULT_TWILIO_AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN", "")
-DEFAULT_TWILIO_FROM_NUMBER = os.getenv("TWILIO_FROM_NUMBER", "")
+# Twilio configuration credentials (loaded from settings with environment fallbacks)
+DEFAULT_TWILIO_ACCOUNT_SID = getattr(settings, "TWILIO_ACCOUNT_SID", os.getenv("TWILIO_ACCOUNT_SID", "your_twilio_account_sid_here"))
+DEFAULT_TWILIO_AUTH_TOKEN = getattr(settings, "TWILIO_AUTH_TOKEN", os.getenv("TWILIO_AUTH_TOKEN", "your_twilio_auth_token_here"))
+DEFAULT_TWILIO_FROM_NUMBER = getattr(settings, "TWILIO_FROM_NUMBER", os.getenv("TWILIO_FROM_NUMBER", "+16365470791"))
 DEFAULT_TARGET_NUMBERS = ["+919748379047", "+919883370734", "+919019586089"]
 
 
@@ -322,7 +323,10 @@ async def dispatch_voice_calls(payload: CallDispatchRequest):
     target_script = WARNING_AUDIO_SCRIPTS.get(payload.language, WARNING_AUDIO_SCRIPTS["hi"])
     dispatched_records = []
     
-    can_attempt_real_twilio = bool(payload.account_sid and payload.auth_token)
+    account_sid = (payload.account_sid or "").strip() or DEFAULT_TWILIO_ACCOUNT_SID
+    auth_token = (payload.auth_token or "").strip() or DEFAULT_TWILIO_AUTH_TOKEN
+    
+    can_attempt_real_twilio = bool(account_sid and auth_token)
 
     for phone in payload.phone_numbers:
         clean_phone = phone.replace(" ", "").replace("-", "")
@@ -346,21 +350,18 @@ async def dispatch_voice_calls(payload: CallDispatchRequest):
         if can_attempt_real_twilio:
             try:
                 twiml_content = f"""<Response>
-                    <Say voice="Polly.{target_script['polly_voice']}" language="{target_script['polly_lang']}">
-                        {target_script['script']}
-                    </Say>
+                    <Say language="{target_script['polly_lang']}">{target_script['script']}</Say>
                 </Response>"""
-                twimlet_url = f"http://twimlets.com/echo?Twiml={urllib.parse.quote(twiml_content)}"
+                twimlet_url = f"https://twimlets.com/echo?Twiml={urllib.parse.quote(twiml_content)}"
                 
                 # Resolve the paired trial From number for this verified recipient
-                actual_from = (
-                    payload.from_number
-                    if payload.from_number and payload.from_number != DEFAULT_TWILIO_FROM_NUMBER
-                    else TWILIO_RECIPIENT_TRIAL_PAIRS.get(clean_phone, DEFAULT_TWILIO_FROM_NUMBER)
+                actual_from = TWILIO_RECIPIENT_TRIAL_PAIRS.get(
+                    clean_phone,
+                    payload.from_number.strip() if (payload.from_number and payload.from_number.strip()) else DEFAULT_TWILIO_FROM_NUMBER
                 )
 
-                async with httpx.AsyncClient(timeout=10.0) as client:
-                    twilio_url = f"https://api.twilio.com/2010-04-01/Accounts/{payload.account_sid}/Calls.json"
+                async with httpx.AsyncClient(timeout=15.0) as client:
+                    twilio_url = f"https://api.twilio.com/2010-04-01/Accounts/{account_sid}/Calls.json"
                     resp = await client.post(
                         twilio_url,
                         data={
@@ -397,15 +398,15 @@ async def dispatch_voice_calls(payload: CallDispatchRequest):
                                 resp_json = resp.json()
                             except Exception:
                                 pass
-                            record["status"] = "TWILIO_AUTHENTICATED_GATEWAY_LINKED"
+                            record["status"] = "TWILIO_ERROR"
                             record["carrier_response"] = {
                                 "http_code": resp.status_code,
-                                "account_sid": payload.account_sid,
+                                "account_sid": account_sid,
                                 "twilio_code": resp_json.get("code"),
                                 "twilio_message": resp_json.get("message"),
                             }
             except Exception as exc:
-                record["status"] = "TWILIO_DISPATCHED_SIMULATED"
+                record["status"] = "TWILIO_ERROR"
                 record["carrier_response"] = str(exc)
         else:
             record["status"] = "DISPATCHED"

@@ -1,0 +1,248 @@
+{
+  "metadata": {
+    "run_id": "run_20260915_143925_2092c728",
+    "mode": "LIVE_ROLLING",
+    "prediction_timestamp_utc": "2026-09-15T10:39:25.540089+00:00",
+    "data_window_start_utc": "2026-08-31T14:39:25.540089+00:00",
+    "data_window_end_utc": "2026-09-15T14:39:25.540089+00:00",
+    "rolling_days": 15,
+    "noaa_gfs_status": "NO_DATA",
+    "noaa_gfs_summary": {
+      "status": "NO_DATA"
+    },
+    "nasa_smap_l4_status": "NO_DATA",
+    "nasa_smap_l4_summary": {
+      "status": "NO_DATA"
+    },
+    "source_freshness": "FRESH",
+    "pipeline_status": "SYSTEM_HEALTHY",
+    "degraded_mode": false,
+    "degraded_reasons": []
+  },
+  "cache_inspection": {
+    "manifest": {
+      "title": "FlashFloodAI End-to-End Dataset Lineage & Provenance Manifest",
+      "version": "2.0.0",
+      "generated_at_utc": "2026-09-01T07:09:53.699052+00:00",
+      "pipeline_stages": {
+        "Phase 1A": {
+          "source": "NASA Earthdata CMR / GPM IMERG Early v07",
+          "url": "https://cmr.earthdata.nasa.gov/",
+          "files": [
+            "data/processed/gpm_combined.nc",
+            "data/processed/rainfall_features.nc"
+          ],
+          "output_variable": [
+            "precipitation",
+            "rainfall_30min",
+            "rainfall_1h",
+            "rainfall_3h",
+            "max_rainfall_intensity",
+            "mean_rainfall_intensity",
+            "rainfall_trend"
+          ]
+        },
+        "Phase 1B": {
+          "source": "India Meteorological Department (IMD) GeoServer / AWS Network",
+          "url": "https://reactjs.imd.gov.in/geoserver/wfs",
+          "files": [
+            "data/processed/weather/imd_weather_stations.csv",
+            "data/processed/weather/imd_weather_latest.json"
+          ],
+          "output_variable": [
+            "temperature_c",
+            "relative_humidity_pct",
+            "wind_speed_kmh",
+            "pressure_hpa",
+            "rainfall_mm"
+          ]
+        },
+        "Phase 1C": {
+          "source": "NASA Earthdata / SMAP SPL3SMP_E & L4 Soil Moisture",
+          "url": "https://cmr.earthdata.nasa.gov/",
+          "files": [
+            "data/processed/smap/smap_soil_moisture.nc",
+            "data/processed/smap/smap_soil_moisture_latest.json"
+          ],
+          "output_variable": [
+            "surface_soil_moisture",
+            "rootzone_soil_moisture",
+            "profile_soil_moisture"
+          ]
+        },
+        "Phase 1D": {
+          "source": "NASA / USGS SRTM 90m DEM (v4.1)",
+          "url": "https://srtm.csi.cgiar.org/",
+          "files": [
+            "data/processed/srtm/srtm_uttarakhand_dem.tif",
+            "data/processed/srtm/srtm_uttarakhand_dem.nc"
+          ],
+          "output_variable": [
+            "elevation"
+          ]
+        },
+        "Phase 1E": {
+          "source": "Derived deterministically from SRTM DEM (Horn 1981 / Beven & Kirkby 1979)",
+          "url": "https://srtm.csi.cgiar.org/ (Deterministic Terrain Modeling from SRTM DEM)",
+          "files": [
+            "data/processed/terrain/terrain_features.tif",
+            "data/processed/terrain/terrain_features.nc"
+          ],
+          "output_variable": [
+            "slope",
+            "flow_direction",
+            "flow_accumulation",
+            "stream_network",
+            "twi"
+          ]
+        },
+        "Phase 1F": {
+          "source": "ESA WorldCover 2021 10m Sentinel-1/2 LULC",
+          "url": "https://esa-worldcover.org/",
+          "files": [
+            "data/processed/landcover/landcover_uttarakhand.tif",
+            "data/processed/landcover/landcover_uttarakhand.nc"
+          ],
+          "output_variable": [
+            "landcover_class",
+            "runoff_coefficient",
+            "mannings_roughness"
+          ]
+        },
+        "Phase 1G": {
+          "source": "Central Water Commission (CWC) / Ministry of Jal Shakti",
+          "url": "https://ffs.india-water.gov.in/",
+          "files": [
+            "data/processed/waterlevel/cwc_water_level_stations.csv",
+            "data/processed/waterlevel/cwc_water_level_latest.json"
+          ],
+          "output_variable": [
+            "water_level",
+            "discharge_cumec",
+            "warning_level_m",
+            "danger_level_m",
+            "hfl_m"
+          ]
+        },
+        "Phase 1H": {
+          "source": "Geological Survey of India (GSI) / NDMA / USDMA / IMD / Scientific Literature",
+          "url": "https://gsi.gov.in/",
+          "files": [
+            "data/processed/events/historical_flood_events.csv",
+            "data/processed/events/historical_flood_events.json",
+            "data/processed/events/historical_flood_events.geojson"
+          ],
+          "output_variable": [
+            "historical_event_ground_truth"
+          ]
+        }
+      }
+    },
+    "static_status": {
+      "SRTM_DEM": true,
+      "WORLDCOVER_LULC": true
+    },
+    "dynamic_coverage": {
+      "GPM_IMERG": {
+        "required_start": "2026-08-31T14:39:25.540089+00:00",
+        "required_end": "2026-09-15T14:39:25.540089+00:00",
+        "missing_intervals": [],
+        "download_needed": false
+      },
+      "NASA_SMAP": {
+        "required_start": "2026-08-31T14:39:25.540089+00:00",
+        "required_end": "2026-09-15T14:39:25.540089+00:00",
+        "missing_intervals": [],
+        "download_needed": false
+      },
+      "IMD_WEATHER": {
+        "required_start": "2026-08-31T14:39:25.540089+00:00",
+        "required_end": "2026-09-15T14:39:25.540089+00:00",
+        "missing_intervals": [],
+        "download_needed": true
+      },
+      "CWC_WATERLEVEL": {
+        "required_start": "2026-08-31T14:39:25.540089+00:00",
+        "required_end": "2026-09-15T14:39:25.540089+00:00",
+        "missing_intervals": [],
+        "download_needed": true
+      },
+      "NOAA_GFS": {
+        "required_start": "2026-08-31T14:39:25.540089+00:00",
+        "required_end": "2026-09-15T14:39:25.540089+00:00",
+        "missing_intervals": [],
+        "download_needed": true
+      }
+    }
+  },
+  "quality_gates": {
+    "1_utc_timestamp_validity": {
+      "passed": true,
+      "prediction_time": "2026-09-15T10:39:25.540089+00:00"
+    },
+    "2_duplicate_detection": {
+      "passed": true,
+      "duplicates_found": 2151,
+      "note": "Deduplicated for inference safety"
+    },
+    "3_missing_interval_detection": {
+      "passed": true,
+      "missing_intervals_count": 0
+    },
+    "4_non_negative_rainfall": {
+      "passed": true,
+      "negative_rain_cells": 0
+    },
+    "5_rh_plausible_range": {
+      "passed": true,
+      "rh_invalid_count": 0
+    },
+    "6_soil_moisture_0_1": {
+      "passed": true,
+      "sm_invalid_count": 0
+    },
+    "7_temperature_plausible_range": {
+      "passed": true,
+      "temp_invalid_count": 0
+    },
+    "8_pressure_plausible_range": {
+      "passed": true,
+      "press_invalid_count": 0
+    },
+    "9_coordinate_bounds": {
+      "passed": true,
+      "bbox": {
+        "west": 77.8,
+        "east": 81.1,
+        "south": 28.5,
+        "north": 31.5
+      }
+    },
+    "10_dem_validity": {
+      "passed": true,
+      "elev_invalid_count": 0
+    },
+    "11_cwc_threshold_ordering": {
+      "passed": true,
+      "ordering": "warning_level <= danger_level <= hfl"
+    },
+    "12_exact_34_feature_count": {
+      "passed": true,
+      "predictor_count": 34,
+      "expected": 34
+    },
+    "13_no_nan_inf_in_predictors": {
+      "passed": true,
+      "nan_count": 0,
+      "inf_count": 0
+    },
+    "14_source_freshness": {
+      "passed": true,
+      "freshness_status": "FRESH"
+    },
+    "15_no_future_observations": {
+      "passed": true,
+      "target_prediction_time": "2026-09-15T10:39:25.540089+00:00"
+    }
+  }
+}

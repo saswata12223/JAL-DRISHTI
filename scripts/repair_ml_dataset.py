@@ -385,7 +385,6 @@ else:
 # CWC threshold ordering: warning_level <= danger_level <= hfl
 
 thresh_valid = (df_clean["warning_level_m"] <= df_clean["danger_level_m"] + 1e-3).all() and \
-
                (df_clean["danger_level_m"] <= df_clean["hfl_m"] + 1e-3).all()
 
 if not thresh_valid:

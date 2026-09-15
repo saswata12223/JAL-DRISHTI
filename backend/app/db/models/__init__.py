@@ -11,7 +11,12 @@ from app.db.models.historical_event import HistoricalFloodEvent
 from app.db.models.prediction import FloodPrediction
 from app.db.models.risk_decision import RiskDecisionRecord
 
+from app.db.models.user import User
+from app.db.models.audit import AuditLog
+
 __all__ = [
+    "User",
+    "AuditLog",
     "Station",
     "WeatherObservation",
     "RainfallObservation",
