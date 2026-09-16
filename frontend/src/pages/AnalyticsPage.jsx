@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { BarChart, Bar, Cell, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import { useTheme } from '../context/ThemeContext';
 import PanelCard from '../components/analytics/PanelCard';
@@ -695,7 +696,12 @@ function DecisionDetail({ decision }) {
 // ---------------------------------------------------------------------------
 
 export default function AnalyticsPage() {
-  const [activeTab, setActiveTab] = useState('risk_analytics'); // 'risk_analytics' | 'model_performance' | 'model_explainability'
+  const [searchParams, setSearchParams] = useSearchParams();
+  const activeTab = searchParams.get('tab') || 'risk_analytics';
+
+  const setActiveTab = (tab) => {
+    setSearchParams({ tab });
+  };
 
   // Risk Analytics State
   const [stations, setStations] = useState(STATIONS);

@@ -78,6 +78,8 @@ export default function TacticalActionMap({
 
   const [showShelters, setShowShelters] = useState(true);
 
+  const [showSos, setShowSos] = useState(true);
+
 
 
   const BASEMAPS = {
@@ -149,6 +151,8 @@ export default function TacticalActionMap({
   const safeShortestRoutes = tacticalData?.safe_shortest_routes || [];
 
   const shelters = tacticalData?.shelters || [];
+
+  const sosAlerts = tacticalData?.sosAlerts || [];
 
 
 
@@ -309,6 +313,30 @@ export default function TacticalActionMap({
               <span className="w-2 h-2 rounded-full bg-teal-400" />
 
               <span>Relief Shelters</span>
+
+            </span>
+
+          </label>
+
+          <label className="flex items-center gap-1.5 cursor-pointer hover:text-white">
+
+            <input
+
+              type="checkbox"
+
+              checked={showSos}
+
+              onChange={(e) => setShowSos(e.target.checked)}
+
+              className="accent-orange-500 rounded"
+
+            />
+
+            <span className="flex items-center gap-1">
+
+              <span className="w-2 h-2 rounded-full bg-orange-500 animate-pulse" />
+
+              <span>Active SOS ({sosAlerts.filter((s) => s.status !== 'RESOLVED').length})</span>
 
             </span>
 
@@ -811,6 +839,67 @@ export default function TacticalActionMap({
                   <div className="text-slate-700">Capacity: {s.capacity} | Free: <span className="font-bold text-emerald-600">{s.available}</span></div>
 
                   <div className="text-slate-600">Contact: {s.contact_officer}</div>
+
+                </div>
+
+              </Tooltip>
+
+            </CircleMarker>
+
+          ))}
+
+        {/* 7. Active SOS Distress Beacons */}
+
+        {showSos &&
+
+          sosAlerts.filter((s) => s.status !== 'RESOLVED').map((sos) => (
+
+            <CircleMarker
+
+              key={sos.id}
+
+              center={[sos.latitude, sos.longitude]}
+
+              radius={10}
+
+              className="animate-ping"
+
+              pathOptions={{
+
+                color: '#EA580C',
+
+                fillColor: '#F97316',
+
+                fillOpacity: 0.9,
+
+                weight: 3,
+
+              }}
+
+              eventHandlers={{
+
+                click: () => onSelectEntity && onSelectEntity({ 
+                  ...sos, 
+                  type: 'VULNERABLE', 
+                  name: `SOS: ${sos.name}`, 
+                  description: `${sos.distress_type} - ${sos.message}` 
+                }),
+
+              }}
+
+            >
+
+              <Tooltip direction="top" offset={[0, -10]}>
+
+                <div className="font-sans text-xs">
+
+                  <strong className="text-orange-900">SOS: {sos.name}</strong>
+
+                  <div className="text-slate-800">Phone: {sos.phone}</div>
+
+                  <div className="text-orange-700 font-bold">{sos.distress_type}</div>
+
+                  <div className="text-slate-600">Gateway: {sos.gateway_id} | Hops: {sos.mesh_hops}</div>
 
                 </div>
 

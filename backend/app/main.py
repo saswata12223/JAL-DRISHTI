@@ -21,10 +21,13 @@ logging.basicConfig(
 logger = logging.getLogger("FlashFloodAI.Main")
 
 
+from app.db.sos_database import init_sos_db
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Application lifespan context for startup and shutdown routines."""
     logger.info("Initializing FlashFloodAI Backend REST API...")
+    init_sos_db()
     logger.info(f"Target Region: Uttarakhand (Bounding Box: {settings.BBOX_MIN_LON}E - {settings.BBOX_MAX_LON}E, {settings.BBOX_MIN_LAT}N - {settings.BBOX_MAX_LAT}N)")
     logger.info(f"Connecting to ML Prediction Service...")
     _ = PredictionService.get_instance()

@@ -38,9 +38,8 @@ const DEFAULT_MAP_STATIONS = [
 
 
 
-function MapControls() {
-
-  const map = useMap();
+function MapControls({ map }) {
+  if (!map) return null;
 
   return (
 
@@ -97,8 +96,8 @@ function MapControls() {
 
 
 export default function RiskOverviewMap({ stations = DEFAULT_MAP_STATIONS, onSelectLocation, selectedLocation }) {
-
   const [filter, setFilter] = useState('ALL');
+  const [map, setMap] = useState(null);
 
 
 
@@ -178,17 +177,12 @@ export default function RiskOverviewMap({ stations = DEFAULT_MAP_STATIONS, onSel
       {/* 2. Leaflet Map Viewport */}
 
       <div className="flex-1 w-full relative z-0">
-
         <MapContainer
-
           center={[30.15, 79.2]}
-
           zoom={8}
-
-          className="w-full h-full"
-
+          className="w-full h-full z-0"
           zoomControl={false}
-
+          ref={setMap}
         >
 
           <TileLayer
@@ -339,11 +333,8 @@ export default function RiskOverviewMap({ stations = DEFAULT_MAP_STATIONS, onSel
 
 
 
-          <MapControls />
-
         </MapContainer>
-
-
+        <MapControls map={map} />
 
         {/* 3. Floating Glass Legend (Bottom Left) */}
         <div className="absolute bottom-6 left-6 z-20 bg-white/90 backdrop-blur-md border border-[#A5F1F7]/50 px-4 py-3 rounded-xl select-none pointer-events-auto shadow-sm">

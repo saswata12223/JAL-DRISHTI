@@ -9,13 +9,15 @@ import stationsService from '../services/stationsService';
 
 export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
-  const [lastUpdatedTime, setLastUpdatedTime] = useState('12:04:18 IST');
+  const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState(false);
+  const [lastUpdatedTime, setLastUpdatedTime] = useState(null);
   const containerRef = useRef(null);
 
   const [summaryData, setSummaryData] = useState({
-    activeExtreme: 1,
-    activeHigh: 3,
-    activeAlerts: 2,
+    activeExtreme: null,
+    activeHigh: null,
+    activeAlerts: null,
   });
 
   const [selectedLocation, setSelectedLocation] = useState({
@@ -34,11 +36,13 @@ export default function DashboardPage() {
 
   // Load Dashboard Data from Backend Services
   useEffect(() => {
-    async function loadDashboardData() {
+    let abortController = new AbortController();
+
+    async function loadDashboardData(isRefresh = false) {
       try {
-        setLoading(true);
-        const nowTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }) + ' IST';
-        setLastUpdatedTime(nowTime);
+        if (!isRefresh) setLoading(true);
+        else setRefreshing(true);
+        setError(false);
 
         const [summaryRes, alertsRes, stationsRes, latestDecisionsRes] = await Promise.allSettled([
           riskService.getRiskSummary(),
@@ -47,8 +51,13 @@ export default function DashboardPage() {
           riskService.getLatestDecisions(),
         ]);
 
+        if (abortController.signal.aborted) return;
+        
+        let anySuccess = false;
+
         let riskDecisionMap = {};
         if (latestDecisionsRes.status === 'fulfilled' && latestDecisionsRes.value?.data) {
+          anySuccess = true;
           const decisions = latestDecisionsRes.value.data;
           if (Array.isArray(decisions)) {
             decisions.forEach(d => {
@@ -60,6 +69,7 @@ export default function DashboardPage() {
         }
 
         if (stationsRes.status === 'fulfilled' && stationsRes.value?.data) {
+          anySuccess = true;
           const rawStations = stationsRes.value.data;
           const mapped = rawStations.map((st, i) => {
             const dec = riskDecisionMap[st.station_id] || {};
@@ -83,20 +93,32 @@ export default function DashboardPage() {
         }
 
         if (summaryRes.status === 'fulfilled' && summaryRes.value?.data) {
+          anySuccess = true;
           const s = summaryRes.value.data;
-          const extCount = s.risk_class_counts?.EXTREME ?? 1;
-          const highCount = s.risk_class_counts?.HIGH ?? 3;
-          const critAlerts = s.alert_priority_counts?.CRITICAL ?? 1;
-          const warnAlerts = s.alert_priority_counts?.WARNING ?? 1;
+          
+          const extCount = s.risk_class_counts?.EXTREME !== undefined ? s.risk_class_counts.EXTREME : null;
+          const highCount = s.risk_class_counts?.HIGH !== undefined ? s.risk_class_counts.HIGH : null;
+          
+          let alertsCount = null;
+          if (s.alert_priority_counts?.CRITICAL !== undefined || s.alert_priority_counts?.WARNING !== undefined) {
+             alertsCount = (s.alert_priority_counts?.CRITICAL || 0) + (s.alert_priority_counts?.WARNING || 0);
+          }
 
           setSummaryData({
             activeExtreme: extCount,
             activeHigh: highCount,
-            activeAlerts: critAlerts + warnAlerts,
+            activeAlerts: alertsCount,
           });
+          
+          if (s.generated_at_utc) {
+             const serverTime = new Date(s.generated_at_utc);
+             const timeString = serverTime.toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata', hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' }) + ' IST';
+             setLastUpdatedTime(timeString);
+          }
         }
 
         if (alertsRes.status === 'fulfilled' && alertsRes.value?.data?.alerts) {
+          anySuccess = true;
           const rawAlerts = alertsRes.value.data.alerts;
           if (Array.isArray(rawAlerts) && rawAlerts.length > 0) {
             const topAlert = rawAlerts[0];
@@ -114,14 +136,32 @@ export default function DashboardPage() {
             });
           }
         }
+        
+        if (!anySuccess) {
+          setError(true);
+        }
       } catch (e) {
-        console.warn('Dashboard live fetch error:', e);
+        if (!abortController.signal.aborted) {
+          console.warn('Dashboard live fetch error:', e);
+          setError(true);
+        }
       } finally {
-        setLoading(false);
+        if (!abortController.signal.aborted) {
+          setLoading(false);
+          setRefreshing(false);
+        }
       }
     }
 
-    loadDashboardData();
+    loadDashboardData(false);
+    const interval = setInterval(() => {
+      loadDashboardData(true);
+    }, 30000);
+
+    return () => {
+      clearInterval(interval);
+      abortController.abort();
+    };
   }, []);
 
   // Anime.js 4.5.0 Mount Animations
@@ -179,25 +219,32 @@ export default function DashboardPage() {
       </div>
 
       {/* 2. Metric Summary Row (3 Equal-Width Aligned Cards) */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 w-full">
-        <StatCard
-          label="EXTREME"
-          value={loading ? '-' : summaryData.activeExtreme}
-          icon="warning"
-          type="extreme"
-        />
-        <StatCard
-          label="HIGH"
-          value={loading ? '-' : summaryData.activeHigh}
-          icon="trending_up"
-          type="high"
-        />
-        <StatCard
-          label="ALERTS"
-          value={loading ? '-' : summaryData.activeAlerts}
-          icon="notifications"
-          type="alerts"
-        />
+      <div className="flex flex-col gap-2 w-full">
+        <div className="flex items-center justify-end px-2">
+          <span className="text-[11px] font-medium text-slate-500">
+            {error ? 'Live update unavailable — showing last successful data' : (refreshing ? 'Updating...' : (lastUpdatedTime ? `Last updated: ${lastUpdatedTime}` : ''))}
+          </span>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 w-full">
+          <StatCard
+            label="EXTREME"
+            value={loading ? '—' : (summaryData.activeExtreme ?? '—')}
+            icon="warning"
+            type="extreme"
+          />
+          <StatCard
+            label="HIGH"
+            value={loading ? '—' : (summaryData.activeHigh ?? '—')}
+            icon="trending_up"
+            type="high"
+          />
+          <StatCard
+            label="ALERTS"
+            value={loading ? '—' : (summaryData.activeAlerts ?? '—')}
+            icon="notifications"
+            type="alerts"
+          />
+        </div>
       </div>
 
       {/* 3. Analytical Chart Row (2 Equal-Width Aligned Cards) */}

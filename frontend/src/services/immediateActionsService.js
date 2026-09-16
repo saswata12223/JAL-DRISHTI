@@ -27,13 +27,51 @@ export const immediateActionsService = {
   dispatchWhatsAppAlerts: (payload) => api.post('/immediate-actions/whatsapp/dispatch', payload),
 
   // Get Live Mobile SOS Alerts Feed
-  getSosAlerts: (params = {}) => api.get('/immediate-actions/sos', { params }),
+  getSosAlerts: (params = {}) => api.get('/sos', { params }),
 
   // Mobile App SOS Distress Inbound Webhook Simulation
-  submitMobileSos: (payload) => api.post('/immediate-actions/sos', payload),
+  submitMobileSos: (payload) => api.post('/sos/incoming', payload, {
+    headers: {
+      'X-Gateway-Key': 'gateway_secret_123'
+    }
+  }),
 
-  // Update SOS Status (Dispatch Rescue Unit / Resolve)
-  updateSosStatus: (sosId, payload) => api.patch(`/immediate-actions/sos/${sosId}/status`, payload),
+  // Update SOS Status (Dispatch Rescue Unit)
+  dispatchSos: (sosId) => api.put(`/sos/${sosId}/dispatch`),
+  
+  // Update SOS Status (Acknowledge)
+  acknowledgeSos: (sosId) => api.put(`/sos/${sosId}/acknowledge`),
+  
+  // Update SOS Status (Resolve)
+  resolveSos: (sosId) => api.put(`/sos/${sosId}/resolve`),
+  
+  // Subscribe to real-time SOS stream via SSE
+  subscribeToSosStream: (onMessage) => {
+    // Determine the base URL for the EventSource
+    // If we're using Vite's proxy in dev, it's just /api/v1/sos/stream
+    const baseUrl = import.meta.env.VITE_API_URL || '/api/v1';
+    const eventSource = new EventSource(`${baseUrl}/sos/stream`);
+    
+    eventSource.addEventListener('new_sos', (e) => {
+      onMessage('new_sos', JSON.parse(e.data));
+    });
+    
+    eventSource.addEventListener('update_sos', (e) => {
+      onMessage('update_sos', JSON.parse(e.data));
+    });
+    
+    eventSource.addEventListener('ping', () => {
+      // Keep-alive heartbeat
+    });
+    
+    eventSource.onerror = (error) => {
+      console.error('SSE connection error:', error);
+    };
+    
+    return () => {
+      eventSource.close();
+    };
+  },
 
   // Get Statewide Shelter Registry with Real-Time Availability
   getShelters: () => api.get('/immediate-actions/shelters'),

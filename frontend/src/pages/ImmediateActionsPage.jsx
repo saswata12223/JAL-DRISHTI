@@ -434,22 +434,46 @@ export default function ImmediateActionsPage() {
       }
     }
     loadData();
+    
+    // Subscribe to SSE
+    const unsubscribe = immediateActionsService.subscribeToSosStream((eventType, data) => {
+      if (eventType === 'new_sos') {
+        setSosAlerts((prev) => [data, ...prev]);
+      } else if (eventType === 'update_sos') {
+        setSosAlerts((prev) => prev.map((item) => (item.id === data.id ? data : item)));
+      }
+    });
+    
+    return () => {
+      unsubscribe();
+    };
   }, []);
+
+  // Acknowledge SOS
+  const handleAcknowledgeSos = async (sosId) => {
+    try {
+      await immediateActionsService.acknowledgeSos(sosId);
+      // state will update via SSE
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
   // Dispatch rescue team for SOS
   const handleDispatchSosUnit = async (sosId) => {
     try {
-      await immediateActionsService.updateSosStatus(sosId, {
-        status: 'DISPATCHED',
-        assigned_unit: 'SDRF Quick Response Team 1 (Immediate Dispatch)',
-      });
-      setSosAlerts((prev) =>
-        prev.map((item) =>
-          item.id === sosId
-            ? { ...item, status: 'DISPATCHED', assigned_unit: 'SDRF Quick Response Team 1 (Immediate Dispatch)' }
-            : item
-        )
-      );
+      await immediateActionsService.dispatchSos(sosId);
+      // state will update via SSE
+    } catch (e) {
+      console.error(e);
+    }
+  };
+  
+  // Resolve SOS
+  const handleResolveSos = async (sosId) => {
+    try {
+      await immediateActionsService.resolveSos(sosId);
+      // state will update via SSE
     } catch (e) {
       console.error(e);
     }
@@ -458,21 +482,26 @@ export default function ImmediateActionsPage() {
   // Simulate new inbound mobile SOS
   const handleSimulateMobileSos = async () => {
     const mockSos = {
-      citizen_name: 'Anand Semwal',
-      contact_number: '+91 97483 79047',
-      lat: 30.289,
-      lon: 78.983,
-      location_name: 'Rudraprayag Sangam - Near Laxmi Narayan Temple',
+      sos_id: `SOS-UK-${Math.floor(Math.random() * 1000)}`,
+      sender_id: `CITIZEN-${Math.floor(Math.random() * 100)}`,
+      timestamp: new Date().toISOString(),
+      name: 'Anand Semwal',
+      phone: '+91 97483 79047',
+      latitude: 30.2841,
+      longitude: 78.9812,
       distress_type: 'RISING_WATER',
-      distress_description: 'Flash water surge entered courtyard. 3 children and 2 adults need boat evacuation.',
-      people_count: 5,
-      battery_percent: 64,
+      message: 'Flash water surge entered courtyard. 3 children and 2 adults need boat evacuation.',
+      people_trapped: 5,
+      battery: 64,
+      mesh_hops: 2,
+      device_id: 'BLE-NODE-042',
+      gateway_id: 'GW-SIMULATOR',
+      gateway_received_at: new Date().toISOString(),
+      source: 'SIMULATED'
     };
     try {
-      const res = await immediateActionsService.submitMobileSos(mockSos);
-      if (res?.data) {
-        setSosAlerts((prev) => [res.data, ...prev]);
-      }
+      await immediateActionsService.submitMobileSos(mockSos);
+      // we do not manually append to state here, SSE handles it!
     } catch (e) {
       console.error(e);
     }
@@ -777,7 +806,7 @@ export default function ImmediateActionsPage() {
               </div>
             </div>
             <TacticalActionMap
-              tacticalData={{ ...tacticalData, shelters }}
+              tacticalData={{ ...tacticalData, shelters, sosAlerts }}
               selectedEntity={selectedEntity}
               onSelectEntity={setSelectedEntity}
               activeRouteId={activeRoute?.from_point_id}
@@ -2086,12 +2115,17 @@ export default function ImmediateActionsPage() {
               {sosAlerts.map((sos) => {
                 const isActive = sos.status === 'ACTIVE';
                 const isDispatched = sos.status === 'DISPATCHED';
+                const isAcknowledged = sos.status === 'ACKNOWLEDGED';
+                const isReal = sos.source === 'BLE_MESH';
+
                 return (
                   <div
                     key={sos.id}
                     className={`p-4 rounded-xl border transition-all ${
                       isActive
                         ? 'bg-rose-50/70 border-rose-300 shadow-sm'
+                        : isAcknowledged
+                        ? 'bg-orange-50/60 border-orange-300'
                         : isDispatched
                         ? 'bg-amber-50/60 border-amber-300'
                         : 'bg-slate-50 border-slate-200 opacity-80'
@@ -2099,18 +2133,30 @@ export default function ImmediateActionsPage() {
                   >
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-slate-200/80">
                       <div className="flex items-center gap-2">
-                        <span className="font-bold text-sm text-slate-900">{sos.citizen_name}</span>
-                        <span className="font-mono text-xs text-slate-600">{sos.contact_number}</span>
+                        {isReal ? (
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded border border-red-500 bg-red-100 text-red-800 flex items-center gap-1">
+                            <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
+                            REAL — BLE MESH
+                          </span>
+                        ) : (
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded border border-orange-500 bg-orange-100 text-orange-800">
+                            DEMO — SIMULATED
+                          </span>
+                        )}
+                        <span className="font-bold text-sm text-slate-900">{sos.name}</span>
+                        <span className="font-mono text-xs text-slate-600">{sos.phone}</span>
                         <span className="text-[10px] font-mono bg-white px-2 py-0.5 rounded border border-slate-300 font-bold">
                           {sos.id}
                         </span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <span className="text-[11px] text-slate-500">{sos.timestamp}</span>
+                        <span className="text-[11px] text-slate-500">{new Date(sos.received_at || sos.timestamp).toLocaleTimeString()}</span>
                         <span
                           className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
                             isActive
                               ? 'bg-red-600 text-white animate-pulse'
+                              : isAcknowledged
+                              ? 'bg-orange-600 text-white'
                               : isDispatched
                               ? 'bg-amber-600 text-white'
                               : 'bg-emerald-600 text-white'
@@ -2121,36 +2167,70 @@ export default function ImmediateActionsPage() {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs py-2 text-slate-700">
+                    <div className="grid grid-cols-1 sm:grid-cols-4 gap-2 text-xs py-2 text-slate-700 border-b border-slate-100/50 pb-2 mb-2">
                       <div>
-                        <strong>Location:</strong> {sos.location_name}
+                        <strong>Coordinates:</strong> {sos.latitude}, {sos.longitude}
                       </div>
                       <div>
-                        <strong>People Trapped:</strong> {sos.people_count} | <strong>Battery:</strong> {sos.battery_percent}%
+                        <strong>People Trapped:</strong> {sos.people_trapped} | <strong>Battery:</strong> {sos.battery}%
                       </div>
                       <div>
                         <strong>Distress Type:</strong> <span className="text-red-700 font-bold">{sos.distress_type}</span>
                       </div>
+                      <div>
+                        <strong>Gateway:</strong> {sos.gateway_id || 'N/A'} (Hops: {sos.mesh_hops || 0})
+                      </div>
                     </div>
 
                     <p className="text-xs text-slate-600 italic bg-white/70 p-2 rounded border border-slate-200/60">
-                      "{sos.distress_description}"
+                      "{sos.message}"
                     </p>
+                    
+                    {/* Timestamps Row */}
+                    <div className="flex gap-4 pt-2 mt-2 border-t border-slate-200/50 text-[10px] text-slate-400 font-mono">
+                       <div><strong>CREATED:</strong> {sos.timestamp ? new Date(sos.timestamp).toLocaleTimeString() : '--:--'}</div>
+                       <div><strong>RECEIVED:</strong> {sos.received_at ? new Date(sos.received_at).toLocaleTimeString() : '--:--'}</div>
+                       <div><strong>ACK'D:</strong> {sos.acknowledged_at ? new Date(sos.acknowledged_at).toLocaleTimeString() : '--:--'}</div>
+                       <div><strong>DISP'D:</strong> {sos.dispatched_at ? new Date(sos.dispatched_at).toLocaleTimeString() : '--:--'}</div>
+                    </div>
 
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-2 mt-2 border-t border-slate-200/80 text-xs">
                       <div className="text-slate-600">
                         <strong>Assigned Unit:</strong>{' '}
                         <span className="text-blue-700 font-semibold">{sos.assigned_unit || 'Unassigned'}</span>
                       </div>
-                      {isActive && (
-                        <button
-                          onClick={() => handleDispatchSosUnit(sos.id)}
-                          className="px-3 py-1 rounded bg-red-600 hover:bg-red-500 text-white font-bold text-xs uppercase tracking-wider flex items-center gap-1 shadow-xs"
-                        >
-                          <span className="material-symbols-outlined text-sm">siren</span>
-                          <span>Dispatch SDRF Unit</span>
-                        </button>
-                      )}
+                      
+                      <div className="flex items-center gap-2">
+                        {isActive && (
+                          <button
+                            onClick={() => handleAcknowledgeSos(sos.id)}
+                            className="px-3 py-1 rounded bg-orange-600 hover:bg-orange-500 text-white font-bold text-xs uppercase tracking-wider flex items-center gap-1 shadow-xs"
+                          >
+                            <span className="material-symbols-outlined text-sm">done</span>
+                            <span>Acknowledge</span>
+                          </button>
+                        )}
+                        
+                        {(isActive || isAcknowledged) && (
+                          <button
+                            onClick={() => handleDispatchSosUnit(sos.id)}
+                            className="px-3 py-1 rounded bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs uppercase tracking-wider flex items-center gap-1 shadow-xs"
+                          >
+                            <span className="material-symbols-outlined text-sm">local_shipping</span>
+                            <span>Record Prototype Dispatch</span>
+                          </button>
+                        )}
+                        
+                        {isDispatched && (
+                          <button
+                            onClick={() => handleResolveSos(sos.id)}
+                            className="px-3 py-1 rounded bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs uppercase tracking-wider flex items-center gap-1 shadow-xs"
+                          >
+                            <span className="material-symbols-outlined text-sm">check_circle</span>
+                            <span>Resolve Incident</span>
+                          </button>
+                        )}
+                      </div>
                     </div>
                   </div>
                 );

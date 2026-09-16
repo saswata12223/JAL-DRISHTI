@@ -4,7 +4,7 @@ export default function StatCard({ label, value, subtext, icon, type = 'default'
   let valColor = 'text-[#102A2E]';
   let badgeColor = 'text-[#24464B]';
 
-  if (value === 0 || value === '-') {
+  if (value === 0 || value === '-' || value === '—') {
     valColor = 'text-slate-400';
     badgeColor = 'text-slate-400';
   } else if (type === 'extreme') {
@@ -18,9 +18,13 @@ export default function StatCard({ label, value, subtext, icon, type = 'default'
     badgeColor = 'text-[#D97706]';
   }
 
-  // Format value to 2 digits if less than 10 for clean telemetry aesthetic (e.g. 01, 00)
-  // If it's a dash (loading state), don't format it.
-  const displayVal = typeof value === 'number' && value < 10 ? `0${value}` : value;
+  // Format value to 2 digits if less than 10 for clean telemetry aesthetic (e.g. 01)
+  // If it's zero, just show "0". If it's a dash (loading state), don't format it.
+  let displayVal = value;
+  if (typeof value === 'number') {
+    if (value === 0) displayVal = '0';
+    else if (value > 0 && value < 10) displayVal = `0${value}`;
+  }
 
   return (
     <div className="kpi-card bg-white border border-slate-200 p-6 rounded-2xl flex items-center select-none shadow-xs hover:shadow-sm transition-all duration-200 group">

@@ -1,119 +1,104 @@
-# Environment variables & secrets
+# ============================================================
+# JAL DRISHTI — .gitignore
+# ============================================================
 
+# ── Environment variables & secrets ─────────────────────────
 .env
-
 .env.local
-
 .env.*.local
-
 *.env.local
+.env.production
+.env.development
 
 
-
-
-
-# Python
-
+# ── Python ──────────────────────────────────────────────────
 __pycache__/
-
 *.py[cod]
-
 *$py.class
-
 .venv/
-
 env/
-
 venv/
-
-*.sqlite3
-
-
-
-# Node / Frontend
-
-node_modules/
-
+*.egg-info/
 dist/
+build/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
 
+
+# ── SQLite / Local Databases (runtime data, never commit) ───
+*.sqlite3
+*.sqlite
+*.db
+
+
+# ── Backend runtime data directory (auth & SOS databases) ───
+backend/data/
+
+
+# ── Node / Frontend ──────────────────────────────────────────
+node_modules/
+dist/
 .vite/
-
 npm-debug.log*
-
 yarn-debug.log*
-
 yarn-error.log*
+*.log
+dump.cjs
+frontend/dump.cjs
 
 
-
-# OS / IDE
-
+# ── OS / IDE ─────────────────────────────────────────────────
 .DS_Store
-
 Thumbs.db
-
 .idea/
-
 .vscode/
+*.suo
+*.user
 
 
-
-# Large Datasets & Binary Rasters (generated via ingest scripts)
-
+# ── Large Datasets & Binary Rasters (generated via ingest) ──
 data/raw/
-
 data/backup_august_2026/
-
 *.nc
-
 *.nc4
-
 *.tif
-
 *.tiff
-
 *.zip
-
 *.tar.gz
 
 
-
-# Generated ML transient datasets, caches & experimental outputs
-
+# ── Generated ML datasets, caches & experimental outputs ────
 data/processed/ml/rolling/
 !data/processed/ml/rolling/rolling_features_latest.parquet
-
 data/processed/ml/nowcast/
-
 data/processed/ml/validation/
-
 data/processed/ml/insat3dr/
-
 data/processed/ml/*.parquet
 !data/processed/ml/flood_ml_features_clean.parquet
-
 data/processed/ml/*.csv
-
 data/processed/smap/*.json
-
 data/processed/weather/*.json
-
 data/processed/waterlevel/*.json
-
 data/processed/waterlevel/*.csv
-
 data/processed/weather/*.csv
 
+
+# ── ML model binary files ────────────────────────────────────
 *.h5
-
 *.hdf5
+*.pkl
+*.joblib
+*.onnx
 
+
+# ── Geospatial / Weather binary formats ──────────────────────
 *.grib
-
 *.grib2
-
 scratch_test_gfs.grib2
-
 data/processed/gfs/
-
 data/processed/smap_l4/
+
+
+# ── Test artifacts ───────────────────────────────────────────
+test_twilio.py

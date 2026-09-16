@@ -1,9 +1,12 @@
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import PanelCard from '../components/analytics/PanelCard';
 
+// Lazy-load the heavy map component to avoid blocking initial render
+const UttarakhandTerrainMap = lazy(() =>
+  import('../components/terrain/UttarakhandTerrainMap')
+);
+
 // About & Terrain intelligence — Uttarakhand flood early-warning platform.
-// Data sources below reflect the accepted project inputs (CWC, IMD, NRSC,
-// USGS, GSI and Uttarakhand State), consistent with the application footer.
 const TERRAIN_SOURCES = [
   { icon: 'terrain', label: 'SRTM Elevation', detail: 'Digital terrain elevation model used for slope and runoff routing.' },
   { icon: 'landscape', label: 'Terrain Slope', detail: 'Riparian slope derived from DEM to compute SCS-CN peak runoff.' },
@@ -16,19 +19,31 @@ const TERRAIN_SOURCES = [
 export default function AboutTerrainPage() {
   return (
     <div className="flex flex-col gap-5 w-full">
-      {/* 1. Page Header */}
-      <div className="flex flex-col gap-3.5">
-        <div>
-          <h1 className="text-[17px] font-bold text-app-text-primary tracking-tight font-sans">
-            ABOUT &amp; TERRAIN
-          </h1>
-          <p className="text-[11.5px] font-medium text-app-text-secondary">
-            Uttarakhand flood intelligence platform, terrain inputs, SCS-CN hydrologic runoff and model pipeline
-          </p>
-        </div>
+      {/* Page Header */}
+      <div className="flex flex-col gap-1">
+        <h1 className="text-[17px] font-bold text-app-text-primary tracking-tight font-sans">
+          ABOUT &amp; TERRAIN
+        </h1>
+        <p className="text-[11.5px] font-medium text-app-text-secondary">
+          Uttarakhand flood intelligence platform, terrain inputs, SCS-CN hydrologic runoff and model pipeline
+        </p>
       </div>
 
-      {/* 2. About + Terrain Panels */}
+      {/* Interactive GIS Terrain Map */}
+      <Suspense
+        fallback={
+          <div className="w-full rounded-2xl bg-[#0F172A] border border-white/10 flex items-center justify-center" style={{ height: 640 }}>
+            <div className="flex flex-col items-center gap-3">
+              <div className="w-8 h-8 border-2 border-[#38BDF8] border-t-transparent rounded-full animate-spin" />
+              <span className="text-[#94A3B8] text-[12px] font-semibold tracking-wide">Loading terrain intelligence map...</span>
+            </div>
+          </div>
+        }
+      >
+        <UttarakhandTerrainMap height="640px" />
+      </Suspense>
+
+      {/* About + Terrain Panels */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         <div className="flex flex-col gap-5">
           <PanelCard

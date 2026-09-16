@@ -333,7 +333,7 @@ async def dispatch_voice_calls(payload: CallDispatchRequest):
         if not clean_phone.startswith("+"):
             clean_phone = f"+91{clean_phone}" if len(clean_phone) == 10 else f"+{clean_phone}"
             
-        record = {
+        record: Dict[str, Any] = {
             "call_id": f"CA-{uuid.uuid4().hex[:12].upper()}",
             "phone_number": clean_phone,
             "language": payload.language,
@@ -354,11 +354,8 @@ async def dispatch_voice_calls(payload: CallDispatchRequest):
                 </Response>"""
                 twimlet_url = f"https://twimlets.com/echo?Twiml={urllib.parse.quote(twiml_content)}"
                 
-                # Resolve the paired trial From number for this verified recipient
-                actual_from = TWILIO_RECIPIENT_TRIAL_PAIRS.get(
-                    clean_phone,
-                    payload.from_number.strip() if (payload.from_number and payload.from_number.strip()) else DEFAULT_TWILIO_FROM_NUMBER
-                )
+                # Use the configured Twilio From number
+                actual_from = payload.from_number.strip() if (payload.from_number and payload.from_number.strip()) else DEFAULT_TWILIO_FROM_NUMBER
 
                 async with httpx.AsyncClient(timeout=15.0) as client:
                     twilio_url = f"https://api.twilio.com/2010-04-01/Accounts/{account_sid}/Calls.json"
