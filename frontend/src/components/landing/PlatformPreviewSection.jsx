@@ -27,16 +27,19 @@ export default function PlatformPreviewSection() {
             </button>
           </div>
 
-          {/* Mini Dashboard UI Mockup */}
+          {/* Video Preview */}
           <div className="lg:w-2/3 w-full relative">
             <div className="w-full max-w-[800px] mx-auto aspect-[16/10] bg-white rounded-xl shadow-2xl border border-[#E2E8F0] overflow-hidden flex flex-col relative transform lg:rotate-[-2deg] transition-transform hover:rotate-0 duration-500">
-              {/* Live Dashboard Preview Iframe */}
-              <iframe 
-                src="/dashboard" 
-                title="Dashboard Preview"
-                className="w-full h-full border-none pointer-events-none select-none overflow-hidden"
-                style={{ width: '100%', height: '100%' }}
-              />
+              <div className="w-full h-full bg-[#F8FAFC]">
+                <video
+                  src="/assets/video/InShot_20260917_040506723.mp4"
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  className="w-full h-full object-cover rounded-lg select-none pointer-events-none"
+                />
+              </div>
             </div>
 
             {/* Slogan Note */}

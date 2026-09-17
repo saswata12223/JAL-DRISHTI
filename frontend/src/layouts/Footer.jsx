@@ -159,14 +159,8 @@ export default function Footer() {
           {/* Brand & Mission (Left) */}
           <div className="md:col-span-12 lg:col-span-4 flex flex-col items-start gap-4">
             <div className="flex items-center gap-3 select-none">
-              <img src="/assets/images/logo_without_text.png" alt="Jal Drishti Logo" className="w-8 h-8 object-contain shrink-0" />
-              <div className="flex flex-col justify-center">
-                <span className="text-[17px] font-bold text-white tracking-tight leading-none">
-                  Jal Drishti
-                </span>
-                <span className="text-[9px] font-bold text-cyan-400 uppercase tracking-widest leading-tight mt-0.5">
-                  Sense the storm, see the risk, act in time
-                </span>
+              <div className="bg-white rounded-full p-1 shadow-sm shrink-0">
+                <img src="/assets/images/logo_without_text.png" alt="Jal Drishti Logo" className="w-7 h-7 object-contain" />
               </div>
             </div>
             <p className="text-[12px] leading-relaxed text-slate-400 max-w-sm">

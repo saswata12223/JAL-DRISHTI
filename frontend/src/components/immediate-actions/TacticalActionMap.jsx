@@ -861,8 +861,7 @@ export default function TacticalActionMap({
               center={[sos.latitude, sos.longitude]}
 
               radius={10}
-
-              className="animate-ping"
+              className="animate-pulse"
 
               pathOptions={{
 
@@ -889,21 +888,58 @@ export default function TacticalActionMap({
 
             >
 
-              <Tooltip direction="top" offset={[0, -10]}>
+              <Popup className="sos-map-popup">
+                <div className="font-sans text-xs min-w-[280px] p-1 space-y-2.5">
+                  <div className="flex items-center justify-between border-b border-orange-200 pb-2">
+                    <div className="flex items-center gap-1.5">
+                      <span className={`px-1.5 py-0.5 rounded text-[9px] font-bold ${sos.source === 'BLE_MESH' ? 'bg-red-100 text-red-800 border border-red-300' : 'bg-orange-100 text-orange-800 border border-orange-300'}`}>
+                        {sos.source === 'BLE_MESH' ? 'BLE_MESH - LIVE' : 'DEMO - SIMULATED'}
+                      </span>
+                      <span className="bg-slate-100 px-1.5 py-0.5 rounded text-[9px] text-slate-600 font-mono border border-slate-200">
+                        {sos.sos_id || `SOS-${sos.id}`}
+                      </span>
+                    </div>
+                    <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold text-white ${sos.status === 'ACTIVE' ? 'bg-red-500 animate-pulse' : 'bg-orange-500'}`}>
+                      {sos.status}
+                    </span>
+                  </div>
 
-                <div className="font-sans text-xs">
+                  <div>
+                    <div className="font-bold text-sm text-slate-900">{sos.name || 'Unknown Citizen'}</div>
+                    <div className="text-slate-600 font-mono text-[10px] mt-0.5">{sos.phone || 'No Phone Number'}</div>
+                  </div>
 
-                  <strong className="text-orange-900">SOS: {sos.name}</strong>
+                  <div className="grid grid-cols-2 gap-2 bg-slate-50 p-2 rounded border border-slate-100">
+                    <div>
+                      <span className="text-[10px] text-slate-500 block">Coordinates</span>
+                      <span className="font-mono text-[11px] text-slate-800">{sos.latitude?.toFixed(4)}, {sos.longitude?.toFixed(4)}</span>
+                    </div>
+                    <div>
+                      <span className="text-[10px] text-slate-500 block">Distress Type</span>
+                      <span className="font-bold text-[11px] text-red-600">{sos.distress_type}</span>
+                    </div>
+                    <div>
+                      <span className="text-[10px] text-slate-500 block">People | Battery</span>
+                      <span className="font-bold text-[11px] text-slate-800">{sos.people_trapped} | {sos.battery}%</span>
+                    </div>
+                    <div>
+                      <span className="text-[10px] text-slate-500 block">Gateway (Hops)</span>
+                      <span className="font-mono text-[10px] text-slate-800">{sos.gateway_id} ({sos.mesh_hops})</span>
+                    </div>
+                  </div>
 
-                  <div className="text-slate-800">Phone: {sos.phone}</div>
+                  {sos.message && (
+                    <div className="italic text-slate-700 bg-orange-50/50 p-2 rounded-lg border border-orange-100 border-l-2 border-l-orange-400">
+                      "{sos.message}"
+                    </div>
+                  )}
 
-                  <div className="text-orange-700 font-bold">{sos.distress_type}</div>
-
-                  <div className="text-slate-600">Gateway: {sos.gateway_id} | Hops: {sos.mesh_hops}</div>
-
+                  <div className="flex items-center justify-between text-[9px] font-mono text-slate-400 border-t border-slate-100 pt-2">
+                    <div>CRE: {new Date(sos.timestamp).toLocaleTimeString()}</div>
+                    <div>RCV: {new Date(sos.gateway_received_at || sos.timestamp).toLocaleTimeString()}</div>
+                  </div>
                 </div>
-
-              </Tooltip>
+              </Popup>
 
             </CircleMarker>
 

@@ -29,12 +29,8 @@ export default function LoginPage() {
         {/* Header */}
         <div className="px-6 pt-6 pb-5 border-b border-[#E2E8F0] flex flex-col items-center justify-center bg-[#0F4C81] text-white">
           <Link to="/" className="flex flex-col items-center gap-2 group mb-2 hover:opacity-90 transition-opacity">
-             <div className="w-12 h-12 rounded-xl bg-[#8FD3E8]/20 border border-[#8FD3E8]/40 flex items-center justify-center shadow-inner group-hover:scale-105 transition-transform duration-300">
-               <span className="material-symbols-outlined text-[#8FD3E8] text-2xl">tsunami</span>
-             </div>
-             <div className="text-center">
-               <h3 className="text-lg font-black text-white tracking-tight uppercase leading-none">Jal Drishti</h3>
-               <p className="text-[10px] text-[#8FD3E8] font-bold uppercase tracking-widest mt-1">Flood Intelligence</p>
+             <div className="bg-white rounded-full p-2.5 shadow-lg flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
+               <img src="/assets/images/logo_without_text.png" alt="Jal Drishti Logo" className="w-14 h-14 object-contain drop-shadow-sm" />
              </div>
           </Link>
         </div>

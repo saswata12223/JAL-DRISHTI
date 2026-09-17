@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import logo from '../../assets/images/jal_drishti_logo_transparent.png'; // Using the logo that includes text if possible, or logo_without_text
+
 
 export default function LandingHeader() {
   const navigate = useNavigate();
@@ -27,16 +27,15 @@ export default function LandingHeader() {
           >
             {/* The user requested logo_without_text, but the design shows Jal Drishti text next to it. Let's use logo_without_text + text */}
             <div className="flex items-center gap-3">
-              <img
-                src="/assets/images/logo_without_text.png"
-                alt="Jal Drishti Logo"
-                className="h-10 sm:h-12 w-auto object-contain drop-shadow-md group-hover:scale-[1.02] transition-transform"
-                onError={(e) => { e.target.src = '/images/logo_without_text.png' }}
-              />
-              <div className="flex flex-col">
-                <span className="text-white font-black text-xl leading-none tracking-tight">Jal Drishti</span>
-                <span className="text-white/70 text-[9px] uppercase tracking-widest leading-none mt-1 font-semibold">Sense the storm. See the risk. Act in time</span>
+              <div className="bg-white rounded-full p-1.5 shadow-md flex items-center justify-center">
+                <img
+                  src="/assets/images/logo_without_text.png"
+                  alt="Jal Drishti Logo"
+                  className="h-8 sm:h-10 w-8 sm:w-10 object-contain drop-shadow-sm group-hover:scale-[1.02] transition-transform"
+                  onError={(e) => { e.target.src = '/images/logo_without_text.png' }}
+                />
               </div>
+
             </div>
           </a>
         </div>

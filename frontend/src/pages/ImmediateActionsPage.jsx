@@ -2112,7 +2112,12 @@ export default function ImmediateActionsPage() {
             </div>
 
             <div className="space-y-3">
-              {sosAlerts.map((sos) => {
+              {[...sosAlerts].sort((a, b) => {
+                // LIVE BLE_MESH alerts always on top, then by newest first
+                if (a.source === 'BLE_MESH' && b.source !== 'BLE_MESH') return -1;
+                if (a.source !== 'BLE_MESH' && b.source === 'BLE_MESH') return 1;
+                return new Date(b.timestamp) - new Date(a.timestamp);
+              }).map((sos) => {
                 const isActive = sos.status === 'ACTIVE';
                 const isDispatched = sos.status === 'DISPATCHED';
                 const isAcknowledged = sos.status === 'ACKNOWLEDGED';
@@ -2121,8 +2126,12 @@ export default function ImmediateActionsPage() {
                 return (
                   <div
                     key={sos.id}
-                    className={`p-4 rounded-xl border transition-all ${
-                      isActive
+                    className={`p-4 rounded-xl border-2 transition-all ${
+                      isReal && isActive
+                        ? 'bg-red-50 border-red-500 shadow-lg shadow-red-200 animate-pulse'
+                        : isReal
+                        ? 'bg-red-50/50 border-red-400 shadow-md shadow-red-100'
+                        : isActive
                         ? 'bg-rose-50/70 border-rose-300 shadow-sm'
                         : isAcknowledged
                         ? 'bg-orange-50/60 border-orange-300'

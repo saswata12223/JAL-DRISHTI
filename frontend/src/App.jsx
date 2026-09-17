@@ -41,6 +41,7 @@ export default function App() {
           {/* Public Informational Routes */}
           <Route path="about" element={<AboutPage />} />
           <Route path="resources" element={<ResourcesPage />} />
+          <Route path="about-terrain" element={<AboutTerrainPage />} />
 
           {/* Policy Routes */}
           <Route path="privacy" element={<PrivacyPolicyPage />} />
@@ -59,7 +60,6 @@ export default function App() {
             <Route path="alerts" element={<AlertsManagementPage />} />
             <Route path="historical-events" element={<HistoricalEventsPage />} />
             <Route path="model-intelligence" element={<Navigate to="/analytics" replace />} />
-            <Route path="about-terrain" element={<AboutTerrainPage />} />
           </Route>
         </Route>
 

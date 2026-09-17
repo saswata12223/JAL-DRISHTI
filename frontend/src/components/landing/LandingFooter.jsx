@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import logo from '../../assets/images/jal_drishti_logo_transparent.png';
+
 
 export default function LandingFooter() {
   const navigate = useNavigate();
@@ -15,16 +15,15 @@ export default function LandingFooter() {
           {/* Brand */}
           <div className="lg:w-1/4 flex flex-col items-start">
             <div className="flex items-center gap-3 mb-4">
-              <img
-                src="/assets/images/logo_without_text.png"
-                alt="Jal Drishti Logo"
-                className="h-10 w-auto object-contain drop-shadow-md"
-                onError={(e) => { e.target.src = '/images/logo_without_text.png' }}
-              />
-              <div className="flex flex-col">
-                <span className="text-white font-black text-xl leading-none tracking-tight">Jal Drishti</span>
-                <span className="text-[#8FD3E8] text-[9px] uppercase tracking-[0.15em] leading-none mt-1 font-bold">Flood Intelligence</span>
+              <div className="bg-white rounded-full p-1.5 shadow-md flex items-center justify-center">
+                <img
+                  src="/assets/images/logo_without_text.png"
+                  alt="Jal Drishti Logo"
+                  className="h-8 w-8 object-contain drop-shadow-sm"
+                  onError={(e) => { e.target.src = '/images/logo_without_text.png' }}
+                />
               </div>
+
             </div>
             <p className="text-[#94A3B8] text-sm font-medium leading-relaxed max-w-xs">
               Sense the storm. See the risk. Act in time. Providing early insights for safer tomorrows in Uttarakhand.

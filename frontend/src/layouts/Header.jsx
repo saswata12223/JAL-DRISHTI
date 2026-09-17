@@ -199,21 +199,11 @@ export default function Header({
 
         <NavLink to="/dashboard" className="flex items-center gap-3 shrink-0 group">
 
-          <img src="/assets/images/logo_without_text.png" alt="Jal Drishti Logo" className="w-8 h-8 object-contain shrink-0 group-hover:scale-105 transition-transform duration-300" />
-
-          <div className="flex flex-col justify-center">
-
-            <span className="text-[18px] font-bold text-white tracking-tight leading-none group-hover:text-cyan-300 transition-colors">
-
-              Jal Drishti
-
-            </span>
-
-            <span className="text-[9.5px] font-bold text-cyan-300 uppercase tracking-widest leading-tight mt-0.5">
-              Sense the storm, see the risk, act in time
-            </span>
-
+          <div className="bg-white rounded-full p-1 shadow-sm shrink-0 group-hover:shadow-md transition-shadow">
+            <img src="/assets/images/logo_without_text.png" alt="Jal Drishti Logo" className="w-7 h-7 object-contain group-hover:scale-105 transition-transform duration-300" />
           </div>
+
+
 
         </NavLink>
 
