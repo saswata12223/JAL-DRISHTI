@@ -8,7 +8,7 @@ from PIL import Image, ImageStat, ImageFilter
 app = Flask(__name__)
 ARDUINO_PORT = "COM8"
 BAUD_RATE = 9600
-ESP32_IP = "192.168.1.116"
+ESP32_IP = "10.168.41.28"
 CAPTURE_URL = f"http://{ESP32_IP}/capture"
 SOIL_DRY_RAW = 620
 SOIL_WET_RAW = 230

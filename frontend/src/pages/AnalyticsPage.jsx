@@ -13,6 +13,7 @@ import RiskFactorsPanel from '../components/analytics/RiskFactorsPanel';
 import PredictionVsObservedPanel from '../components/analytics/PredictionVsObservedPanel';
 import TopRiskLocationsPanel from '../components/analytics/TopRiskLocationsPanel';
 import AnalyticalInsightPanel from '../components/analytics/AnalyticalInsightPanel';
+import FfewsForecastPanel from '../components/analytics/FfewsForecastPanel';
 
 import {
   STATIONS,
@@ -848,124 +849,9 @@ export default function AnalyticsPage() {
         {/* SUB-SECTION 1: RISK ANALYTICS */}
         {activeTab === 'risk_analytics' && (
           <div className="flex flex-col gap-5 animate-fade-in">
-            {/* Control Bar */}
-            <div className="bg-app-surface border border-app-border p-3 rounded-xl shadow-sm flex flex-wrap items-center justify-between gap-2.5 select-none">
-              <div className="flex flex-wrap items-center gap-2 text-[12px]">
-                <div className="flex items-center bg-app-surface-elevated border border-app-border rounded-lg p-0.5 text-[10.5px] font-bold">
-                  {TIME_RANGES.map((r) => (
-                    <button
-                      key={r.id}
-                      onClick={() => setTimeRange(r.id)}
-                      className={`px-2.5 py-1 rounded-md transition-colors cursor-pointer ${
-                        timeRange === r.id
-                          ? 'bg-indigo-500/20 text-indigo-400'
-                          : 'text-app-text-muted hover:text-app-text-primary'
-                      }`}
-                    >
-                      {r.label.toUpperCase()}
-                    </button>
-                  ))}
-                </div>
-
-                <select value={district} onChange={(e) => setDistrict(e.target.value)} className={selectClass}>
-                  <option value="ALL">District: All</option>
-                  {DISTRICTS.map((d) => (
-                    <option key={d} value={d}>
-                      {d}
-                    </option>
-                  ))}
-                </select>
-
-                <select value={basin} onChange={(e) => setBasin(e.target.value)} className={selectClass}>
-                  <option value="ALL">Basin: All</option>
-                  {BASINS.map((b) => (
-                    <option key={b} value={b}>
-                      {b}
-                    </option>
-                  ))}
-                </select>
-
-                <select value={riskLevel} onChange={(e) => setRiskLevel(e.target.value)} className={selectClass}>
-                  {RISK_OPTIONS.map((r) => (
-                    <option key={r} value={r}>
-                      {r === 'ALL' ? 'Risk: All' : `Risk: ${r}`}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <button
-                onClick={handleReset}
-                className="px-3 py-1.5 rounded-lg bg-app-surface-elevated hover:bg-app-surface-hover text-app-text-muted hover:text-app-text-primary border border-app-border transition-colors text-[11.5px] font-semibold flex items-center gap-1 cursor-pointer"
-              >
-                <span className="material-symbols-outlined text-[14px]">restart_alt</span>
-                Reset Filters
-              </button>
-            </div>
-
-            {/* KPI Summary */}
-            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <KpiCard
-                label="Overall Risk Probability"
-                value={`${Math.round(kpis.maxProb * 100)}%`}
-                subtext="Highest monitored location"
-                icon="crisis_alert"
-                accent="red"
-              />
-              <KpiCard
-                label="High / Extreme Locations"
-                value={kpis.highExtreme}
-                subtext="Across filtered scope"
-                icon="warning"
-                accent="orange"
-              />
-              <KpiCard
-                label="Rainfall Intensity"
-                value={`${kpis.maxRain} mm/h`}
-                subtext="Peak hourly accumulation"
-                icon="water_drop"
-                accent="sky"
-              />
-              <KpiCard
-                label="Critical Water Levels"
-                value={kpis.criticalLevels}
-                subtext="Above CWC danger mark"
-                icon="waves"
-                accent="red"
-              />
-            </div>
-
-            {/* Risk Trend + Rainfall */}
-            <div className="grid grid-cols-1 xl:grid-cols-3 gap-5">
-              <div className="xl:col-span-2">
-                <RiskTrendPanel data={stateTrend} />
-              </div>
-              <RainfallTrendPanel data={rainfallData} />
-            </div>
-
-            {/* Water Level + Risk by District */}
-            <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
-              <WaterLevelTrendPanel data={focusSeries} station={focusStation} />
-              <DistrictRiskPanel data={districtRank} mode={rankMode} onModeChange={setRankMode} />
-            </div>
-
-            {/* Risk Factors */}
-            <div className="grid grid-cols-1 gap-5">
-              <RiskFactorsPanel factors={factorData.factors} hasExtreme={factorData.hasExtreme} />
-            </div>
-
-            {/* Top Risk Locations + Insight */}
-            <div className="grid grid-cols-1 xl:grid-cols-5 gap-5">
-              <div className="xl:col-span-3">
-                <TopRiskLocationsPanel
-                  locations={topLocations}
-                  selectedId={selectedId}
-                  onSelect={setSelectedId}
-                />
-              </div>
-              <div className="xl:col-span-2">
-                <AnalyticalInsightPanel insight={insight} />
-              </div>
+            {/* FFEWS Forecast Module */}
+            <div className="grid grid-cols-1 gap-5 mt-2">
+              <FfewsForecastPanel />
             </div>
           </div>
         )}

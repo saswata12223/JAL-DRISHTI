@@ -199,7 +199,10 @@ class RainTestForecastingService:
                         logger.error(f"Arduino read error: {e}")
                         time.sleep(2)
             except Exception as e:
-                logger.error(f"Arduino connection failed on {self.arduino_port}: {e}. Retrying in 3s...")
+                # Log once every minute to avoid spamming the console when the hardware is disconnected
+                if not hasattr(self, "_last_arduino_err_time") or time.time() - self._last_arduino_err_time > 60:
+                    logger.error(f"Arduino connection failed on {self.arduino_port}: {e}. Will keep retrying silently every 3s...")
+                    self._last_arduino_err_time = time.time()
                 time.sleep(3.0)
 
     def ingest_sensor_reading(self, raw_sensor_value: float, water_level_m: float, timestamp_epoch: float, is_simulated: bool = False, soil_raw: float = None) -> LiveForecastSummary:

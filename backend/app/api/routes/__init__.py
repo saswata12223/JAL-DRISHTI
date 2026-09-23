@@ -17,11 +17,13 @@ from app.api.routes.immediate_actions import router as immediate_actions_router
 from app.api.routes.flood_forecasting import router as flood_forecasting_router
 from app.api.routes.auth import router as auth_router
 from app.api.routes.sos import router as sos_router
+from app.api.routes.ffews import router as ffews_router
 
 api_router = APIRouter()
 
 api_router.include_router(auth_router)
 api_router.include_router(sos_router)
+api_router.include_router(ffews_router)
 api_router.include_router(health_router)
 api_router.include_router(stations_router)
 api_router.include_router(observations_router)
