@@ -46,32 +46,52 @@ export const immediateActionsService = {
   resolveSos: (sosId) => api.put(`/sos/${sosId}/resolve`),
   
   // Subscribe to real-time SOS stream via SSE
-  subscribeToSosStream: (onMessage) => {
-    // Determine the base URL for the EventSource
-    // If we're using Vite's proxy in dev, it's just /api/v1/sos/stream
-    const baseUrl = import.meta.env.VITE_API_URL || '/api/v1';
-    const eventSource = new EventSource(`${baseUrl}/sos/stream`);
-    
-    eventSource.addEventListener('new_sos', (e) => {
-      onMessage('new_sos', JSON.parse(e.data));
-    });
-    
-    eventSource.addEventListener('update_sos', (e) => {
-      onMessage('update_sos', JSON.parse(e.data));
-    });
-    
-    eventSource.addEventListener('ping', () => {
-      // Keep-alive heartbeat
-    });
-    
-    eventSource.onerror = (error) => {
-      console.error('SSE connection error:', error);
+  // Uses a singleton EventSource so React StrictMode double-mount doesn't kill the connection.
+  subscribeToSosStream: (() => {
+    let es = null;          // The single shared EventSource
+    let listeners = [];     // All active React subscriber callbacks
+
+    function ensureConnected() {
+      if (es && es.readyState !== EventSource.CLOSED) return;
+
+      es = new EventSource('/api/v1/sos/stream');
+
+      es.addEventListener('new_sos', (e) => {
+        const data = JSON.parse(e.data);
+        listeners.forEach((fn) => fn('new_sos', data));
+      });
+
+      es.addEventListener('update_sos', (e) => {
+        const data = JSON.parse(e.data);
+        listeners.forEach((fn) => fn('update_sos', data));
+      });
+
+      es.addEventListener('ping', () => { /* heartbeat, keep alive */ });
+
+      es.onerror = () => {
+        // Browser will auto-reconnect; log only when actually closed
+        if (es.readyState === EventSource.CLOSED) {
+          console.warn('[SSE] Connection closed — will reconnect on next subscribe.');
+          es = null;
+        }
+      };
+    }
+
+    return function subscribe(onMessage) {
+      listeners.push(onMessage);
+      ensureConnected();
+
+      // Cleanup: remove this listener but KEEP the EventSource alive for other subscribers
+      return () => {
+        listeners = listeners.filter((fn) => fn !== onMessage);
+        // Only fully close when nobody is listening
+        if (listeners.length === 0 && es) {
+          es.close();
+          es = null;
+        }
+      };
     };
-    
-    return () => {
-      eventSource.close();
-    };
-  },
+  })(),
 
   // Get Statewide Shelter Registry with Real-Time Availability
   getShelters: () => api.get('/immediate-actions/shelters'),

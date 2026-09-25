@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useLocation } from '../context/LocationContext';
+import LocationSearch from '../components/common/LocationSearch';
 import {
   ResponsiveContainer,
   ComposedChart,
@@ -23,103 +25,20 @@ const SCENARIO_STAGES = [
   {
     index: 0,
     time: '00:00',
-    title: 'NORMAL',
+    title: 'WAITING',
     riskClass: 'LOW',
     rainfallMmH: 0,
-    waterLevelM: 1.8,
+    waterLevelM: 0,
     levelChangeM: '+0.0',
-    runoffMm: 12,
+    runoffMm: 0,
     affectedAreaKm2: 0,
     evacuationStatus: 'STANDBY',
-    description: 'Normal seasonal river flow. Multi-sensor telemetry online & clear weather.',
-  },
-  {
-    index: 1,
-    time: '05:00',
-    title: 'HEAVY RAIN',
-    riskClass: 'WATCH',
-    rainfallMmH: 28,
-    waterLevelM: 2.2,
-    levelChangeM: '+0.4',
-    runoffMm: 28,
-    affectedAreaKm2: 0.8,
-    evacuationStatus: 'STANDBY',
-    description: 'Monsoonal rainband intensifies over upper Himalayan catchment.',
-  },
-  {
-    index: 2,
-    time: '10:00',
-    title: 'RUNOFF INCREASE',
-    riskClass: 'WARNING',
-    rainfallMmH: 45,
-    waterLevelM: 2.9,
-    levelChangeM: '+1.1',
-    runoffMm: 68,
-    affectedAreaKm2: 2.4,
-    evacuationStatus: 'STANDBY',
-    description: 'Steep hillslopes saturated. SCS-CN direct surface runoff Q accelerating.',
-  },
-  {
-    index: 3,
-    time: '15:00',
-    title: 'WATER LEVEL RISING',
-    riskClass: 'HIGH',
-    rainfallMmH: 65,
-    waterLevelM: 3.8,
-    levelChangeM: '+2.0',
-    runoffMm: 98,
-    affectedAreaKm2: 5.6,
-    evacuationStatus: 'MONITORING',
-    description: 'River water level approaching official CWC Warning Stage (339.5m).',
-  },
-  {
-    index: 4,
-    time: '20:00',
-    title: 'FLASH FLOOD',
-    riskClass: 'EXTREME',
-    rainfallMmH: 85,
-    waterLevelM: 4.8,
-    levelChangeM: '+3.0',
-    runoffMm: 142,
-    affectedAreaKm2: 9.8,
-    evacuationStatus: 'ADVISED',
-    description: 'Torrential cloudburst surge breaches official CWC Danger Stage (340.5m).',
-  },
-  {
-    index: 5,
-    time: '25:00',
-    title: 'ROAD INUNDATION',
-    riskClass: 'EXTREME',
-    rainfallMmH: 92,
-    waterLevelM: 5.2,
-    levelChangeM: '+3.4',
-    runoffMm: 168,
-    affectedAreaKm2: 12.6,
-    evacuationStatus: 'ADVISED',
-    description: 'Floodwaters overflow riverbank and inundate low-lying NH-58 highway segment.',
-  },
-  {
-    index: 6,
-    time: '30:00',
-    title: 'EVACUATION',
-    riskClass: 'EXTREME',
-    rainfallMmH: 95,
-    waterLevelM: 5.4,
-    levelChangeM: '+3.6',
-    runoffMm: 175,
-    affectedAreaKm2: 14.2,
-    evacuationStatus: 'EVACUATING',
-    description: 'State Emergency SOP triggered. Active evacuation along designated highland route.',
-  },
+    description: 'Waiting for telemetry.',
+  }
 ];
 
 // Timeline Outlook Chart Data (00:00 to 30:00 mins)
-const OUTLOOK_CHART_DATA = SCENARIO_STAGES.map((s) => ({
-  time: s.time,
-  rainfall: s.rainfallMmH,
-  runoff: s.runoffMm,
-  waterLevel: s.waterLevelM,
-}));
+const OUTLOOK_CHART_DATA = [];
 
 // Default Locations
 const LOCATIONS = [
@@ -130,7 +49,9 @@ const LOCATIONS = [
 ];
 
 export default function FloodSimulationPage() {
-  // Mode selection: 'DEMONSTRATION' vs 'LIVE_HARDWARE'
+  const { selectedState, selectedDistrict } = useLocation();
+
+  // Mode selection: 'LIVE_HARDWARE'
   const mode = 'LIVE_HARDWARE';
   const [sendDemoAlertToHw, setSendDemoAlertToHw] = useState(false);
   
@@ -153,43 +74,6 @@ export default function FloodSimulationPage() {
   const [rainfallHistory, setRainfallHistory] = useState([]);
 
   const timelineRef = useRef(null);
-  const maxDurationMs = 30000; // 30 seconds maps to 30 mins scenario time
-
-  // Instantiate real Anime.js 4.5.0 Timer for 100% reliable timeline progression in DEMONSTRATION mode
-  useEffect(() => {
-    const timer = createTimer({
-      duration: maxDurationMs,
-      autoplay: false,
-      speed: speed,
-      onUpdate: (self) => {
-        if (mode === 'DEMONSTRATION') {
-          setCurrentTimeMs(self.currentTime);
-          setIsPlaying(!self.paused);
-        }
-      },
-      onPause: () => {
-        setIsPlaying(false);
-      },
-      onComplete: () => {
-        setIsPlaying(false);
-      },
-    });
-
-    timelineRef.current = timer;
-
-    return () => {
-      if (timelineRef.current) {
-        timelineRef.current.pause();
-      }
-    };
-  }, [mode]);
-
-  // Sync speed changes to Anime.js timer
-  useEffect(() => {
-    if (timelineRef.current) {
-      timelineRef.current.speed = speed;
-    }
-  }, [speed]);
 
   // Hardware status polling (3-second interval)
   const fetchHwStatus = useCallback(async () => {
@@ -404,29 +288,51 @@ export default function FloodSimulationPage() {
 
   const activeLoc = locations[selectedLocIndex] || LOCATIONS[0];
 
+  // Derive location context
+
+
+
+  const isUttarakhand = !selectedState || selectedState === 'Uttarakhand';
+
   return (
     <div className="flex flex-col gap-3 w-full font-sans select-none">
       {/* Title & Status */}
-      <div className="flex flex-wrap items-center justify-between gap-4 mb-3">
-        <div className="flex flex-col">
-          <h1 className="text-[17px] font-bold text-[#102A2E] tracking-tight uppercase flex items-center gap-2">
-            <span className="material-symbols-outlined text-[20px] text-[#0C6E78]">water_drop</span>
-            REAL-TIME FLOOD DIGITAL TWIN
-            <span className="text-[9.5px] font-semibold text-emerald-800 bg-emerald-500/20 px-2 py-0.5 rounded-full border border-emerald-500/30">
-              LIVE HARDWARE
+      <div className="flex flex-col gap-4 border-b border-slate-200 pb-5 mb-3">
+        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+          <div className="flex flex-col">
+            <h1 className="text-[17px] font-bold text-[#102A2E] tracking-tight uppercase flex items-center gap-2">
+              <span className="material-symbols-outlined text-[20px] text-[#0C6E78]">water_drop</span>
+              REAL-TIME FLOOD DIGITAL TWIN
+              <span className="text-[9.5px] font-semibold text-emerald-800 bg-emerald-500/20 px-2 py-0.5 rounded-full border border-emerald-500/30">
+                LIVE HARDWARE
+              </span>
+            </h1>
+            <span className="text-[11.5px] text-[#5F777C] font-medium ml-7 mt-0.5 tracking-wide">
+              Complete Jal Drishti workflow: ESP32 Sensors → Telemetry → ML/Physics Engine → Actuator Buzzer
             </span>
-          </h1>
-          <span className="text-[11.5px] text-[#5F777C] font-medium ml-7 mt-0.5 tracking-wide">
-            Complete Jal Drishti workflow: ESP32 Sensors → Telemetry → ML/Physics Engine → Actuator Buzzer
-          </span>
+          </div>
+          <div className="w-full sm:max-w-xs shrink-0">
+            <LocationSearch />
+          </div>
         </div>
-
       </div>
 
-      {/* 1. Main Central Split: Hero Simulation Scene + Right Operational Panel */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-3.5">
-        {/* Left 8 Cols: Hero Environmental Scene + Controls */}
-        <div className="lg:col-span-8 flex flex-col gap-3">
+      {!isUttarakhand ? (
+        <div className="bg-slate-50 border border-slate-200 rounded-xl p-12 flex flex-col items-center text-center gap-4 shadow-sm">
+          <span className="material-symbols-outlined text-emerald-400 text-[48px]">check_circle</span>
+          <div>
+            <h3 className="text-[15px] font-bold text-slate-700">Live Hardware Simulation unavailable for {selectedState}.</h3>
+            <p className="text-[12.5px] text-slate-500 mt-1 max-w-md">
+              The Real-Time Flood Digital Twin and live ESP32 hardware telemetry are currently scoped to the Uttarakhand evaluation area.
+            </p>
+          </div>
+        </div>
+      ) : (
+        <>
+          {/* 1. Main Central Split: Hero Simulation Scene + Right Operational Panel */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-3.5">
+            {/* Left 8 Cols: Hero Environmental Scene + Controls */}
+            <div className="lg:col-span-8 flex flex-col gap-3">
           {/* ESP32-CAM Feed (Replaces Himalayan Valley) */}
           <Esp32CamEvidence 
             className="w-full min-h-[400px]"
@@ -618,6 +524,8 @@ export default function FloodSimulationPage() {
             : (hwStatus?.latest_telemetry?.rainfall_mm_h || 0)
         }
       />
+      </>
+      )}
     </div>
   );
 }

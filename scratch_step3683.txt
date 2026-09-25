@@ -1,0 +1,80 @@
+All 12 CSVs and 12 markdown reports present. Here is the complete Phase 7C.4D terminal output:
+
+---
+
+```text
+============================================================
+JAL DRISHTI -- PHASE 7C.4D
+HYDROLOGICAL EVENT-STATION ASSOCIATION AUDIT
+============================================================
+
+RAW IMMUTABILITY: PASS
+
+TELEMETRY:
+  STATIONS: 47
+  STATIONS WITH ACTUAL COORDINATES: 3  (CWC authoritative data only)
+  STATIONS WITH ACTUAL 2024 COVERAGE: 45
+
+EVENTS:
+  GDACS EPISODES: 2 (episode 6 and episode 31 of event 1102678)
+  DISTINCT EVENT GROUPS: 1 (GDACS_FL_1102678_2024_INDIA)
+  UK-INTERSECTING EVENTS: 2
+
+SPATIAL:
+  VALID EVENT GEOMETRIES: 2 (GeoJSON parsed, geometry repaired where needed)
+  UK BOUNDARY SOURCE: UTTARAKHAND_STATE_BDY.shp (authoritative, LCC→EPSG:4326)
+  UK INTERSECTION AREA (ep6):  136.5 km²   (0.26% of state — Haridwar area only)
+  UK INTERSECTION AREA (ep31): 52,902.8 km² (99.0% of state — state-wide coverage)
+  CATCHMENT DATA AVAILABLE: NO
+  EVENTS WITH CATCHMENT INTERSECTION: 0
+  STATION POINT IN EVENT POLYGON: 2 pairs
+
+ASSOCIATIONS:
+  CANDIDATE PAIRS: 90
+  VALID: 0
+  QUESTIONABLE: 90
+  INVALID: 0
+  UNRESOLVED: 9,774
+
+TEMPORAL (per-station actual timestamps):
+  FULL_OVERLAP: 90
+  PARTIAL_OVERLAP: 0
+  NO_OVERLAP: 0
+
+INDEPENDENT VALID EVENTS:
+  1H: 0     3H: 0     6H: 0     12H: 0     24H: 0
+
+EVENTS WITH VALID STATION COVERAGE:
+  1H: 0     3H: 0     6H: 0     12H: 0     24H: 0
+
+TARGET MODIFICATION: NONE
+LEAKAGE AUDIT: PASS
+
+PHASE 7D ML: BLOCKED
+
+OPERATIONAL READY: UNKNOWN
+
+FINAL PHASE 7C.4D STATUS: PASS_WITH_LIMITATIONS
+============================================================
+```
+
+---
+
+**Key findings that advance the scientific record:**
+
+| Finding | Detail |
+|---|---|
+| UK boundary intersection | Real polygon intersection against authoritative shapefile, not bbox |
+| ep6 UK area | 136.5 km² — restricted to Haridwar zone |
+| ep31 UK area | 52,902.8 km² — state-wide; essentially all of Uttarakhand covered |
+| Dharchula_1 (Kali/Mahakali) | Station point falls **inside** ep31 polygon — MEDIUM confidence |
+| Srinagar_2 (Alaknanda) | Station point falls **inside** ep31 polygon — MEDIUM confidence |
+| Station coordinates | 3/47 available (CWC name mismatch for remaining 44) |
+| Catchment polygons | NOT found anywhere in repository |
+
+**The single remaining blocking factor is now precisely identified:**
+
+> No authoritative catchment polygon data exists in the repository. Three paths forward:
+> - **A** — Install `pysheds`, delineate catchments from existing SRTM DEM (4 tiles already present)
+> - **B** — Acquire India WRIS catchment boundary shapefile for Uttarakhand rivers
+> - **C** — Expert hydrological review of the 2 point-in-polygon station pairs (Dharchula_1 and Srinagar_2 on episode 31)

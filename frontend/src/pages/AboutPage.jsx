@@ -61,6 +61,51 @@ export default function AboutPage() {
           </div>
         </section>
 
+        {/* SECTION 2.5 - ARCHITECTURE & SCOPE */}
+        <section className="flex flex-col gap-8 bg-slate-50 border border-slate-200 rounded-2xl p-8 shadow-sm">
+          <div className="flex flex-col md:flex-row gap-6 items-start md:items-center">
+            <div className="flex-1 flex flex-col gap-4">
+              <h2 className="text-2xl font-bold text-[#0A2540] tracking-tight">Geographic Scope & Platform Architecture</h2>
+              <p className="text-[15px] text-slate-600 leading-relaxed">
+                Jal Drishti operates on a layered architecture that differentiates between broad geographic awareness and localized intelligence. While the platform's mapping engine spans the entirety of India, its advanced capabilities are selectively activated based on verified data provenance.
+              </p>
+            </div>
+            <div className="w-full md:w-auto bg-white p-4 border border-slate-200 rounded-xl shadow-sm shrink-0">
+              <div className="flex flex-col gap-3">
+                <div className="flex items-center gap-3">
+                  <span className="material-symbols-outlined text-indigo-500">map</span>
+                  <div>
+                    <div className="text-sm font-bold text-slate-700">Pan-India Coverage</div>
+                    <div className="text-[11px] text-slate-500">Administrative Boundaries & GIS</div>
+                  </div>
+                </div>
+                <div className="w-full h-px bg-slate-100"></div>
+                <div className="flex items-center gap-3">
+                  <span className="material-symbols-outlined text-emerald-500">memory</span>
+                  <div>
+                    <div className="text-sm font-bold text-slate-700">Uttarakhand Focus</div>
+                    <div className="text-[11px] text-slate-500">ML Risk Engine & Live Telemetry</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-2">
+            <div className="bg-white border-l-4 border-l-indigo-400 p-5 rounded-r-lg shadow-sm">
+              <h3 className="font-bold text-slate-700 text-sm mb-2">GIS Context Layer</h3>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                The platform includes canonical administrative boundaries (State, District, Subdistrict) for all of India, sourced from the Survey of India. This allows users anywhere to navigate and search the map framework.
+              </p>
+            </div>
+            <div className="bg-white border-l-4 border-l-emerald-400 p-5 rounded-r-lg shadow-sm">
+              <h3 className="font-bold text-slate-700 text-sm mb-2">Machine Learning & Live Layer</h3>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                Live gauge telemetry, predictive hydrology, and ML-driven risk analytics are strictly bounded to Uttarakhand. The system prioritizes data honesty: it will not fabricate charts or risk metrics for regions lacking calibrated models or sensor data.
+              </p>
+            </div>
+          </div>
+        </section>
+
         {/* SECTION 3 - WHAT JAL DRISHTI DOES */}
         <section className="flex flex-col gap-8 bg-white border border-slate-200 rounded-2xl p-8 shadow-sm">
           <h2 className="text-2xl font-bold text-[#0A2540] tracking-tight">From Observations to Risk Intelligence</h2>

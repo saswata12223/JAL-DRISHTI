@@ -74,7 +74,7 @@ RANDOM_SEED = 42
 torch.manual_seed(RANDOM_SEED)
 np.random.seed(RANDOM_SEED)
 
-PROJECT_DIR = Path(r"C:\JAL DRISTI")
+PROJECT_DIR = Path(__file__).resolve().parent.parent
 DATA_DIR = PROJECT_DIR / "data"
 PROC_DIR = DATA_DIR / "processed"
 ML_DIR = PROC_DIR / "ml"
@@ -322,6 +322,10 @@ class PPTAlignedFloodModelTrainingEngine:
         train_events["split_group"] = "TRAIN"
         val_events["split_group"] = "VALIDATION"
         test_events["split_group"] = "TEST"
+
+        df.loc[train_events.index, "split_group"] = "TRAIN"
+        df.loc[val_events.index, "split_group"] = "VALIDATION"
+        df.loc[test_events.index, "split_group"] = "TEST"
 
         train_df = pd.concat([grid_df[grid_df["split_group"] == "TRAIN"], train_events], ignore_index=True)
         val_df = pd.concat([grid_df[grid_df["split_group"] == "VALIDATION"], val_events], ignore_index=True)

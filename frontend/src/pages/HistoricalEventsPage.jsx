@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { useLocation } from '../context/LocationContext';
+
 import { useNavigate } from 'react-router-dom';
 import {
   BarChart,
@@ -418,7 +420,7 @@ function CurrentVsHistorical({ event }) {
           unit=" mm"
         />
         <ComparisonCard
-          label="Risk Probability"
+          label="Model Probability"
           current={Math.round(maxCurrentProb * 100)}
           historical={null}
           unit="%"
@@ -438,7 +440,8 @@ function CurrentVsHistorical({ event }) {
 // ---------------------------------------------------------------------------
 // PAGE
 // ---------------------------------------------------------------------------
-export default function HistoricalEventsPage() {
+export default function HistoricalEventsPage() {  const { selectedState, selectedDistrict } = useLocation();
+
   const [events, setEvents] = useState(HISTORICAL_EVENTS);
   const [search, setSearch] = useState('');
   const [districtFilter, setDistrictFilter] = useState('ALL');
@@ -518,22 +521,55 @@ export default function HistoricalEventsPage() {
     setYearFilter('ALL');
   };
 
+  // Derive location context
+
+
+
+  const isUttarakhand = !selectedState || selectedState === 'Uttarakhand';
+
+  // Sync district filter with location context if possible
+  useEffect(() => {
+    if (selectedDistrict && EVENT_DISTRICTS.includes(selectedDistrict)) {
+      setDistrictFilter(selectedDistrict);
+    } else {
+      setDistrictFilter('ALL');
+    }
+  }, [selectedDistrict]);
+
   const selectClass =
     'bg-app-surface-elevated border border-app-border rounded-lg px-2.5 py-1.5 text-app-text-primary outline-none focus:border-indigo-500/50 cursor-pointer text-[11.5px] font-medium';
 
   return (
     <div className="flex flex-col gap-6 w-full font-sans">
       {/* 1. Page Header */}
-      <div className="flex flex-col gap-4">
-        <div>
-          <h1 className="text-[19px] font-extrabold text-app-text-primary tracking-tight">
-            HISTORICAL FLOOD EVENTS
-          </h1>
-          <p className="text-[12px] font-medium text-app-text-secondary mt-1">
-            Documented flood-event records, trends and comparative intelligence (1970–2024)
-          </p>
-        </div>
+      <div className="flex flex-col gap-4 border-b border-slate-200 pb-5">
+        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+          <div>
+            <h1 className="text-[19px] font-extrabold text-app-text-primary tracking-tight">
+              HISTORICAL FLOOD EVENTS
+            </h1>
+            <p className="text-[12px] font-medium text-app-text-secondary mt-1">
+              Documented flood-event records, trends and comparative intelligence (1970–2024)
+            </p>
+          </div>
+          <div className="w-full sm:max-w-xs shrink-0">
 
+          </div>
+        </div>
+      </div>
+
+      {!isUttarakhand ? (
+        <div className="bg-slate-50 border border-slate-200 rounded-xl p-12 flex flex-col items-center text-center gap-4 shadow-sm">
+          <span className="material-symbols-outlined text-emerald-400 text-[48px]">check_circle</span>
+          <div>
+            <h3 className="text-[15px] font-bold text-slate-700">Historical Event Register unavailable for {selectedState}.</h3>
+            <p className="text-[12.5px] text-slate-500 mt-1 max-w-md">
+              The historical flood-event database currently only covers the Uttarakhand region.
+            </p>
+          </div>
+        </div>
+      ) : (
+        <>
         {/* Filter / Search Bar */}
         <div className="bg-app-surface border border-app-border p-3.5 rounded-xl shadow-sm flex flex-wrap items-center justify-between gap-3 select-none">
           <div className="flex flex-wrap items-center gap-2.5 text-[12px]">
@@ -585,7 +621,6 @@ export default function HistoricalEventsPage() {
             Reset Filters
           </button>
         </div>
-      </div>
 
       {/* 2. Summary KPI Row */}
       <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-5 gap-5">
@@ -632,6 +667,8 @@ export default function HistoricalEventsPage() {
         <DistrictAnalysis byDistrict={byDistrict} />
         {selectedEvent && <CurrentVsHistorical event={selectedEvent} />}
       </div>
+      </>
+      )}
     </div>
   );
 }

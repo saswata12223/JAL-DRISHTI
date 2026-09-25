@@ -6,6 +6,60 @@ import { SIM_REFERENCE, SIM_DATE } from './alertsService';
 
 
 
+// ---------------------------------------------------------------------------
+// LOCAL HELPERS (defined here so the entire module is self-contained)
+// ---------------------------------------------------------------------------
+
+function toFiniteNumber(v) {
+  const n = Number(v);
+  return Number.isFinite(n) ? n : undefined;
+}
+
+function actionForRisk(riskClass) {
+  const catalog = {
+    LOW:      'Continue routine hydrological and meteorological monitoring.',
+    MODERATE: 'Increase telemetry polling. Alert local field observers and inspect drainage catchments.',
+    HIGH:     'Issue Stage-2 preparedness advisory to DEOC. Deploy emergency response assets.',
+    EXTREME:  'Activate emergency protocol. Alert SDRF/NDRF. Prepare immediate evacuation.',
+  };
+  return catalog[riskClass] ?? catalog.LOW;
+}
+
+const REQUIRED_DECISION_FIELDS = [
+  'spatial_id', 'flood_probability', 'final_risk_class', 'alert_priority',
+];
+
+function hasAllDecisionFields(d) {
+  return REQUIRED_DECISION_FIELDS.every((k) => d[k] !== undefined && d[k] !== null);
+}
+
+function mapLiveDecision(d) {
+  return {
+    ...d,
+    flood_probability:       toFiniteNumber(d.flood_probability)        ?? 0,
+    decision_confidence:     toFiniteNumber(d.decision_confidence)      ?? 0,
+    rainfall_1h_mm:          toFiniteNumber(d.rainfall_1h_mm)           ?? null,
+    soil_saturation_index:   toFiniteNumber(d.soil_saturation_index)    ?? null,
+    water_level_m:           toFiniteNumber(d.water_level_m)            ?? null,
+    latitude:                toFiniteNumber(d.latitude)                 ?? 0,
+    longitude:               toFiniteNumber(d.longitude)                ?? 0,
+    final_risk_class:        String(d.final_risk_class   ?? d.ml_risk_class ?? 'LOW'),
+    ml_risk_class:           String(d.ml_risk_class      ?? d.final_risk_class ?? 'LOW'),
+    alert_priority:          String(d.alert_priority     ?? 'INFORMATION'),
+    cwc_threshold_status:    String(d.cwc_threshold_status   ?? 'UNAVAILABLE'),
+    environmental_condition: String(d.environmental_condition ?? 'NORMAL'),
+    operational_state:       String(d.operational_state  ?? 'ROUTINE_MONITORING'),
+    data_quality_status:     String(d.data_quality_status ?? 'UNAVAILABLE'),
+    station_name:            String(d.station_name  ?? d.spatial_id ?? '—'),
+    district:                String(d.district      ?? '—'),
+    contributing_factors:    Array.isArray(d.contributing_factors) ? d.contributing_factors : [],
+    dissemination_channels:  Array.isArray(d.dissemination_channels) ? d.dissemination_channels : [],
+    decision_reason:         String(d.decision_reason ?? '—'),
+    recommended_action:      String(d.recommended_action ?? actionForRisk(d.final_risk_class ?? 'LOW')),
+  };
+}
+
+
 // ============================================================
 
 // MODEL INTELLIGENCE SERVICE (Screen 9H)
@@ -238,426 +292,6 @@ function deriveEnvironmentalCondition(st) {
 
 // ---------------------------------------------------------------------------
 
-// CANONICAL CALIBRATED REFERENCE DECISIONS
-
-// ---------------------------------------------------------------------------
-
-// Built from the SAME STATIONS picture used by Risk Map, Monitoring,
-
-// Analytics and Alerts so every value is mutually consistent. Fields
-
-// mirror RiskDecisionResponse so live and reference records render
-
-// identically. Deterministic: no randomization, no Date.now().
-
-// ---------------------------------------------------------------------------
-
-function buildReferenceDecisions() {
-
-  return STATIONS.map((s) => {
-
-    const driver = primaryDriver(s);
-
-    const stage = cwcStageFromLabel(s.stage);
-
-    const condition = deriveEnvironmentalCondition(s);
-
-    const weight = (lv) => (lv === 'HIGH' || lv === 'DOMINANT' ? 'HIGH' : lv === 'MODERATE' ? 'MEDIUM' : 'LOW');
-
-
-
-    const factors = [
-
-      {
-
-        factor_name: 'ML_FLOOD_PROBABILITY',
-
-        observed_value: s.prob,
-
-        status_label: s.risk,
-
-        impact_weight: weight(s.prob >= 0.4 ? 'HIGH' : s.prob >= 0.2 ? 'MEDIUM' : 'LOW'),
-
-        explanation: `XGBoost champion model predicts ${(s.prob * 100).toFixed(1)}% probability of flash flooding at this location.`,
-
-      },
-
-      {
-
-        factor_name: 'CWC_RIVER_GAUGE_STAGE',
-
-        observed_value: s.waterLevel,
-
-        status_label: stage,
-
-        impact_weight: stage === 'DANGER_ZONE' ? 'DOMINANT' : stage === 'WARNING_ZONE' ? 'HIGH' : 'MEDIUM',
-
-        explanation: `Observed river stage is in official CWC ${stage.replace(/_/g, ' ')} state (calibrated reference telemetry).`,
-
-      },
-
-      {
-
-        factor_name: 'RAINFALL_INTENSITY',
-
-        observed_value: s.rainfallMm,
-
-        status_label: condition,
-
-        impact_weight: condition === 'CRITICAL' || condition === 'ESCALATING' ? 'HIGH' : 'MEDIUM',
-
-        explanation: `Observed reference rainfall accumulation is ${s.rainfallMm} mm/h (${condition} state).`,
-
-      },
-
-      {
-
-        factor_name: 'SOIL_SATURATION',
-
-        observed_value: s.soilSaturation / 100,
-
-        status_label: s.soilSaturation >= 80 ? 'HIGH_SATURATION' : 'NORMAL',
-
-        impact_weight: s.soilSaturation >= 80 ? 'HIGH' : 'LOW',
-
-        explanation: `${s.soilSaturation}% soil saturation index modulating surface infiltration capacity.`,
-
-      },
-
-    ];
-
-
-
-    return {
-
-      spatial_id: s.id,
-
-      sample_id: `REF_${s.id}`,
-
-      sample_type: 'calibrated_reference',
-
-      station_id: s.id,
-
-      station_name: s.name,
-
-      district: s.district,
-
-      river_name: s.river,
-
-      major_basin: resolveBasin(s.river),
-
-      latitude: s.lat,
-
-      longitude: s.lon,
-
-      model_name: MODEL_META.modelName,
-
-      model_version: MODEL_META.modelVersion,
-
-      flood_probability: s.prob,
-
-      ml_risk_class: s.risk,
-
-      ml_decision_threshold: MODEL_META.decisionThreshold,
-
-      water_level_m: s.waterLevel,
-
-      warning_level_m: s.warningLevel,
-
-      danger_level_m: s.dangerLevel,
-
-      hfl_m: null,
-
-      cwc_threshold_status: stage,
-
-      official_alert_stage: stage === 'DANGER_ZONE' ? 'ORANGE' : stage === 'WARNING_ZONE' ? 'YELLOW' : stage === 'ABOVE_HFL' ? 'RED' : stage === 'BELOW_WARNING' ? 'NONE' : 'UNKNOWN',
-
-      is_gauge_offline: false,
-
-      rainfall_1h_mm: s.rainfallMm,
-
-      rainfall_3h_mm: null,
-
-      soil_saturation_index: Math.round((s.soilSaturation / 100) * 1000) / 1000,
-
-      scs_direct_runoff_q_mm: s.runoff === 'HIGH' ? 22 : 4,
-
-      scs_peak_runoff_potential: s.runoff === 'HIGH' ? 27.5 : 5,
-
-      environmental_condition: condition,
-
-      final_risk_class: s.risk,
-
-      operational_state: deriveOperationalState(s.risk),
-
-      alert_priority: deriveAlertPriority(s.risk),
-
-      decision_reason:
-
-        driver === 'Water Level'
-
-          ? `Hydrological signal dominant: river stage is in official CWC ${stage.replace(/_/g, ' ')} (calibrated reference, consistent with Risk Map/Monitoring).`
-
-          : driver === 'Rainfall'
-
-          ? `Atmospheric signal dominant: rainfall intensity of ${s.rainfallMm} mm/h drives elevated runoff response (calibrated reference).`
-
-          : driver === 'Soil Saturation'
-
-          ? `Catchment saturation signal dominant: ${s.soilSaturation}% saturated soil sharply raises runoff response (calibrated reference).`
-
-          : `Multiple signals indicate elevated runoff potential at ${s.name} (calibrated reference).`,
-
-      recommended_action: '',
-
-      contributing_factors: factors,
-
-      data_quality_status: 'CALIBRATED_REFERENCE',
-
-      decision_confidence: null,
-
-      risk_policy_version: MODEL_META.policyVersion,
-
-      threshold_source: 'CWC Hydrological Records (canonical)',
-
-      generated_at_utc: `${SIM_DATE} · ${SIM_REFERENCE}`,
-
-      source: 'CALIBRATED_REFERENCE',
-
-    };
-
-  });
-
-}
-
-
-
-export const REFERENCE_DECISIONS = buildReferenceDecisions();
-
-
-
-export const MODEL_DISTRICTS = Array.from(
-
-  new Set(REFERENCE_DECISIONS.map((d) => d.district))
-
-).sort();
-
-
-
-function actionForRisk(riskClass) {
-
-  switch (riskClass) {
-
-    case 'EXTREME':
-
-      return 'Activate emergency escalation protocol. Alert SDRF/NDRF and local administration. Prepare and execute immediate evacuation procedures for low-lying floodplain and riparian zones.';
-
-    case 'HIGH':
-
-      return 'Issue Stage-2 preparedness advisory to District Emergency Operations Centre (DEOC). Inspect vulnerable embankments and deploy emergency response assets to staging areas.';
-
-    case 'MODERATE':
-
-      return 'Increase sensor telemetry polling frequency. Alert local field observers and inspect vulnerable drainage catchments and bridges.';
-
-    default:
-
-      return 'Continue routine hydrological and meteorological monitoring. Maintain normal river gauge and weather telemetry poll cycles.';
-
-  }
-
-}
-
-
-
-// Attach recommended action to reference decisions (uses the same policy catalog).
-
-export const REFERENCE_DECISIONS_WITH_ACTIONS = REFERENCE_DECISIONS.map((d) => ({
-
-  ...d,
-
-  recommended_action: actionForRisk(d.final_risk_class),
-
-}));
-
-
-
-// ---------------------------------------------------------------------------
-
-// LIVE DECISION MAPPING + VALIDATION (same acceptance rule as Analytics/Alerts)
-
-// ---------------------------------------------------------------------------
-
-const DEGENERATE_PROBABILITY_THRESHOLD = 0.05;
-
-
-
-function toFiniteNumber(v) {
-
-  if (v === undefined || v === null || v === '') return undefined;
-
-  const n = Number(v);
-
-  return Number.isFinite(n) ? n : undefined;
-
-}
-
-
-
-function normalizeRiskClass(value) {
-
-  const s = String(value ?? '').toUpperCase();
-
-  return RISK_CLASSES.includes(s) ? s : undefined;
-
-}
-
-
-
-function normalizeStage(value) {
-
-  const s = String(value ?? '').toUpperCase().replace(/[_\-]/g, ' ');
-
-  if (s.includes('DANGER') || s.includes('ABOVE HFL')) return 'DANGER_ZONE';
-
-  if (s.includes('WARNING')) return 'WARNING_ZONE';
-
-  if (s === 'BELOW WARNING' || s === 'BELOW' || s === 'NORMAL') return 'BELOW_WARNING';
-
-  return s || 'UNAVAILABLE';
-
-}
-
-
-
-function mapLiveDecision(raw) {
-
-  const risk = normalizeRiskClass(raw.final_risk_class ?? raw.ml_risk_class ?? raw['finalRiskClass']);
-
-  return {
-
-    spatial_id: String(raw.spatial_id ?? raw.sample_id ?? ''),
-
-    sample_id: String(raw.sample_id ?? ''),
-
-    sample_type: String(raw.sample_type ?? ''),
-
-    station_id: raw.station_id ?? null,
-
-    station_name: raw.station_name || raw.spatial_id || 'Location',
-
-    district: raw.district || 'Uttarakhand',
-
-    river_name: raw.river_name || null,
-
-    major_basin: raw.major_basin || null,
-
-    latitude: toFiniteNumber(raw.latitude),
-
-    longitude: toFiniteNumber(raw.longitude),
-
-    model_name: raw.model_name || MODEL_META.modelName,
-
-    model_version: raw.model_version || MODEL_META.modelVersion,
-
-    flood_probability: toFiniteNumber(raw.flood_probability),
-
-    ml_risk_class: normalizeRiskClass(raw.ml_risk_class),
-
-    ml_decision_threshold: toFiniteNumber(raw.ml_decision_threshold) ?? MODEL_META.decisionThreshold,
-
-    water_level_m: toFiniteNumber(raw.water_level_m),
-
-    warning_level_m: toFiniteNumber(raw.warning_level_m),
-
-    danger_level_m: toFiniteNumber(raw.danger_level_m),
-
-    hfl_m: toFiniteNumber(raw.hfl_m),
-
-    cwc_threshold_status: normalizeStage(raw.cwc_threshold_status),
-
-    official_alert_stage: String(raw.official_alert_stage ?? 'UNKNOWN'),
-
-    is_gauge_offline: Boolean(raw.is_gauge_offline),
-
-    rainfall_1h_mm: toFiniteNumber(raw.rainfall_1h_mm),
-
-    rainfall_3h_mm: toFiniteNumber(raw.rainfall_3h_mm),
-
-    soil_saturation_index: toFiniteNumber(raw.soil_saturation_index),
-
-    scs_direct_runoff_q_mm: toFiniteNumber(raw.scs_direct_runoff_q_mm),
-
-    scs_peak_runoff_potential: toFiniteNumber(raw.scs_peak_runoff_potential),
-
-    environmental_condition: String(raw.environmental_condition ?? 'NORMAL'),
-
-    final_risk_class: risk,
-
-    operational_state: String(raw.operational_state ?? deriveOperationalState(risk)),
-
-    alert_priority: String(raw.alert_priority ?? deriveAlertPriority(risk)),
-
-    decision_reason: String(raw.decision_reason ?? ''),
-
-    recommended_action: String(raw.recommended_action ?? actionForRisk(risk)),
-
-    contributing_factors: Array.isArray(raw.contributing_factors) ? raw.contributing_factors : [],
-
-    data_quality_status: String(raw.data_quality_status ?? 'UNAVAILABLE'),
-
-    decision_confidence: toFiniteNumber(raw.decision_confidence),
-
-    risk_policy_version: String(raw.risk_policy_version ?? MODEL_META.policyVersion),
-
-    threshold_source: raw.threshold_source || null,
-
-    generated_at_utc: raw.generated_at_utc || raw.timestamp_utc || 'Live',
-
-    source: 'LIVE_BACKEND',
-
-  };
-
-}
-
-
-
-const REQUIRED_DECISION_FIELDS = [
-
-  'spatial_id',
-
-  'station_name',
-
-  'district',
-
-  'flood_probability',
-
-  'final_risk_class',
-
-  'cwc_threshold_status',
-
-  'decision_reason',
-
-  'recommended_action',
-
-];
-
-
-
-function hasAllDecisionFields(record) {
-
-  return REQUIRED_DECISION_FIELDS.every((field) => {
-
-    const v = record[field];
-
-    if (v === undefined || v === null || v === '') return false;
-
-    return true;
-
-  });
-
-}
-
 
 
 export function validateLiveDecisions(records) {
@@ -715,65 +349,19 @@ function devWarning(...args) {
 // Returns { decisions, source, reason }
 
 export async function loadModelDecisions() {
-
   try {
-
-    const res = await riskService.getLatestDecisions({ limit: 100 });
-
+    const res = await riskService.getOfflineDecisions({ limit: 100 });
     const payload = Array.isArray(res) ? res : res?.data;
-
     const raw = Array.isArray(payload) ? payload : [];
-
     if (!raw.length) {
-
-      devWarning('Live decisions empty — retaining calibrated reference.');
-
-      return { decisions: REFERENCE_DECISIONS_WITH_ACTIONS, source: 'CALIBRATED_REFERENCE', reason: 'Live /risk/latest returned no records.' };
-
+      return { decisions: [], source: 'UNAVAILABLE', reason: 'No historical ML records.' };
     }
-
     const mapped = raw.map(mapLiveDecision);
-
-    const { valid, reasons, records } = validateLiveDecisions(mapped);
-
-    if (valid && records.length > 0) {
-
-      devWarning(`Adopting validated live decisions (${records.length}).`);
-
-      return { decisions: records, source: 'LIVE_BACKEND', reason: null };
-
-    }
-
-    devWarning(`Live decisions rejected (${reasons.join('; ')}). Retaining calibrated reference.`);
-
-    return {
-
-      decisions: REFERENCE_DECISIONS_WITH_ACTIONS,
-
-      source: 'CALIBRATED_REFERENCE',
-
-      reason: `Live model snapshot rejected: ${reasons.join('; ')}.`,
-
-    };
-
+    return { decisions: mapped, source: 'HISTORICAL_MODEL_OUTPUT', reason: null };
   } catch (err) {
-
-    devWarning('Live decisions fetch failed; retaining calibrated reference.', err);
-
-    return {
-
-      decisions: REFERENCE_DECISIONS_WITH_ACTIONS,
-
-      source: 'CALIBRATED_REFERENCE',
-
-      reason: 'Live /risk/latest request failed. Showing calibrated reference.',
-
-    };
-
+    return { decisions: [], source: 'UNAVAILABLE', reason: 'Failed to fetch historical ML records.' };
   }
-
 }
-
 
 
 // ---------------------------------------------------------------------------
@@ -1131,3 +719,5 @@ export function dataQualityDistribution(decisions) {
     .sort((a, b) => b.value - a.value);
 
 }
+
+export const MODEL_DISTRICTS = ['Almora', 'Bageshwar', 'Chamoli', 'Champawat', 'Dehradun', 'Haridwar', 'Nainital', 'Pauri Garhwal', 'Pithoragarh', 'Rudraprayag', 'Tehri Garhwal', 'Udham Singh Nagar', 'Uttarkashi'];

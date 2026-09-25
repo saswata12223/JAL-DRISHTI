@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { useLocation } from '../context/LocationContext';
+
 
 const RESOURCES = [
   {
@@ -8,6 +10,7 @@ const RESOURCES = [
     category: 'Government',
     type: 'Official Government',
     icon: 'account_balance',
+    region: 'Uttarakhand',
     links: [
       { label: 'Visit USDMA', url: 'https://usdma.uk.gov.in/' },
       { label: 'USDMA Documents', url: 'https://usdma.uk.gov.in/documents/' }
@@ -20,6 +23,7 @@ const RESOURCES = [
     category: 'Government',
     type: 'Official Government',
     icon: 'account_balance',
+    region: 'National',
     links: [
       { label: 'Visit NDMA', url: 'https://ndma.gov.in/' }
     ]
@@ -31,6 +35,7 @@ const RESOURCES = [
     category: 'Government',
     type: 'Official Government',
     icon: 'campaign',
+    region: 'National',
     links: [
       { label: 'Visit SACHET', url: 'https://sachet.ndma.gov.in/' }
     ]
@@ -42,6 +47,7 @@ const RESOURCES = [
     category: 'Hydrology',
     type: 'Official Government',
     icon: 'waves',
+    region: 'National',
     links: [
       { label: 'Visit CWC', url: 'https://cwc.gov.in/' },
       { label: 'Flood Forecasting & Warning Resources', url: 'https://cwc.gov.in/' }
@@ -54,6 +60,7 @@ const RESOURCES = [
     category: 'Satellite',
     type: 'Official NASA',
     icon: 'satellite_alt',
+    region: 'Global',
     links: [
       { label: 'NASA GPM IMERG Documentation', url: 'https://gpm.nasa.gov/data/imerg' },
       { label: 'NASA GPM Data Directory', url: 'https://gpm.nasa.gov/data/directory' }
@@ -66,6 +73,7 @@ const RESOURCES = [
     category: 'Satellite',
     type: 'Official NASA',
     icon: 'water_drop',
+    region: 'Global',
     links: [
       { label: 'Visit Source', url: 'https://nsidc.org/data/spl4smgp/versions/8' }
     ]
@@ -77,6 +85,7 @@ const RESOURCES = [
     category: 'Weather',
     type: 'Official NOAA',
     icon: 'air',
+    region: 'Global',
     links: [
       { label: 'NOAA GFS Documentation', url: 'https://www.ncei.noaa.gov/products/weather-climate-models/global-forecast' }
     ]
@@ -88,6 +97,7 @@ const RESOURCES = [
     category: 'Terrain',
     type: 'Technical Documentation',
     icon: 'terrain',
+    region: 'Global',
     links: [
       { label: 'Documentation Unavailable', url: '#' }
     ]
@@ -99,6 +109,7 @@ const RESOURCES = [
     category: 'Geology',
     type: 'Official Government',
     icon: 'landslide',
+    region: 'National',
     links: [
       { label: 'Visit Bhusanket', url: 'https://bhusanket.gsi.gov.in/' },
       { label: 'National Landslide Forecasting Centre', url: 'https://bhusanket.gsi.gov.in/about.html' }
@@ -111,6 +122,7 @@ const RESOURCES = [
     category: 'Technical',
     type: 'Project Documentation',
     icon: 'menu_book',
+    region: 'National',
     links: [
       { label: 'Technical documentation is being prepared', url: '#' }
     ]
@@ -122,6 +134,7 @@ const FILTERS = ['All', 'Government', 'Hydrology', 'Weather', 'Satellite', 'Terr
 export default function ResourcesPage() {
   const [activeFilter, setActiveFilter] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
+  const { selectedState, selectedDistrict } = useLocation();
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -129,12 +142,16 @@ export default function ResourcesPage() {
 
   const filteredResources = useMemo(() => {
     return RESOURCES.filter(resource => {
+      // Show National/Global resources everywhere, plus any specific to the selected state
+      const isApplicableRegion = ['National', 'Global'].includes(resource.region) || resource.region === selectedState;
+      if (selectedState && !isApplicableRegion) return false;
+      
       const matchesFilter = activeFilter === 'All' || resource.category === activeFilter;
       const matchesSearch = resource.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
                             resource.description.toLowerCase().includes(searchQuery.toLowerCase());
       return matchesFilter && matchesSearch;
     });
-  }, [activeFilter, searchQuery]);
+  }, [activeFilter, searchQuery, selectedState]);
 
   return (
     <div className="w-full min-h-screen bg-[#F8FAFC] text-slate-800 font-sans mt-16 pb-12 pt-10 px-6 sm:px-10 lg:px-16 overflow-x-hidden">
@@ -142,13 +159,20 @@ export default function ResourcesPage() {
         
         {/* HERO */}
         <section className="flex flex-col gap-4 border-b border-slate-200 pb-10">
-          <span className="text-[11px] font-extrabold tracking-[0.2em] text-[#0F4C81] uppercase">Knowledge Centre</span>
-          <h1 className="text-4xl md:text-5xl font-black text-[#0A2540] tracking-tight leading-tight">
-            Resources
-          </h1>
-          <h2 className="text-lg md:text-xl font-medium text-slate-600 max-w-3xl leading-relaxed mt-2">
-            Official data sources, disaster-management references and technical documentation used to understand and develop the Jal Drishti system.
-          </h2>
+          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+            <div>
+              <span className="text-[11px] font-extrabold tracking-[0.2em] text-[#0F4C81] uppercase">Knowledge Centre</span>
+              <h1 className="text-4xl md:text-5xl font-black text-[#0A2540] tracking-tight leading-tight mt-1">
+                Resources
+              </h1>
+              <h2 className="text-lg md:text-xl font-medium text-slate-600 max-w-3xl leading-relaxed mt-2">
+                Official data sources, disaster-management references and technical documentation used to understand and develop the Jal Drishti system.
+              </h2>
+            </div>
+            <div className="w-full sm:max-w-xs shrink-0 mt-4 sm:mt-0">
+
+            </div>
+          </div>
         </section>
 
         {/* SEARCH & FILTER */}

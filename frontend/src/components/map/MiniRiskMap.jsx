@@ -88,11 +88,12 @@ function MapControls() {
 
 export default function MiniRiskMap({ stations = DEFAULT_STATIONS, onSelectStation }) {
 
-  const cartoApiKey = import.meta.env.VITE_CARTO_API_KEY || 'cb1_2k56_1_d8f949035bf0414f5da8a77b';
+  const cartoApiKey = import.meta.env.VITE_CARTO_API_KEY || '';
 
-  const keyParam = cartoApiKey && cartoApiKey !== 'PASTE_CARTO_KEY_HERE' ? `?key=${cartoApiKey}` : '';
-
-  const tileUrl = `https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png${keyParam}`;
+  const hasValidKey = cartoApiKey && cartoApiKey !== 'PASTE_CARTO_KEY_HERE' && cartoApiKey !== 'cb1_2k56_1_d8f949035bf0414f5da8a77b';
+  const tileUrl = hasValidKey
+    ? `https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png?key=${cartoApiKey}`
+    : `https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png`;
 
 
 

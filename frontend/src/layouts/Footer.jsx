@@ -1,143 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 
@@ -154,7 +14,7 @@ export default function Footer() {
   return (
     <footer className="w-full bg-[#0A2540] text-slate-300 font-sans border-t border-slate-700/50 pt-10 pb-6 shrink-0 z-50 relative">
       <div className="max-w-[1700px] mx-auto px-6 sm:px-10 lg:px-16 flex flex-col gap-10">
-        
+
         <div className="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-12">
           {/* Brand & Mission (Left) */}
           <div className="md:col-span-12 lg:col-span-4 flex flex-col items-start gap-4">
@@ -162,12 +22,19 @@ export default function Footer() {
               <div className="bg-white rounded-full p-1 shadow-sm shrink-0">
                 <img src="/assets/images/logo_without_text.png" alt="Jal Drishti Logo" className="w-7 h-7 object-contain" />
               </div>
+              <span className="text-[13px] font-bold text-white tracking-wide">Jal Drishti</span>
             </div>
             <p className="text-[12px] leading-relaxed text-slate-400 max-w-sm">
               Jal Drishti is a flood risk intelligence and decision-support platform designed to support situational awareness, early warning, and disaster preparedness.
             </p>
+            {/* Tile attribution */}
+            <p className="text-[10px] text-slate-500 leading-relaxed">
+              Map tiles: © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer" className="hover:text-cyan-300">OpenStreetMap</a> contributors,
+              © <a href="https://carto.com/" target="_blank" rel="noopener noreferrer" className="hover:text-cyan-300">CARTO</a>.
+              Administrative boundaries: Survey of India (SOI) — immutable, SHA-256 verified.
+            </p>
           </div>
-          
+
           {/* Portal Navigation (Center-Left) */}
           <div className="md:col-span-4 lg:col-span-3 flex flex-col gap-4">
             <h3 className="text-[11px] font-bold text-white uppercase tracking-wider">Portal Navigation</h3>
@@ -198,23 +65,28 @@ export default function Footer() {
               </a>
             </div>
           </div>
-          
+
           {/* Data Sources (Right) */}
           <div className="md:col-span-4 lg:col-span-3 flex flex-col gap-4 lg:items-end">
             <h3 className="text-[11px] font-bold text-white uppercase tracking-wider">Data & Information Sources</h3>
-            <div className="flex flex-wrap lg:justify-end gap-2 text-[10.5px] font-mono font-semibold text-slate-400">
-              <span className="bg-white/5 border border-white/10 px-2 py-1 rounded">CWC</span>
-              <span className="bg-white/5 border border-white/10 px-2 py-1 rounded">IMD</span>
-              <span className="bg-white/5 border border-white/10 px-2 py-1 rounded">NRSC</span>
-              <span className="bg-white/5 border border-white/10 px-2 py-1 rounded">USGS</span>
-              <span className="bg-white/5 border border-white/10 px-2 py-1 rounded">GSI</span>
+            <div className="flex flex-wrap lg:justify-end gap-2 text-[10.5px] font-mono font-semibold">
+              <span className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-2 py-1 rounded" title="OpenWeatherMap — verified live source">OWM ✓ Live</span>
+              <span className="bg-white/5 border border-white/10 px-2 py-1 rounded text-slate-400" title="Central Water Commission — offline">CWC</span>
+              <span className="bg-white/5 border border-white/10 px-2 py-1 rounded text-slate-400" title="India Meteorological Department — not configured">IMD</span>
+              <span className="bg-white/5 border border-white/10 px-2 py-1 rounded text-slate-400">NRSC</span>
+              <span className="bg-white/5 border border-white/10 px-2 py-1 rounded text-slate-400">USGS</span>
+              <span className="bg-white/5 border border-white/10 px-2 py-1 rounded text-slate-400">GSI</span>
+            </div>
+            <div className="text-[10px] text-slate-500 lg:text-right mt-1">
+              ML Model: XGBoost (historical calibrated reference)<br />
+              GIS: Survey of India (SOI) — Pan-India
             </div>
           </div>
         </div>
-        
+
         {/* Divider */}
         <div className="w-full h-px bg-slate-700/50"></div>
-        
+
         {/* Bottom Legal / Copyright Strip */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-slate-500">
           <div>

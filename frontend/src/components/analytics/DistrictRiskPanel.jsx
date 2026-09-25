@@ -9,7 +9,7 @@ export default function DistrictRiskPanel({ data, mode, onModeChange }) {
     <PanelCard
       icon="map"
       title="Risk by District / Basin"
-      subtitle={`Ranked by peak flood probability across ${data.length ? `${data.length} ${mode === 'basin' ? 'basins' : 'districts'}` : 'scope'}`}
+      subtitle={`Ranked by peak Model Probability across ${data.length ? `${data.length} ${mode === 'basin' ? 'basins' : 'districts'}` : 'scope'}`}
       right={
         <div className="flex items-center bg-app-surface-elevated border border-app-border rounded-lg p-0.5 text-[10.5px] font-bold select-none">
           <button

@@ -30,14 +30,11 @@ export default function PlatformPreviewSection() {
           {/* Video Preview */}
           <div className="lg:w-2/3 w-full relative">
             <div className="w-full max-w-[800px] mx-auto aspect-[16/10] bg-white rounded-xl shadow-2xl border border-[#E2E8F0] overflow-hidden flex flex-col relative transform lg:rotate-[-2deg] transition-transform hover:rotate-0 duration-500">
-              <div className="w-full h-full bg-[#F8FAFC]">
-                <video
-                  src="/assets/video/InShot_20260917_040506723.mp4"
-                  autoPlay
-                  loop
-                  muted
-                  playsInline
-                  className="w-full h-full object-cover rounded-lg select-none pointer-events-none"
+              <div className="w-full h-full bg-[#F8FAFC] p-4 sm:p-6 lg:p-8 flex items-center justify-center">
+                <img
+                  src="/assets/images/frame.png"
+                  alt="Platform Interface Preview"
+                  className="w-full h-full object-contain rounded-lg select-none pointer-events-none drop-shadow-md"
                 />
               </div>
             </div>

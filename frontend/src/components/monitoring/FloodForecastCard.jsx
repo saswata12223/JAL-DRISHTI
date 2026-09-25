@@ -87,7 +87,7 @@ export default function FloodForecastCard({ forecastData, forecast, loading = fa
           <div className="grid grid-cols-2 gap-2 bg-[#F2FAFB] border border-[rgba(16,42,46,0.08)] p-2.5 rounded-lg">
             <div>
               <span className="text-[9px] font-bold text-[#5F777C] uppercase tracking-wider block">
-                Flood Probability
+                Model Probability
               </span>
               <div className="flex items-baseline gap-1 mt-0.5">
                 <span className={`text-2xl font-black font-mono tracking-tight ${getProbColor(prob)}`}>

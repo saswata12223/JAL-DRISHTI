@@ -48,35 +48,14 @@ const RIVER_BASIN = {
 };
 
 export function resolveBasin(riverName) {
-  return RIVER_BASIN[riverName] || 'Uttarakhand Catchment';
+  return RIVER_BASIN[riverName] || 'Unknown Catchment';
 }
 
 // ------------------------------------------------------------
 // CANONICAL ANALYTICS DATASET (isolated demo fallback)
 // Mirrors DEFAULT_CWC_MONITORING from the Monitoring screen.
 // ------------------------------------------------------------
-export const STATIONS = [
-  { id: 'CWC_UK_001', name: 'Joshimath', district: 'Chamoli', river: 'Alaknanda', lat: 30.556, lon: 79.568, risk: 'EXTREME', prob: 0.94, stage: 'DANGER ZONE', waterLevel: 341.7, warningLevel: 339.5, dangerLevel: 340.5, rainfallMm: 85, status: 'CRITICAL', soilSaturation: 94, runoff: 'HIGH' },
-  { id: 'CWC_UK_002', name: 'Rishikesh', district: 'Dehradun', river: 'Ganga', lat: 30.108, lon: 78.298, risk: 'HIGH', prob: 0.68, stage: 'WARNING ZONE', waterLevel: 339.8, warningLevel: 339.5, dangerLevel: 340.5, rainfallMm: 45, status: 'WARNING', soilSaturation: 82, runoff: 'HIGH' },
-  { id: 'CWC_UK_003', name: 'Uttarkashi', district: 'Uttarkashi', river: 'Bhagirathi', lat: 30.727, lon: 78.435, risk: 'HIGH', prob: 0.72, stage: 'WARNING ZONE', waterLevel: 1120.4, warningLevel: 1119.0, dangerLevel: 1121.0, rainfallMm: 62, status: 'WARNING', soilSaturation: 85, runoff: 'HIGH' },
-  { id: 'CWC_UK_004', name: 'Rudraprayag', district: 'Rudraprayag', river: 'Mandakini', lat: 30.285, lon: 78.981, risk: 'EXTREME', prob: 0.91, stage: 'DANGER ZONE', waterLevel: 618.2, warningLevel: 616.0, dangerLevel: 617.5, rainfallMm: 78, status: 'CRITICAL', soilSaturation: 92, runoff: 'HIGH' },
-  { id: 'CWC_UK_005', name: 'Srinagar', district: 'Pauri Garhwal', river: 'Alaknanda', lat: 30.221, lon: 78.784, risk: 'HIGH', prob: 0.65, stage: 'WARNING ZONE', waterLevel: 536.4, warningLevel: 535.0, dangerLevel: 537.0, rainfallMm: 48, status: 'WARNING', soilSaturation: 78, runoff: 'HIGH' },
-  { id: 'CWC_UK_006', name: 'Devprayag', district: 'Tehri Garhwal', river: 'Ganga', lat: 30.146, lon: 78.598, risk: 'MODERATE', prob: 0.35, stage: 'NORMAL', waterLevel: 452.1, warningLevel: 454.0, dangerLevel: 456.0, rainfallMm: 22, status: 'ONLINE', soilSaturation: 64, runoff: 'NORMAL' },
-  { id: 'CWC_UK_007', name: 'Haridwar', district: 'Haridwar', river: 'Ganga', lat: 29.945, lon: 78.164, risk: 'LOW', prob: 0.12, stage: 'NORMAL', waterLevel: 292.3, warningLevel: 294.0, dangerLevel: 295.5, rainfallMm: 10, status: 'ONLINE', soilSaturation: 48, runoff: 'NORMAL' },
-  { id: 'CWC_UK_008', name: 'Dharchula', district: 'Pithoragarh', river: 'Kali', lat: 29.851, lon: 80.542, risk: 'EXTREME', prob: 0.88, stage: 'DANGER ZONE', waterLevel: 890.5, warningLevel: 888.0, dangerLevel: 890.0, rainfallMm: 72, status: 'CRITICAL', soilSaturation: 91, runoff: 'HIGH' },
-  { id: 'CWC_UK_009', name: 'Karanprayag', district: 'Chamoli', river: 'Alaknanda', lat: 30.260, lon: 79.220, risk: 'MODERATE', prob: 0.38, stage: 'NORMAL', waterLevel: 778.0, warningLevel: 780.0, dangerLevel: 782.0, rainfallMm: 24, status: 'ONLINE', soilSaturation: 62, runoff: 'NORMAL' },
-  { id: 'CWC_UK_010', name: 'Almora', district: 'Almora', river: 'Kosi', lat: 29.597, lon: 79.659, risk: 'LOW', prob: 0.15, stage: 'NORMAL', waterLevel: 1580.0, warningLevel: 1583.0, dangerLevel: 1585.0, rainfallMm: 8, status: 'ONLINE', soilSaturation: 45, runoff: 'NORMAL' },
-  { id: 'CWC_UK_011', name: 'Nainital', district: 'Nainital', river: 'Gaula', lat: 29.380, lon: 79.463, risk: 'LOW', prob: 0.18, stage: 'NORMAL', waterLevel: 1930.0, warningLevel: 1935.0, dangerLevel: 1937.0, rainfallMm: 12, status: 'ONLINE', soilSaturation: 52, runoff: 'NORMAL' },
-  { id: 'CWC_UK_012', name: 'Bageshwar', district: 'Bageshwar', river: 'Sarayu', lat: 29.838, lon: 79.771, risk: 'MODERATE', prob: 0.32, stage: 'NORMAL', waterLevel: 980.0, warningLevel: 983.0, dangerLevel: 985.0, rainfallMm: 19, status: 'ONLINE', soilSaturation: 58, runoff: 'NORMAL' },
-  { id: 'CWC_UK_013', name: 'Champawat', district: 'Champawat', river: 'Lohawati', lat: 29.337, lon: 80.092, risk: 'LOW', prob: 0.10, stage: 'NORMAL', waterLevel: 1610.0, warningLevel: 1615.0, dangerLevel: 1617.0, rainfallMm: 6, status: 'ONLINE', soilSaturation: 42, runoff: 'NORMAL' },
-  { id: 'CWC_UK_014', name: 'Rudrapur', district: 'Udham Singh Nagar', river: 'Kalyani', lat: 28.980, lon: 79.400, risk: 'LOW', prob: 0.08, stage: 'NORMAL', waterLevel: 205.0, warningLevel: 208.0, dangerLevel: 210.0, rainfallMm: 4, status: 'ONLINE', soilSaturation: 38, runoff: 'NORMAL' },
-  { id: 'CWC_UK_015', name: 'Gopeshwar', district: 'Chamoli', river: 'Balkhila', lat: 30.410, lon: 79.330, risk: 'HIGH', prob: 0.70, stage: 'WARNING ZONE', waterLevel: 1450.0, warningLevel: 1448.0, dangerLevel: 1451.0, rainfallMm: 55, status: 'WARNING', soilSaturation: 84, runoff: 'HIGH' },
-  { id: 'CWC_UK_016', name: 'Tehri', district: 'Tehri Garhwal', river: 'Bhagirathi', lat: 30.380, lon: 78.480, risk: 'MODERATE', prob: 0.30, stage: 'NORMAL', waterLevel: 825.0, warningLevel: 830.0, dangerLevel: 835.0, rainfallMm: 16, status: 'ONLINE', soilSaturation: 55, runoff: 'NORMAL' },
-  { id: 'CWC_UK_017', name: 'Barkot', district: 'Uttarkashi', river: 'Yamuna', lat: 30.810, lon: 78.200, risk: 'LOW', prob: 0.14, stage: 'NORMAL', waterLevel: 1210.0, warningLevel: 1215.0, dangerLevel: 1218.0, rainfallMm: 8, status: 'ONLINE', soilSaturation: 46, runoff: 'NORMAL' },
-  { id: 'CWC_UK_018', name: 'Pithoragarh', district: 'Pithoragarh', river: 'Ramganga', lat: 29.580, lon: 80.210, risk: 'LOW', prob: 0.16, stage: 'NORMAL', waterLevel: 1510.0, warningLevel: 1515.0, dangerLevel: 1518.0, rainfallMm: 11, status: 'ONLINE', soilSaturation: 49, runoff: 'NORMAL' },
-  { id: 'CWC_UK_019', name: 'Kashipur', district: 'Udham Singh Nagar', river: 'Dhela', lat: 29.210, lon: 78.950, risk: 'LOW', prob: 0.09, stage: 'NORMAL', waterLevel: 215.0, warningLevel: 218.0, dangerLevel: 220.0, rainfallMm: 5, status: 'ONLINE', soilSaturation: 40, runoff: 'NORMAL' },
-  { id: 'CWC_UK_020', name: 'Dehradun City', district: 'Dehradun', river: 'Bindal', lat: 30.316, lon: 78.032, risk: 'LOW', prob: 0.11, stage: 'NORMAL', waterLevel: 640.0, warningLevel: 645.0, dangerLevel: 647.0, rainfallMm: 14, status: 'ONLINE', soilSaturation: 50, runoff: 'NORMAL' },
-];
+export const STATIONS = [];
 
 export const DISTRICTS = Array.from(new Set(STATIONS.map((s) => s.district))).sort();
 export const BASINS = Array.from(new Set(STATIONS.map((s) => resolveBasin(s.river)))).sort();
@@ -283,7 +262,7 @@ export function buildInsight(stations, stateTrend, kpis, rankList) {
   const warningStations = stations.filter((s) => s.stage === 'WARNING ZONE').length;
 
   const headline =
-    `Risk probability ${trendPhrase} from ${first.prob}% to ${last.prob}% since ${first.time}, ` +
+    `Model Probability ${trendPhrase} from ${first.prob}% to ${last.prob}% since ${first.time}, ` +
     `primarily associated with rising rainfall intensity (${kpis.maxRain} mm/h) and river stage escalation.`;
 
   const points = [];
@@ -370,7 +349,7 @@ function normalizeStatus(value) {
 function mapLiveStation(st, index) {
   const id = String(st?.station_id ?? `STN_${index + 1}`);
   const name = st?.station_name || st?.name || id;
-  const district = st?.district || 'Uttarakhand';
+  const district = st?.district || st?.state || 'Unknown';
   const river = liveValue(st, ['river_name', 'river']);
   const lat = toFiniteNumber(liveValue(st, ['latitude']));
   const lon = toFiniteNumber(liveValue(st, ['longitude']));

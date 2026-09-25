@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { useLocation } from '../context/LocationContext';
+import LocationSearch from '../components/common/LocationSearch';
 
-import { MapContainer, TileLayer, CircleMarker, Popup, useMap, Tooltip, Polygon } from 'react-leaflet';
+import { MapContainer, TileLayer, CircleMarker, Popup, useMap, Tooltip, Polygon, GeoJSON } from 'react-leaflet';
 
 import L from 'leaflet';
 
@@ -18,57 +20,16 @@ import riskService from '../services/riskService';
 
 import eventsService from '../services/eventsService';
 
+import gisService from '../services/gisService';
 
 
-// Uttarakhand Geographic Bounds for Precise Operational Viewport
 
-const UTTARAKHAND_BOUNDS = [
-
-  [28.80, 77.60], // Southwest (Udham Singh Nagar / Haridwar border)
-
-  [31.45, 81.05], // Northeast (Uttarkashi / Pithoragarh border)
-
+// India Geographic Bounds for Precise Operational Viewport
+const INDIA_BOUNDS = [
+  [6.5, 68.0], // Southwest
+  [35.5, 97.5], // Northeast
 ];
 
-
-
-// Uttarakhand Approximate State Boundary (GeoJSON Polygon coordinates)
-
-const UTTARAKHAND_BOUNDARY = [
-
-  [31.45, 77.85],
-
-  [31.35, 78.45],
-
-  [31.10, 79.10],
-
-  [31.05, 79.80],
-
-  [30.80, 80.30],
-
-  [30.45, 80.85],
-
-  [29.90, 81.05],
-
-  [29.50, 80.50],
-
-  [28.95, 80.15],
-
-  [28.80, 79.60],
-
-  [29.20, 79.05],
-
-  [29.60, 78.30],
-
-  [29.95, 78.05],
-
-  [30.40, 77.70],
-
-  [30.90, 77.65],
-
-  [31.45, 77.85],
-
-];
 
 
 
@@ -148,9 +109,8 @@ function MapInstanceCapture({ setMap }) {
 
       setMap(map);
 
-      // Auto-fit closely on Uttarakhand extent with comfortable margin
-
-      map.fitBounds(UTTARAKHAND_BOUNDS, { padding: [30, 30], animate: false });
+      // Auto-fit closely on India extent with comfortable margin
+      map.fitBounds(INDIA_BOUNDS, { padding: [30, 30], animate: false });
 
     }
 
@@ -162,17 +122,28 @@ function MapInstanceCapture({ setMap }) {
 
 
 
-export default function RiskMapPage() {
+export default function RiskMapPage() {  const { selectedState, selectedDistrict } = useLocation();
+
 
   const { isDark } = useTheme();
+  
+  // Use location context
+
+
+  const isUttarakhand = !selectedState || selectedState === 'Uttarakhand';
 
   const [map, setMap] = useState(null);
-
   const [stations, setStations] = useState(DEFAULT_CWC_STATIONS);
-
   const [searchTerm, setSearchTerm] = useState('');
-
   const [isLayerOpen, setIsLayerOpen] = useState(false);
+  const [geojsonData, setGeojsonData] = useState(null);
+
+  useEffect(() => {
+    fetch('/api/v1/gis/admin/boundaries')
+      .then(res => res.json())
+      .then(data => setGeojsonData(data))
+      .catch(err => console.error("Failed to load boundaries", err));
+  }, []);
 
 
 
@@ -374,57 +345,56 @@ export default function RiskMapPage() {
 
 
 
-  const handleSelectStation = (st) => {
-
-    setSelectedLocation({
-
+  const handleSelectStation = async (st) => {
+    const baseLoc = {
       ...st,
-
       finalRisk: st.risk,
-
       mlProbability: st.prob,
-
       cwcStage: st.stage,
-
       rainfall: st.prob > 0.7 ? 'CRITICAL (85 mm/h)' : st.prob > 0.4 ? 'HIGH (45 mm/h)' : 'NORMAL (12 mm/h)',
-
       soilSaturation: st.prob > 0.7 ? '94%' : st.prob > 0.4 ? '82%' : '52%',
-
       runoff: st.prob > 0.4 ? 'HIGH' : 'NORMAL',
-
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }) + ' IST',
-
-    });
-
-
+      adminContext: null,
+    };
+    setSelectedLocation(baseLoc);
 
     if (map) {
-
       map.setView([st.lat, st.lon], 10, { animate: true });
-
     }
 
+    // Async: enrich with GIS admin context
+    if (st.lat != null && st.lon != null) {
+      try {
+        const adminData = await gisService.resolveAdminContext(st.lat, st.lon);
+        setSelectedLocation(current => {
+          if (current.lat === st.lat && current.lon === st.lon) {
+            return { ...current, adminContext: adminData };
+          }
+          return current;
+        });
+      } catch (e) {
+        console.error('[RiskMapPage] GIS resolve failed:', e);
+      }
+    }
   };
 
 
 
-  const handleFitUttarakhand = () => {
 
+  const handleFitIndia = () => {
     if (map) {
-
-      map.fitBounds(UTTARAKHAND_BOUNDS, { padding: [30, 30], animate: true });
-
+      map.fitBounds(INDIA_BOUNDS, { padding: [30, 30], animate: true });
     }
-
   };
 
 
 
   // Secure CARTO Basemap URL
 
-  const cartoApiKey = import.meta.env.VITE_CARTO_API_KEY || 'cb1_2k56_1_d8f949035bf0414f5da8a77b';
+  const cartoApiKey = import.meta.env.VITE_CARTO_API_KEY || '';
 
-  const keyParam = cartoApiKey && cartoApiKey !== 'PASTE_CARTO_KEY_HERE' ? `?key=${cartoApiKey}` : '';
+  const hasValidKey = cartoApiKey && cartoApiKey !== 'PASTE_CARTO_KEY_HERE' && cartoApiKey !== 'cb1_2k56_1_d8f949035bf0414f5da8a77b';
 
   const tileUrl = isDark
 
@@ -452,7 +422,7 @@ export default function RiskMapPage() {
 
           <p className="text-[11.5px] font-medium text-app-text-secondary">
 
-            Uttarakhand Flood Risk & Station Intelligence
+            Pan-India Flood Risk & Station Intelligence
 
           </p>
 
@@ -463,6 +433,10 @@ export default function RiskMapPage() {
         {/* Operational Status Badges & Quick Actions */}
 
         <div className="flex flex-wrap items-center gap-2.5">
+        
+          <div className="w-full sm:max-w-xs shrink-0">
+            <LocationSearch />
+          </div>
 
           <div className="flex items-center gap-2 px-3 py-1 bg-app-surface-elevated rounded-lg border border-app-border text-[11px] font-mono font-bold">
 
@@ -505,24 +479,31 @@ export default function RiskMapPage() {
 
 
           <button
-
-            onClick={handleFitUttarakhand}
-
+            onClick={handleFitIndia}
             className="px-3 py-1.5 bg-app-surface-elevated hover:bg-app-surface-hover text-app-text-primary border border-app-border rounded-lg text-[11.5px] font-semibold flex items-center gap-1.5 shadow-sm transition-colors cursor-pointer"
-
-            title="Reset Map to Full Uttarakhand Extent"
-
+            title="Reset Map to Full India Extent"
           >
-
             <span className="material-symbols-outlined text-[15px]">my_location</span>
-
-            <span>Fit Uttarakhand</span>
-
+            <span>Fit India</span>
           </button>
 
         </div>
 
       </div>
+
+      {!isUttarakhand && (
+        <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 flex items-start gap-4 mx-1">
+          <span className="material-symbols-outlined text-[20px] text-slate-400 shrink-0 mt-0.5">info</span>
+          <div>
+            <div className="text-[12px] font-bold text-slate-700 mb-0.5">
+              {selectedState} — GIS Coverage Available
+            </div>
+            <p className="text-[11px] text-slate-500 leading-relaxed">
+              Administrative GIS boundaries are active. Live telemetry and ML risk overlays are currently available for Uttarakhand only.
+            </p>
+          </div>
+        </div>
+      )}
 
 
 
@@ -556,32 +537,19 @@ export default function RiskMapPage() {
 
 
 
-          {/* Uttarakhand State Boundary */}
-
-          {layers.stateBoundary && (
-
-            <Polygon
-
-              positions={UTTARAKHAND_BOUNDARY}
-
-              pathOptions={{
-
+          {/* PAN-India State Boundaries */}
+          {layers.stateBoundary && geojsonData && (
+            <GeoJSON
+              data={geojsonData}
+              style={{
                 color: isDark ? '#6366F1' : '#0D9488',
-
-                weight: 2,
-
-                opacity: 0.7,
-
+                weight: 1.5,
+                opacity: 0.6,
                 fillColor: isDark ? '#6366F1' : '#0D9488',
-
                 fillOpacity: isDark ? 0.04 : 0.03,
-
-                dashArray: '5, 5',
-
+                dashArray: '3, 3',
               }}
-
             />
-
           )}
 
 

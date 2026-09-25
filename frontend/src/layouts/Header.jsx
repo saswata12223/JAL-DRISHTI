@@ -114,7 +114,7 @@ function NavDropdown({ group, isActive }) {
 export default function Header({
   activeAlertsCount = 2,
   systemStatus = 'LIVE',
-  lastUpdated = '01:32 AM IST',
+  lastUpdated = 'Unavailable',
 }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [portalMenuOpen, setPortalMenuOpen] = useState(false);
@@ -197,10 +197,14 @@ export default function Header({
 
         {/* Brand Identity */}
 
-        <NavLink to="/dashboard" className="flex items-center gap-3 shrink-0 group">
+        <NavLink to="/" className="flex items-center gap-3 shrink-0 group">
 
           <div className="bg-white rounded-full p-1 shadow-sm shrink-0 group-hover:shadow-md transition-shadow">
             <img src="/assets/images/logo_without_text.png" alt="Jal Drishti Logo" className="w-7 h-7 object-contain group-hover:scale-105 transition-transform duration-300" />
+          </div>
+          <div className="hidden sm:flex flex-col leading-none">
+            <span className="text-[13px] font-bold text-white tracking-wide">Jal Drishti</span>
+            <span className="text-[9px] font-medium text-slate-400 uppercase tracking-wider">USDMA · Flood Intelligence</span>
           </div>
 
 

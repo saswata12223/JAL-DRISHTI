@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation } from '../context/LocationContext';
+
 import immediateActionsService from '../services/immediateActionsService';
 import TacticalActionMap from '../components/immediate-actions/TacticalActionMap';
 import AudioCallSimulatorModal from '../components/immediate-actions/AudioCallSimulatorModal';
@@ -97,7 +99,8 @@ const TARGET_DETAILS = [
   { phone: '90195 86089', name: 'Guptkashi Staging Base Officer', role: 'Mandakini Sector Forward Base', district: 'Rudraprayag' },
 ];
 
-export default function ImmediateActionsPage() {
+export default function ImmediateActionsPage() {  const { selectedState, selectedDistrict } = useLocation();
+
   const [activeTab, setActiveTab] = useState('tactical'); // tactical, population, calls, sms_sos, shelters
   const [tacticalData, setTacticalData] = useState(null);
   const [shelters, setShelters] = useState([]);
@@ -435,17 +438,44 @@ export default function ImmediateActionsPage() {
     }
     loadData();
     
-    // Subscribe to SSE
+    // Subscribe to SSE for real-time pushes
     const unsubscribe = immediateActionsService.subscribeToSosStream((eventType, data) => {
       if (eventType === 'new_sos') {
-        setSosAlerts((prev) => [data, ...prev]);
+        setSosAlerts((prev) => {
+          // Avoid duplicates if polling already caught it
+          if (prev.some((s) => s.id === data.id)) return prev;
+          return [data, ...prev];
+        });
       } else if (eventType === 'update_sos') {
         setSosAlerts((prev) => prev.map((item) => (item.id === data.id ? data : item)));
       }
     });
+
+    // Polling fallback — re-fetch SOS list every 10s so messages always appear
+    // even when SSE is disconnected or the browser blocks long-lived connections.
+    const pollInterval = setInterval(async () => {
+      try {
+        const sosRes = await immediateActionsService.getSosAlerts();
+        if (sosRes?.data) {
+          setSosAlerts((prev) => {
+            const incoming = sosRes.data;
+            // Merge: keep existing order for known IDs, prepend truly new ones
+            const prevIds = new Set(prev.map((s) => s.id));
+            const brandNew = incoming.filter((s) => !prevIds.has(s.id));
+            // Also apply any status updates
+            const updated = prev.map((s) => {
+              const fresh = incoming.find((f) => f.id === s.id);
+              return fresh ? fresh : s;
+            });
+            return [...brandNew, ...updated];
+          });
+        }
+      } catch (_) { /* silent fallback */ }
+    }, 10000);
     
     return () => {
       unsubscribe();
+      clearInterval(pollInterval);
     };
   }, []);
 
@@ -479,33 +509,6 @@ export default function ImmediateActionsPage() {
     }
   };
 
-  // Simulate new inbound mobile SOS
-  const handleSimulateMobileSos = async () => {
-    const mockSos = {
-      sos_id: `SOS-UK-${Math.floor(Math.random() * 1000)}`,
-      sender_id: `CITIZEN-${Math.floor(Math.random() * 100)}`,
-      timestamp: new Date().toISOString(),
-      name: 'Anand Semwal',
-      phone: '+91 97483 79047',
-      latitude: 30.2841,
-      longitude: 78.9812,
-      distress_type: 'RISING_WATER',
-      message: 'Flash water surge entered courtyard. 3 children and 2 adults need boat evacuation.',
-      people_trapped: 5,
-      battery: 64,
-      mesh_hops: 2,
-      device_id: 'BLE-NODE-042',
-      gateway_id: 'GW-SIMULATOR',
-      gateway_received_at: new Date().toISOString(),
-      source: 'SIMULATED'
-    };
-    try {
-      await immediateActionsService.submitMobileSos(mockSos);
-      // we do not manually append to state here, SSE handles it!
-    } catch (e) {
-      console.error(e);
-    }
-  };
 
   // Switch Emergency Preset Template
   const handleSelectTemplate = (tplId) => {
@@ -701,6 +704,12 @@ export default function ImmediateActionsPage() {
     }
   };
 
+  // Derive location context
+
+
+
+  const isUttarakhand = !selectedState || selectedState === 'Uttarakhand';
+
   return (
     <div className="space-y-6 pb-12 animate-fade-in text-slate-800">
       {/* Top Banner Header */}
@@ -709,8 +718,8 @@ export default function ImmediateActionsPage() {
           <span className="material-symbols-outlined text-[200px]">emergency</span>
         </div>
 
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
+        <div className="relative z-10 flex flex-col md:flex-row md:items-start justify-between gap-4">
+          <div className="flex-1">
             <div className="flex items-center gap-2 mb-1.5">
               <span className="w-2.5 h-2.5 rounded-full bg-red-500 animate-ping" />
               <span className="text-[11px] font-bold uppercase tracking-widest text-red-300 bg-red-950/80 px-2.5 py-0.5 rounded-full border border-red-500/40">
@@ -721,45 +730,60 @@ export default function ImmediateActionsPage() {
               Immediate Actions &amp; Tactical Command
             </h1>
             <p className="text-slate-200 text-xs sm:text-sm mt-1 max-w-2xl">
-              Coordinated force deployment, safe egress routing, automated citizen calling via Twilio, mobile app SOS reception, and two-way shelter logistics for Uttarakhand.
+              Coordinated force deployment, safe egress routing, automated citizen calling via Twilio, mobile app SOS reception, and two-way shelter logistics.
             </p>
           </div>
+          <div className="w-full sm:max-w-xs shrink-0 mt-2 sm:mt-0 relative z-20">
 
-          <div className="flex items-center gap-3 shrink-0">
-            <button
-              onClick={() => setCallModalOpen(true)}
-              className="px-4 py-2.5 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold text-xs uppercase tracking-wider flex items-center gap-2 shadow-lg shadow-red-600/30 transition-all active:scale-95"
-            >
-              <span className="material-symbols-outlined text-lg animate-pulse">phone_forwarded</span>
-              <span>Trigger Multilingual Call Warning</span>
-            </button>
-          </div>
-        </div>
-
-        {/* Quick KPI Strip */}
-        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mt-6 pt-5 border-t border-white/15 text-xs">
-          <div>
-            <div className="text-slate-300 text-[11px]">Forces Ready</div>
-            <div className="text-lg font-bold text-white mt-0.5">5 Battalions (820 Men)</div>
-          </div>
-          <div>
-            <div className="text-slate-300 text-[11px]">Ingress Routes</div>
-            <div className="text-lg font-bold text-[#8FD3E8] mt-0.5">3 Corridors + Air</div>
-          </div>
-          <div>
-            <div className="text-slate-300 text-[11px]">Vulnerable Chokes</div>
-            <div className="text-lg font-bold text-amber-300 mt-0.5">5 Monitored Points</div>
-          </div>
-          <div>
-            <div className="text-slate-300 text-[11px]">Monitored Population</div>
-            <div className="text-lg font-bold text-rose-300 mt-0.5">~109,900 Citizens</div>
-          </div>
-          <div>
-            <div className="text-slate-300 text-[11px]">Shelters Registered</div>
-            <div className="text-lg font-bold text-emerald-300 mt-0.5">{shelters.length} Shelters (11,850 Cap)</div>
           </div>
         </div>
       </div>
+
+      {!isUttarakhand ? (
+        <div className="bg-slate-50 border border-slate-200 rounded-xl p-12 flex flex-col items-center text-center gap-4 shadow-sm">
+          <span className="material-symbols-outlined text-emerald-400 text-[48px]">check_circle</span>
+          <div>
+            <h3 className="text-[15px] font-bold text-slate-700">Immediate Actions & Tactical Command unavailable for {selectedState}.</h3>
+            <p className="text-[12.5px] text-slate-500 mt-1 max-w-md">
+              Tactical dispatch, calling, and force routing systems are exclusively integrated with the Uttarakhand disaster management command framework.
+            </p>
+          </div>
+        </div>
+      ) : (
+        <>
+        <div className="flex items-center gap-3 shrink-0 my-2">
+          <button
+            onClick={() => setCallModalOpen(true)}
+            className="px-4 py-2.5 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold text-xs uppercase tracking-wider flex items-center gap-2 shadow-lg shadow-red-600/30 transition-all active:scale-95"
+          >
+            <span className="material-symbols-outlined text-lg animate-pulse">phone_forwarded</span>
+            <span>Trigger Multilingual Call Warning</span>
+          </button>
+        </div>
+
+        {/* Quick KPI Strip */}
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 pt-2 border-t border-slate-200 text-xs">
+          <div>
+            <div className="text-slate-500 text-[11px]">Forces Ready</div>
+            <div className="text-lg font-bold text-slate-800 mt-0.5">5 Battalions (820 Men)</div>
+          </div>
+          <div>
+            <div className="text-slate-500 text-[11px]">Ingress Routes</div>
+            <div className="text-lg font-bold text-[#0F4C81] mt-0.5">3 Corridors + Air</div>
+          </div>
+          <div>
+            <div className="text-slate-500 text-[11px]">Vulnerable Chokes</div>
+            <div className="text-lg font-bold text-amber-600 mt-0.5">5 Monitored Points</div>
+          </div>
+          <div>
+            <div className="text-slate-500 text-[11px]">Monitored Population</div>
+            <div className="text-lg font-bold text-rose-600 mt-0.5">~109,900 Citizens</div>
+          </div>
+          <div>
+            <div className="text-slate-500 text-[11px]">Shelters Registered</div>
+            <div className="text-lg font-bold text-emerald-600 mt-0.5">{shelters.length} Shelters (11,850 Cap)</div>
+          </div>
+        </div>
 
       {/* Operational Navigation Tabs */}
       <div className="flex flex-wrap items-center gap-2 border-b border-slate-200 pb-2">
@@ -2102,13 +2126,20 @@ export default function ImmediateActionsPage() {
                   Receives live SOS distress beacons transmitted from our companion mobile application.
                 </p>
               </div>
-              <button
-                onClick={handleSimulateMobileSos}
-                className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-white font-semibold text-xs flex items-center gap-1.5 self-start sm:self-center"
-              >
-                <span className="material-symbols-outlined text-sm">add_alert</span>
-                <span>Simulate Inbound SOS from Mobile App</span>
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={async () => {
+                    try {
+                      const sosRes = await immediateActionsService.getSosAlerts();
+                      if (sosRes?.data) setSosAlerts(sosRes.data);
+                    } catch (_) {}
+                  }}
+                  className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs flex items-center gap-1 self-start sm:self-center border border-slate-300"
+                  title="Refresh SOS feed"
+                >
+                  <span className="material-symbols-outlined text-sm">refresh</span>
+                </button>
+              </div>
             </div>
 
             <div className="space-y-3">
@@ -2142,14 +2173,10 @@ export default function ImmediateActionsPage() {
                   >
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-slate-200/80">
                       <div className="flex items-center gap-2">
-                        {isReal ? (
+                        {isReal && (
                           <span className="text-[10px] font-bold px-2 py-0.5 rounded border border-red-500 bg-red-100 text-red-800 flex items-center gap-1">
                             <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
                             REAL — BLE MESH
-                          </span>
-                        ) : (
-                          <span className="text-[10px] font-bold px-2 py-0.5 rounded border border-orange-500 bg-orange-100 text-orange-800">
-                            DEMO — SIMULATED
                           </span>
                         )}
                         <span className="font-bold text-sm text-slate-900">{sos.name}</span>
@@ -2372,6 +2399,8 @@ export default function ImmediateActionsPage() {
         onClose={() => setCallModalOpen(false)}
         defaultNumbers={TARGET_NUMBERS}
       />
+      </>
+      )}
     </div>
   );
 }

@@ -8,9 +8,9 @@ import riskService from '../services/riskService';
 
 export default function AppLayout() {
   const [summary, setSummary] = useState(null);
-  const [activeAlertsCount, setActiveAlertsCount] = useState(2);
-  const [dataQuality, setDataQuality] = useState('COMPLETE');
-  const [lastUpdated, setLastUpdated] = useState('01:32 AM IST');
+  const [activeAlertsCount, setActiveAlertsCount] = useState(0);
+  const [dataQuality, setDataQuality] = useState('CHECKING');
+  const [lastUpdated, setLastUpdated] = useState('Unavailable');
 
   useEffect(() => {
     async function fetchSummary() {

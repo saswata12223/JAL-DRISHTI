@@ -28,8 +28,8 @@ export default function RiskTrendPanel({ data }) {
   return (
     <PanelCard
       icon="trending_up"
-      title="Flood Risk Probability Trend"
-      subtitle="Predicted flash flood probability over the selected window"
+      title="Flood Model Probability Trend"
+      subtitle="Predicted flash Model Probability over the selected window"
       badge={
         <span className="text-[12px] font-bold font-mono text-red-500 bg-red-500/10 border border-red-500/20 px-2 py-0.5 rounded-md">
           P = {current}%
@@ -63,7 +63,7 @@ export default function RiskTrendPanel({ data }) {
                 fontSize: '11px',
                 color: tooltipText,
               }}
-              formatter={(val) => [`${val}%`, 'Risk Probability']}
+              formatter={(val) => [`${val}%`, 'Model Probability']}
             />
             <ReferenceLine
               y={40}

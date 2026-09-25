@@ -66,7 +66,7 @@ export default function RainfallHistoryTrendChart({ historyData = [], currentFor
           </span>
           <div>
             <h3 className="text-[13px] font-bold text-[#102A2E] uppercase tracking-wider flex items-center gap-2">
-              Rainfall Intensity &amp; Flood Probability Trend
+              Rainfall Intensity &amp; Model Probability Trend
             </h3>
             <span className="text-[10.5px] text-[#5F777C] font-medium">
               Sensor-derived intensity proxy vs. ML forecasting probability curve
@@ -126,7 +126,7 @@ export default function RainfallHistoryTrendChart({ historyData = [], currentFor
             <Line
               type="monotone"
               dataKey="floodProb"
-              name="Forecast Flood Probability (%)"
+              name="Forecast Model Probability (%)"
               stroke="#ef4444"
               strokeWidth={2.5}
               dot={{ r: 3, fill: '#ef4444' }}

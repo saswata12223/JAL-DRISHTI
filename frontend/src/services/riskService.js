@@ -1,8 +1,11 @@
-import api from './api';
+﻿import api from './api';
 
 export const riskService = {
   // Get latest multi-signal risk decisions across Uttarakhand
   getLatestDecisions: (params = {}) => api.get('/risk/latest', { params }),
+
+  // Get historical / offline risk decisions from verified Phase 12 ML output
+  getOfflineDecisions: (params = {}) => api.get('/risk/offline', { params }),
 
   // Get state-wide executive risk summary
   getRiskSummary: () => api.get('/risk/summary'),
@@ -14,7 +17,7 @@ export const riskService = {
   getRiskPolicy: () => api.get('/risk/policy'),
 
   // Get decision for a specific station
-  getStationDecision: (stationId) => api.get(`/risk/${stationId}`),
+  getStationDecision: (stationId) => api.get(/risk/ + stationId),
 
   // Get sequential time-series risk evaluations
   getRiskTimeseries: (spatialId, limit = 50) =>

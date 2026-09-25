@@ -2,13 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import riskService from '../../services/riskService';
 import { animate } from 'animejs';
 
-const DEMO_ALERTS = [
-  { id: '1', area: 'RISHIKESH', severity: 'HIGH', message: 'Water Stage Approaching Warning Threshold (4.2m)' },
-  { id: '2', area: 'DEVPRAYAG', severity: 'EXTREME', message: 'High Runoff Velocity Detected - SCS-CN Q=85mm' },
-  { id: '3', area: 'JOSHIMATH', severity: 'HIGH', message: 'Himalayan Catchment Saturation > 92%' },
-  { id: '4', area: 'ALAKNANDA BASIN', severity: 'EXTREME', message: 'Heavy Rainband 48mm/h Active Over Headwaters' },
-  { id: '5', area: 'CHAMOLI', severity: 'MODERATE', message: 'Elevated Hydrograph Trend Observed' },
-];
+const DEMO_ALERTS = [];
 
 export default function EmergencyTickerRibbon() {
   const [alerts, setAlerts] = useState(DEMO_ALERTS);
@@ -31,7 +25,7 @@ export default function EmergencyTickerRibbon() {
           setIsLive(true);
         }
       } catch (err) {
-        console.warn('Landing ticker live alert fetch fallback to demo alerts:', err);
+        console.warn('Landing ticker live alert fetch failed:', err);
       }
     }
 
@@ -74,7 +68,7 @@ export default function EmergencyTickerRibbon() {
         </span>
         <span className="w-1.5 h-1.5 rounded-full bg-[#DC2626] animate-ping" />
         <span className="text-[9px] font-bold text-[#DC2626]/80 border-l border-red-200 pl-2 hidden sm:inline">
-          {isLive ? 'LIVE DATA' : 'DEMO TICKER'}
+          {isLive ? 'LIVE DATA' : 'NO ALERTS'}
         </span>
       </div>
 

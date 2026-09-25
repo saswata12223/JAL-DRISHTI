@@ -1,69 +1,120 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { animate, stagger } from 'animejs';
-import StatCard from '../components/common/StatCard';
-import RiskOverviewMap from '../components/map/RiskOverviewMap';
+import { useLocation } from '../context/LocationContext';
+import IndiaExplorerMap from '../components/map/IndiaExplorerMap';
+import LocationCapabilityCard from '../components/common/LocationCapabilityCard';
+import LocationSearch from '../components/common/LocationSearch';
 import DecisionIntelligenceCard from '../components/decision/DecisionIntelligenceCard';
+import StatCard from '../components/common/StatCard';
 import DashboardTrends from '../components/charts/DashboardTrends';
 import riskService from '../services/riskService';
 import stationsService from '../services/stationsService';
+import { loadSummary, loadModelDecisions } from '../services/modelIntelligenceService';
+import { SEARCH_INDEX } from '../utils/stateCoordinates';
+
+// Default quick-select states for Pan-India exploration
+const DEFAULT_PINNED = [
+  'Uttarakhand', 'Himachal Pradesh', 'Jammu & Kashmir', 
+  'Sikkim', 'Arunachal Pradesh', 'Meghalaya', 'Maharashtra', 'Kerala'
+];
 
 export default function DashboardPage() {
+  const { selectedState, selectedDistrict, selectState, selectDistrict, capabilities, breadcrumb, clearSelection } = useLocation();
+  const containerRef = useRef(null);
+
+  // Data state
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(false);
-  const [lastUpdatedTime, setLastUpdatedTime] = useState(null);
-  const containerRef = useRef(null);
-
-  const [summaryData, setSummaryData] = useState({
-    activeExtreme: null,
-    activeHigh: null,
-    activeAlerts: null,
-  });
-
-  const [selectedLocation, setSelectedLocation] = useState({
-    name: 'Alaknanda River Basin (Rishikesh)',
-    lat: 30.108,
-    lon: 78.298,
-    mlProbability: 0.94,
-    rainfall: 'HIGH',
-    soilSaturation: 'HIGH',
-    cwcStage: 'DANGER',
-    runoff: 'HIGH',
-    finalRisk: 'EXTREME',
-  });
-
+  const [lastUpdatedTime, setLastUpdatedTime] = useState('');
+  const [summaryData, setSummaryData] = useState({ maxProb: null, highExtreme: null, maxRain: null, criticalWater: null });
   const [stationsList, setStationsList] = useState([]);
+  const [selectedStation, setSelectedStation] = useState(null);
 
-  // Load Dashboard Data from Backend Services
+  // Custom Pinned States state
+  const [pinnedStates, setPinnedStates] = useState(() => {
+    try {
+      const saved = localStorage.getItem('jaldrishti_pinned_states');
+      if (!saved) return DEFAULT_PINNED;
+      const parsed = JSON.parse(saved);
+      return Array.isArray(parsed) ? parsed : DEFAULT_PINNED;
+    } catch (e) {
+      return DEFAULT_PINNED;
+    }
+  });
+  const [showQuickAccessEditor, setShowQuickAccessEditor] = useState(false);
+  const editorRef = useRef(null);
+
+  const ALL_STATES = SEARCH_INDEX.filter(item => item.type === 'State' || item.type === 'UT')
+    .sort((a, b) => a.label.localeCompare(b.label));
+
+  // Close editor on outside click
+  useEffect(() => {
+    function onClickOutside(e) {
+      if (editorRef.current && !editorRef.current.contains(e.target)) {
+        setShowQuickAccessEditor(false);
+      }
+    }
+    document.addEventListener('mousedown', onClickOutside);
+    return () => document.removeEventListener('mousedown', onClickOutside);
+  }, []);
+
+  const togglePinnedState = (stateName) => {
+    setPinnedStates(prev => {
+      const safePrev = Array.isArray(prev) ? prev : DEFAULT_PINNED;
+      let updated;
+      if (safePrev.includes(stateName)) {
+        updated = safePrev.filter(s => s !== stateName);
+      } else {
+        updated = [...safePrev, stateName];
+      }
+      localStorage.setItem('jaldrishti_pinned_states', JSON.stringify(updated));
+      return updated;
+    });
+  };
+
+  // Derive ML availability from location context
+  const isUttarakhand = selectedState === 'Uttarakhand' || !selectedState;
+  const mlEnabled = capabilities?.historical_ml?.available ?? false;
+
+  // Load dashboard data — only fetches UK ML data when Uttarakhand selected
   useEffect(() => {
     let abortController = new AbortController();
+    let interval;
 
-    async function loadDashboardData(isRefresh = false) {
+    async function loadData(isRefresh = false) {
       try {
         if (!isRefresh) setLoading(true);
         else setRefreshing(true);
         setError(false);
 
-        const [summaryRes, alertsRes, stationsRes, latestDecisionsRes] = await Promise.allSettled([
-          riskService.getRiskSummary(),
+        const [summaryRes, alertsRes, stationsRes, decisionsRes] = await Promise.allSettled([
+          loadSummary(),
           riskService.getActiveAlerts(),
           stationsService.getStations(),
-          riskService.getLatestDecisions(),
+          loadModelDecisions(),
         ]);
 
         if (abortController.signal.aborted) return;
-        
-        let anySuccess = false;
 
+        let anySuccess = false;
         let riskDecisionMap = {};
-        if (latestDecisionsRes.status === 'fulfilled' && latestDecisionsRes.value?.data) {
+        let maxProb = 0, maxRain = 0, calcHighExtreme = 0, calcCriticalWater = 0;
+
+        if (decisionsRes.status === 'fulfilled' && decisionsRes.value?.decisions) {
           anySuccess = true;
-          const decisions = latestDecisionsRes.value.data;
+          const decisions = decisionsRes.value.decisions;
+          if (Array.isArray(decisions) && decisions.length > 0) {
+            maxProb = Math.max(0, ...decisions.map(d => d.flood_probability || 0));
+            maxRain = Math.max(0, ...decisions.map(d => d.rainfall_1h_mm || 0));
+          }
           if (Array.isArray(decisions)) {
             decisions.forEach(d => {
-              if (d.spatial_id) {
-                riskDecisionMap[d.spatial_id] = d;
-              }
+              if (d.spatial_id) riskDecisionMap[d.spatial_id] = d;
+              const risk = d.final_risk_class || d.alert_priority || 'LOW';
+              if (['HIGH', 'EXTREME', 'CRITICAL', 'WARNING'].includes(risk)) calcHighExtreme++;
+              const cwc = d.cwc_threshold_status || 'NORMAL';
+              if (['DANGER_ZONE', 'ABOVE_HFL', 'DANGER'].includes(cwc)) calcCriticalWater++;
             });
           }
         }
@@ -74,9 +125,8 @@ export default function DashboardPage() {
           const mapped = rawStations.map((st, i) => {
             const dec = riskDecisionMap[st.station_id] || {};
             const risk = dec.final_risk_class || st.latest_alert_stage || 'LOW';
-            const prob = dec.flood_probability !== undefined ? dec.flood_probability : 0.12;
-            const stage = dec.cwc_threshold_status || st.latest_alert_stage || 'NORMAL';
-
+            const prob = dec.flood_probability !== undefined ? dec.flood_probability : null;
+            const rainfallMm = dec.rainfall_1h_mm !== undefined ? dec.rainfall_1h_mm : 0;
             return {
               id: st.station_id || `STN-${i}`,
               name: st.station_name,
@@ -84,171 +134,259 @@ export default function DashboardPage() {
               river: st.river_name || 'River Basin',
               lat: st.latitude,
               lon: st.longitude,
-              risk: risk,
-              prob: prob,
-              stage: stage,
+              risk, prob,
+              stage: dec.cwc_threshold_status || st.latest_alert_stage || 'NORMAL',
+              rainfall: rainfallMm > 50 ? 'CRITICAL' : rainfallMm > 25 ? 'HIGH' : 'NORMAL',
+              soilSaturation: dec.soil_saturation_index ? `${Math.round(dec.soil_saturation_index * 100)}%` : null,
+              runoff: dec.scs_direct_runoff_q_mm > 30 ? 'HIGH' : 'NORMAL',
+              cwcStage: dec.cwc_threshold_status || 'NORMAL',
+              finalRisk: risk,
             };
           });
           setStationsList(mapped);
         }
 
-        if (summaryRes.status === 'fulfilled' && summaryRes.value?.data) {
+        if (summaryRes.status === 'fulfilled' && summaryRes.value?.summary) {
           anySuccess = true;
-          const s = summaryRes.value.data;
-          
-          const extCount = s.risk_class_counts?.EXTREME !== undefined ? s.risk_class_counts.EXTREME : null;
-          const highCount = s.risk_class_counts?.HIGH !== undefined ? s.risk_class_counts.HIGH : null;
-          
-          let alertsCount = null;
-          if (s.alert_priority_counts?.CRITICAL !== undefined || s.alert_priority_counts?.WARNING !== undefined) {
-             alertsCount = (s.alert_priority_counts?.CRITICAL || 0) + (s.alert_priority_counts?.WARNING || 0);
-          }
-
-          setSummaryData({
-            activeExtreme: extCount,
-            activeHigh: highCount,
-            activeAlerts: alertsCount,
-          });
-          
+          const s = summaryRes.value.summary;
           if (s.generated_at_utc) {
-             const serverTime = new Date(s.generated_at_utc);
-             const timeString = serverTime.toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata', hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' }) + ' IST';
-             setLastUpdatedTime(timeString);
+            const serverTime = new Date(s.generated_at_utc);
+            setLastUpdatedTime(serverTime.toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata', hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' }) + ' IST');
           }
         }
 
-        if (alertsRes.status === 'fulfilled' && alertsRes.value?.data?.alerts) {
-          anySuccess = true;
-          const rawAlerts = alertsRes.value.data.alerts;
-          if (Array.isArray(rawAlerts) && rawAlerts.length > 0) {
-            const topAlert = rawAlerts[0];
-            const level = topAlert.final_risk_class || (topAlert.alert_priority === 'CRITICAL' ? 'EXTREME' : 'HIGH');
-            setSelectedLocation({
-              name: topAlert.station_name ? `${topAlert.station_name} Basin` : `${topAlert.district} Catchment`,
-              lat: topAlert.latitude || 30.108,
-              lon: topAlert.longitude || 78.298,
-              mlProbability: topAlert.flood_probability || 0.88,
-              rainfall: topAlert.rainfall_intensity_mmh > 50 ? 'CRITICAL' : topAlert.rainfall_intensity_mmh > 25 ? 'HIGH' : 'NORMAL',
-              soilSaturation: topAlert.soil_saturation_pct > 80 ? 'HIGH' : 'MODERATE',
-              cwcStage: topAlert.cwc_threshold_status || (level === 'EXTREME' ? 'DANGER' : 'WARNING'),
-              runoff: topAlert.direct_runoff_q_mm > 30 ? 'HIGH' : 'NORMAL',
-              finalRisk: level,
-            });
-          }
-        }
-        
-        if (!anySuccess) {
-          setError(true);
-        }
+        setSummaryData({ maxProb, maxRain, highExtreme: calcHighExtreme, criticalWater: calcCriticalWater });
+        if (!anySuccess) setError(true);
       } catch (e) {
-        if (!abortController.signal.aborted) {
-          console.warn('Dashboard live fetch error:', e);
-          setError(true);
-        }
+        if (!abortController.signal.aborted) { setError(true); }
       } finally {
-        if (!abortController.signal.aborted) {
-          setLoading(false);
-          setRefreshing(false);
-        }
+        if (!abortController.signal.aborted) { setLoading(false); setRefreshing(false); }
       }
     }
 
-    loadDashboardData(false);
-    const interval = setInterval(() => {
-      loadDashboardData(true);
-    }, 30000);
-
-    return () => {
-      clearInterval(interval);
-      abortController.abort();
-    };
+    loadData(false);
+    interval = setInterval(() => loadData(true), 30000);
+    return () => { clearInterval(interval); abortController.abort(); };
   }, []);
 
-  // Anime.js 4.5.0 Mount Animations
+  // Animate KPI cards on load
   useEffect(() => {
     if (!loading && containerRef.current) {
-      animate('.kpi-card', {
-        opacity: [0, 1],
-        translateY: [16, 0],
-        delay: stagger(70),
-        duration: 450,
-        easing: 'easeOutQuad',
-      });
+      animate('.kpi-card', { opacity: [0, 1], translateY: [16, 0], delay: stagger(70), duration: 450, easing: 'easeOutQuad' });
     }
   }, [loading]);
 
-  const handleSelectLocation = (loc) => {
-    setSelectedLocation({
-      name: `${loc.name} (${loc.river || 'River Basin'})`,
-      lat: loc.lat || 30.0668,
-      lon: loc.lon || 79.0193,
-      mlProbability: loc.prob || 0.85,
-      rainfall: loc.prob > 0.7 ? 'CRITICAL' : loc.prob > 0.4 ? 'HIGH' : 'NORMAL',
-      soilSaturation: loc.prob > 0.7 ? 'HIGH' : 'MODERATE',
-      cwcStage: loc.stage || 'NORMAL',
-      runoff: loc.prob > 0.4 ? 'HIGH' : 'NORMAL',
-      finalRisk: loc.risk || 'LOW',
+  // Handle station selection from map
+  const handleSelectStation = useCallback((st) => {
+    setSelectedStation({
+      name: `${st.name} (${st.river || 'River'})`,
+      lat: st.lat,
+      lon: st.lon,
+      mlProbability: st.prob,
+      rainfall: st.rainfall,
+      soilSaturation: st.soilSaturation,
+      cwcStage: st.cwcStage || st.stage,
+      runoff: st.runoff,
+      finalRisk: st.finalRisk || st.risk,
+      adminContext: null,
     });
-  };
+    if (st.district) selectDistrict(st.district);
+  }, [selectDistrict]);
+
+  const decisionLoc = selectedStation || (selectedDistrict ? {
+    name: `${selectedDistrict}${selectedState ? ', ' + selectedState : ''}`,
+    mlProbability: null, rainfall: null, soilSaturation: null,
+    cwcStage: null, runoff: null, finalRisk: null, adminContext: null,
+  } : (selectedState && selectedState !== 'Uttarakhand') ? {
+    name: selectedState,
+    mlProbability: null, rainfall: null, soilSaturation: null,
+    cwcStage: null, runoff: null, finalRisk: null, adminContext: { ml: { available: false, reason: `OUTSIDE_PROJECT_REGION — ${selectedState} not covered by Uttarakhand ML model` } },
+  } : null);
 
   return (
-    <div ref={containerRef} className="flex flex-col gap-8 w-full font-sans select-none">
-      {/* 1. Primary Operational Section: 70% Map + 30% Risk Decision Sidebar */}
-      <div className="grid grid-cols-1 lg:grid-cols-[7fr_3fr] gap-6 w-full items-stretch min-h-[500px]">
-        {/* Left 70%: Primary Risk Map */}
-        <div className="flex flex-col w-full h-full min-h-[480px] lg:min-h-[520px]">
-          <RiskOverviewMap
-            stations={stationsList.length > 0 ? stationsList : undefined}
-            onSelectLocation={handleSelectLocation}
-            selectedLocation={selectedLocation}
-          />
-        </div>
+    <div ref={containerRef} className="flex flex-col gap-6 w-full font-sans select-none">
 
-        {/* Right 30%: Risk Decision & Telemetry Sidebar */}
-        <div className="flex flex-col gap-6 w-full h-full">
-          <DecisionIntelligenceCard
-            locationName={selectedLocation.name}
-            mlProbability={selectedLocation.mlProbability}
-            rainfallStatus={selectedLocation.rainfall}
-            soilSaturationStatus={selectedLocation.soilSaturation}
-            cwcStage={selectedLocation.cwcStage}
-            runoffStatus={selectedLocation.runoff}
-            finalRiskState={selectedLocation.finalRisk}
-          />
+      {/* Location breadcrumb + search bar */}
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+        {/* Breadcrumb */}
+        <div className="flex items-center gap-1 flex-wrap flex-1">
+          {breadcrumb.map((crumb, i) => (
+            <React.Fragment key={crumb.label}>
+              {i > 0 && <span className="text-slate-300 text-[11px]">›</span>}
+              <button
+                onClick={crumb.onClick || undefined}
+                disabled={!crumb.onClick}
+                className={`text-[12px] font-semibold transition-colors rounded px-1 py-0.5 ${
+                  crumb.active
+                    ? 'text-slate-900 bg-slate-100 cursor-default'
+                    : 'text-cyan-600 hover:text-cyan-800 hover:bg-cyan-50 cursor-pointer'
+                }`}
+              >
+                {crumb.label}
+              </button>
+            </React.Fragment>
+          ))}
+          {refreshing && <span className="text-[10px] text-slate-400 ml-2 font-medium">Updating…</span>}
+          {lastUpdatedTime && !refreshing && (
+            <span className="text-[10px] text-slate-400 ml-2 font-mono">{lastUpdatedTime}</span>
+          )}
+        </div>
+        {/* Search */}
+        <div className="w-full sm:max-w-xs">
+          <LocationSearch />
         </div>
       </div>
 
-      {/* 2. Metric Summary Row (3 Equal-Width Aligned Cards) */}
-      <div className="flex flex-col gap-2 w-full">
-        <div className="flex items-center justify-end px-2">
-          <span className="text-[11px] font-medium text-slate-500">
-            {error ? 'Live update unavailable — showing last successful data' : (refreshing ? 'Updating...' : (lastUpdatedTime ? `Last updated: ${lastUpdatedTime}` : ''))}
-          </span>
+      {/* Quick state tiles */}
+      <div className="flex gap-2 flex-wrap items-center">
+        {(Array.isArray(pinnedStates) ? pinnedStates : DEFAULT_PINNED).map(stateName => {
+          const isActive = selectedState === stateName;
+          const stateData = SEARCH_INDEX.find(s => s.label === stateName);
+          const hasML = stateData?.mlAvailable;
+          return (
+            <button
+              key={stateName}
+              onClick={() => isActive ? clearSelection() : selectState(stateName)}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-bold transition-all border ${
+                isActive
+                  ? 'bg-[#0A2540] text-white border-[#0A2540] shadow-sm'
+                  : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300 hover:text-slate-900'
+              }`}
+            >
+              {stateName}
+              {hasML && <span className={`w-1.5 h-1.5 rounded-full ${isActive ? 'bg-cyan-400' : 'bg-emerald-500'}`} title="ML available" />}
+            </button>
+          );
+        })}
+        <div className="relative" ref={editorRef}>
+          <button
+            onClick={() => setShowQuickAccessEditor(!showQuickAccessEditor)}
+            className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-[11px] font-bold text-slate-400 hover:text-slate-600 border border-slate-200 hover:border-slate-300 transition-all bg-slate-50"
+            title="Customize Quick Access"
+          >
+            <span className="material-symbols-outlined text-[16px]">tune</span>
+            <span className="hidden sm:inline">Edit</span>
+          </button>
+
+          {showQuickAccessEditor && (
+            <div className="absolute top-full left-0 mt-2 w-[220px] bg-white border border-slate-200 rounded-xl shadow-xl z-[500] max-h-[300px] overflow-y-auto p-2">
+              <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 px-2">Customize Quick Access</div>
+              {ALL_STATES.map(s => (
+                <label key={s.label} className="flex items-center gap-2 px-2 py-1.5 hover:bg-slate-50 rounded cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={(Array.isArray(pinnedStates) ? pinnedStates : DEFAULT_PINNED).includes(s.label)}
+                    onChange={() => togglePinnedState(s.label)}
+                    className="rounded text-cyan-600 focus:ring-cyan-500"
+                  />
+                  <span className="text-[12px] font-medium text-slate-700">{s.label}</span>
+                </label>
+              ))}
+            </div>
+          )}
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 w-full">
-          <StatCard
-            label="EXTREME"
-            value={loading ? '—' : (summaryData.activeExtreme ?? '—')}
-            icon="warning"
-            type="extreme"
+
+        <button
+          onClick={clearSelection}
+          className="px-3 py-1.5 rounded-xl text-[11px] font-bold text-slate-400 hover:text-slate-700 border border-dashed border-slate-200 hover:border-slate-300 transition-all ml-auto sm:ml-0"
+        >
+          Reset
+        </button>
+      </div>
+
+      {/* Main grid: Map + Capability/Decision sidebar */}
+      <div className="grid grid-cols-1 lg:grid-cols-[7fr_3fr] gap-6 items-stretch min-h-[520px]">
+        {/* Map */}
+        <div className="min-h-[480px] lg:min-h-[520px]">
+          <IndiaExplorerMap
+            stations={stationsList}
+            onSelectStation={handleSelectStation}
           />
-          <StatCard
-            label="HIGH"
-            value={loading ? '—' : (summaryData.activeHigh ?? '—')}
-            icon="trending_up"
-            type="high"
-          />
-          <StatCard
-            label="ALERTS"
-            value={loading ? '—' : (summaryData.activeAlerts ?? '—')}
-            icon="notifications"
-            type="alerts"
-          />
+        </div>
+
+        {/* Sidebar: Capability + Decision */}
+        <div className="flex flex-col gap-4">
+          {/* Location Capability Card */}
+          <LocationCapabilityCard />
+
+          {/* Decision Intelligence Card — only when a station is selected in Uttarakhand */}
+          {decisionLoc && (
+            <DecisionIntelligenceCard
+              locationName={decisionLoc.name}
+              mlProbability={mlEnabled ? decisionLoc.mlProbability : null}
+              rainfallStatus={mlEnabled ? decisionLoc.rainfall : null}
+              soilSaturationStatus={mlEnabled ? decisionLoc.soilSaturation : null}
+              cwcStage={mlEnabled ? decisionLoc.cwcStage : null}
+              runoffStatus={mlEnabled ? decisionLoc.runoff : null}
+              finalRiskState={mlEnabled ? decisionLoc.finalRisk : null}
+              adminContext={!mlEnabled ? { ml: { available: false, reason: `OUTSIDE_PROJECT_REGION — ${selectedState || 'selected area'} not covered by Uttarakhand ML model` } } : null}
+            />
+          )}
+
+          {/* If no selection, show prompt */}
+          {!decisionLoc && (
+            <div className="bg-white border border-slate-200 rounded-2xl p-6 flex flex-col items-center text-center gap-3">
+              <span className="material-symbols-outlined text-[28px] text-slate-300">touch_app</span>
+              <div>
+                <div className="text-[12px] font-bold text-slate-600">Select a Location</div>
+                <p className="text-[10.5px] text-slate-400 mt-1 leading-relaxed">
+                  Click any state on the map or use the search to explore capabilities. In Uttarakhand, you can click monitoring stations for historical ML risk data.
+                </p>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* 3. Analytical Chart Row (2 Equal-Width Aligned Cards) */}
-      <DashboardTrends />
+      {/* KPI Summary Row — only meaningful for Uttarakhand */}
+      {isUttarakhand && (
+        <div className="flex flex-col gap-2 w-full">
+          <div className="flex items-center gap-2">
+            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Uttarakhand Historical ML Summary</span>
+            <span className="text-[9px] bg-amber-50 border border-amber-200 text-amber-700 font-bold px-1.5 py-0.5 rounded">Historical — not live</span>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 w-full">
+            <div className="kpi-card"><StatCard label="Max Model Probability" value={loading ? '—' : (summaryData.maxProb !== null ? `${Math.round(summaryData.maxProb * 100)}%` : '—')} subtext="Highest monitored station" icon="crisis_alert" type="extreme" /></div>
+            <div className="kpi-card"><StatCard label="High / Extreme Locations" value={loading ? '—' : (summaryData.highExtreme ?? '—')} subtext="Historical ML classification" icon="warning" type="alerts" /></div>
+            <div className="kpi-card"><StatCard label="Peak Rainfall" value={loading ? '—' : (summaryData.maxRain !== null ? `${Math.round(summaryData.maxRain)} mm/h` : '—')} subtext="From calibrated reference" icon="water_drop" type="default" /></div>
+            <div className="kpi-card"><StatCard label="Critical Water Levels" value={loading ? '—' : (summaryData.criticalWater ?? '—')} subtext="CWC danger threshold" icon="waves" type="extreme" /></div>
+          </div>
+        </div>
+      )}
+
+      {/* Non-Uttarakhand region message */}
+      {selectedState && !isUttarakhand && (
+        <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6 flex items-start gap-4">
+          <span className="material-symbols-outlined text-[24px] text-slate-400 shrink-0 mt-0.5">info</span>
+          <div>
+            <div className="text-[13px] font-bold text-slate-700 mb-1">
+              {selectedState} — GIS Coverage Available
+            </div>
+            <p className="text-[12px] text-slate-500 leading-relaxed">
+              Administrative GIS boundaries from the Survey of India dataset are available for {selectedState}.
+              Historical ML risk outputs and live telemetry are not currently available for this region —
+              the validated ML model covers Uttarakhand only.
+            </p>
+            <div className="flex items-center gap-3 mt-3">
+              <span className="flex items-center gap-1.5 text-[10.5px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-1 rounded-lg">
+                <span className="material-symbols-outlined text-[12px]">check_circle</span>
+                GIS Boundaries ✓
+              </span>
+              <span className="flex items-center gap-1.5 text-[10.5px] font-semibold text-slate-500 bg-slate-100 border border-slate-200 px-2 py-1 rounded-lg">
+                <span className="material-symbols-outlined text-[12px]">cancel</span>
+                ML Model — Not available
+              </span>
+              <span className="flex items-center gap-1.5 text-[10.5px] font-semibold text-slate-500 bg-slate-100 border border-slate-200 px-2 py-1 rounded-lg">
+                <span className="material-symbols-outlined text-[12px]">cancel</span>
+                Live Telemetry — Not available
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Analytics trends — only for UK */}
+      {isUttarakhand && <DashboardTrends />}
     </div>
   );
 }

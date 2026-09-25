@@ -1,0 +1,9 @@
+{
+  "step_index": 3684,
+  "source": "MODEL",
+  "type": "RUN_COMMAND",
+  "status": "DONE",
+  "exit_code": 0,
+  "created_at": "2026-09-15T16:20:47Z",
+  "content": "Created At: 2026-09-15T21:50:47+05:30\nCompleted At: 2026-09-15T21:50:50+05:30\n\n\t\t\t\tThe command exited with code 0.\n\t\t\t\tOutput:\n\t\t\t\t=== raw rainfall columns ===\r\n['SlNo', 'Station', 'Agency', 'State LGD Code', 'State', 'District LGD Code', 'District', 'Tehsil', 'Block', 'Village', 'River', 'Basin', 'Tributary', 'Subtributary', 'SubSubtributary', 'Local River', 'Latitude', 'Longitude', 'Data Acquisition Time', 'Telemetry Hourly Rainfall (mm)']\r\n   SlNo   Station  ... Data Acquisition Time  Telemetry Hourly Rainfall (mm)\r\n0     1  Almora_1  ...      05-10-2022 10:00                               1\r\n1     2  Almora_1  ...      05-10-2022 11:00                               1\r\n\r\n[2 rows x 20 columns]\r\nphase7c4d contents: ['association_reconciliation.csv', 'catchment_inventory.csv', 'event_catchment_intersections.csv', 'event_geometry_audit.csv', 'event_identity_audit.csv', 'event_station_associations_v3.csv', 'horizon_compatibility_v2.csv', 'independent_event_diversity.csv', 'leakage_audit.csv', 'PHASE_7C4D_ASSOCIATION_RECONCILIATION.md', 'PHASE_7C4D_CATCHMENT_ASSOCIATION_REPORT.md', 'PHASE_7C4D_EVENT_DIVERSITY_REPORT.md', 'PHASE_7C4D_EVENT_GEOMETRY_AUDIT.md', 'PHASE_7C4D_EVENT_IDENTITY_REPORT.md', 'PHASE_7C4D_FINAL_AUDIT.md', 'PHASE_7C4D_HORIZON_COMPATIBILITY_REPORT.md', 'PHASE_7C4D_LEAKAGE_AUDIT.md', 'PHASE_7C4D_ML_READINESS_GATE.md', 'PHASE_7C4D_SPATIAL_DATA_INVENTORY.md', 'PHASE_7C4D_STATION_SPATIAL_AUDIT.md', 'PHASE_7C4D_TEMPORAL_OVERLAP_REPORT.md', 'readiness_gate_v3.csv', 'spatial_data_inventory.csv', 'station_spatial_inventory.csv', 'temporal_overlap_audit.csv']\r\n\n"
+}

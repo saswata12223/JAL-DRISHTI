@@ -18,7 +18,7 @@ const UTTARAKHAND_BOUNDS = [
 
 
 
-const CARTO_API_KEY = import.meta.env.VITE_CARTO_API_KEY || 'cb1_2k56_1_d8f949035bf0414f5da8a77b';
+const CARTO_API_KEY = import.meta.env.VITE_CARTO_API_KEY || '';
 
 
 
@@ -124,7 +124,7 @@ export default function TacticalActionMap({
 
       name: 'CARTO Voyager (Geospatial Light)',
 
-      url: `https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png?key=${CARTO_API_KEY}`,
+      url: CARTO_API_KEY && CARTO_API_KEY !== 'cb1_2k56_1_d8f949035bf0414f5da8a77b' ? `https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png?key=${CARTO_API_KEY}` : 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
 
       attribution: '&copy; CARTO & OpenStreetMap',
 
@@ -892,8 +892,8 @@ export default function TacticalActionMap({
                 <div className="font-sans text-xs min-w-[280px] p-1 space-y-2.5">
                   <div className="flex items-center justify-between border-b border-orange-200 pb-2">
                     <div className="flex items-center gap-1.5">
-                      <span className={`px-1.5 py-0.5 rounded text-[9px] font-bold ${sos.source === 'BLE_MESH' ? 'bg-red-100 text-red-800 border border-red-300' : 'bg-orange-100 text-orange-800 border border-orange-300'}`}>
-                        {sos.source === 'BLE_MESH' ? 'BLE_MESH - LIVE' : 'DEMO - SIMULATED'}
+                      <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-red-100 text-red-800 border border-red-300">
+                        BLE_MESH - LIVE
                       </span>
                       <span className="bg-slate-100 px-1.5 py-0.5 rounded text-[9px] text-slate-600 font-mono border border-slate-200">
                         {sos.sos_id || `SOS-${sos.id}`}

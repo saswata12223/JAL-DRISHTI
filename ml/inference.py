@@ -41,21 +41,14 @@ MODELS_DIR = ML_DIR / "models"
 
 
 # Promoted Phase 4 Candidate Artifacts (Physical 34-Predictor Contract)
-
-CANDIDATE_MODEL_PATH = MODELS_DIR / "candidate_flood_risk_model_phase4.joblib"
-
+CANDIDATE_MODEL_PATH = MODELS_DIR / "final_flood_risk_model.joblib"
+SHAP_EXPLAINER_PATH = MODELS_DIR / "shap_explainer.joblib"
 CANDIDATE_PREPROCESSOR_PATH = MODELS_DIR / "candidate_feature_preprocessor_phase4.joblib"
-
 CANDIDATE_ALLOWLIST_PATH = MODELS_DIR / "candidate_feature_allowlist_phase4.json"
 
-
-
 # Legacy Fallback Paths
-
 LEGACY_CHAMPION_MODEL_PATH = MODELS_DIR / "final_flood_risk_model.joblib"
-
 LEGACY_SCALER_PATH = MODELS_DIR / "feature_scaler.joblib"
-
 LEGACY_ALLOWLIST_PATH = ML_DIR / "model_feature_allowlist.json"
 
 
@@ -63,23 +56,14 @@ LEGACY_ALLOWLIST_PATH = ML_DIR / "model_feature_allowlist.json"
 
 
 def classify_risk(prob: float) -> str:
-
     """Categorizes continuous probability into discrete risk level."""
-
-    if prob < 0.20:
-
+    if prob < 0.15:
         return "LOW"
-
-    elif prob < 0.40:
-
+    elif prob < 0.25:
         return "MODERATE"
-
-    elif prob < 0.70:
-
+    elif prob < 0.50:
         return "HIGH"
-
     else:
-
         return "EXTREME"
 
 
@@ -151,53 +135,55 @@ class FloodRiskInferenceEngine:
 
 
         self._model = joblib.load(self.model_path)
+        if SHAP_EXPLAINER_PATH.exists():
+            try:
+                self._explainer = joblib.load(SHAP_EXPLAINER_PATH)
+            except Exception as e:
+                self._explainer = None
+        else:
+            self._explainer = None
+
+        if hasattr(self._model, "feature_names_in_"):
+            self._predictors = list(self._model.feature_names_in_)
+            self._is_phase4 = False  # XGBoost handles raw features
+        else:
+            # Check if loading Phase 4 candidate model format
+            if self.preprocessor_path and self.preprocessor_path.exists():
+                self._preprocessor = joblib.load(self.preprocessor_path)
+                self._is_phase4 = True
+
+            with open(self.allowlist_path, "r", encoding="utf-8") as f:
+                allowlist = json.load(f)
+
+            if "predictors" in allowlist:
+                self._predictors = list(allowlist["predictors"])
+                self._is_phase4 = True
+
+            elif "allowed_predictors" in allowlist:
+
+                base_preds = [p["feature"] for p in allowlist["allowed_predictors"]]
+
+                physics_preds = [
+
+                    "scs_potential_retention_s_mm",
+
+                    "scs_initial_abstraction_ia_mm",
+
+                    "scs_direct_runoff_q_mm",
+
+                    "scs_peak_runoff_potential",
+
+                ]
+
+                self._predictors = base_preds + physics_preds
+
+            else:
+                raise ValueError("Could not parse predictors from allowlist.")
 
 
 
-        # Check if loading Phase 4 candidate model format
-
-        if self.preprocessor_path and self.preprocessor_path.exists():
-
-            self._preprocessor = joblib.load(self.preprocessor_path)
-
-            self._is_phase4 = True
-
-
-
-        with open(self.allowlist_path, "r", encoding="utf-8") as f:
-
-            allowlist = json.load(f)
-
-
-
-        if "predictors" in allowlist:
-
-            self._predictors = list(allowlist["predictors"])
-
-            self._is_phase4 = True
-
-        elif "allowed_predictors" in allowlist:
-
-            base_preds = [p["feature"] for p in allowlist["allowed_predictors"]]
-
-            physics_preds = [
-
-                "scs_potential_retention_s_mm",
-
-                "scs_initial_abstraction_ia_mm",
-
-                "scs_direct_runoff_q_mm",
-
-                "scs_peak_runoff_potential",
-
-            ]
-
-            self._predictors = base_preds + physics_preds
-
-
-
-        if not self._is_phase4 and LEGACY_SCALER_PATH.exists():
-
+        self._scaler = None
+        if not self._is_phase4 and LEGACY_SCALER_PATH.exists() and not hasattr(self._model, "feature_names_in_"):
             self._scaler = joblib.load(LEGACY_SCALER_PATH)
 
 
@@ -272,29 +258,21 @@ class FloodRiskInferenceEngine:
 
 
 
-    def _transform_features(self, df_input: pd.DataFrame) -> np.ndarray:
-
+    def _transform_features(self, df_input: pd.DataFrame) -> Union[np.ndarray, pd.DataFrame]:
         """Helper to reindex, impute, and scale features according to loaded model requirements."""
-
         df_reindexed = df_input.reindex(columns=self._predictors, fill_value=0.0).fillna(0.0)
-
+        
         if self._is_phase4 and self._preprocessor:
-
             imputer = self._preprocessor["imputer"]
-
             scaler = self._preprocessor["scaler"]
-
             X_imp = imputer.transform(df_reindexed)
-
             return scaler.transform(X_imp)
-
+            
         elif self._scaler is not None:
-
             return self._scaler.transform(df_reindexed)
-
+            
         else:
-
-            return df_reindexed.values
+            return df_reindexed
 
 
 
@@ -325,25 +303,34 @@ class FloodRiskInferenceEngine:
 
 
         prob = float(self._model.predict_proba(X_scaled)[0, 1])
-
         risk_class = classify_risk(prob)
 
-
+        shap_values_dict = {}
+        if self._explainer is not None:
+            try:
+                # Get SHAP values for the single sample
+                shap_vals = self._explainer(X_scaled)
+                # Ensure it's for the positive class if it returns a list or multiple dimensions
+                if isinstance(shap_vals.values, list):
+                    vals = shap_vals.values[1][0]
+                elif len(shap_vals.values.shape) == 3: # (samples, features, classes)
+                    vals = shap_vals.values[0, :, 1]
+                else:
+                    vals = shap_vals.values[0]
+                
+                for i, col in enumerate(self._predictors):
+                    shap_values_dict[col] = float(vals[i])
+            except Exception as e:
+                pass
 
         return {
-
             "probability": round(prob, 4),
-
             "risk_class": risk_class,
-
-            "decision_threshold": 0.40,
-
-            "is_alarm": bool(prob >= 0.40),
-
+            "decision_threshold": 0.25,
+            "is_alarm": bool(prob >= 0.25),
             "scs_direct_runoff_q_mm": physics["scs_direct_runoff_q_mm"],
-
             "scs_potential_retention_s_mm": physics["scs_potential_retention_s_mm"],
-
+            "shap_values": shap_values_dict,
         }
 
 
@@ -409,11 +396,7 @@ class FloodRiskInferenceEngine:
 
 
         res = df.copy()
-
         res["prediction_probability"] = np.round(probs, 4)
-
         res["ml_risk_class"] = risk_classes
-
-        res["is_alarm"] = probs >= 0.40
-
+        res["is_alarm"] = probs >= 0.25
         return res

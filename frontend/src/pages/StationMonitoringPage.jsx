@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { useLocation } from '../context/LocationContext';
+import LocationSearch from '../components/common/LocationSearch';
 import StationTable from '../components/monitoring/StationTable';
 import StationDetailDrawer from '../components/monitoring/StationDetailDrawer';
 import stationsService from '../services/stationsService';
@@ -30,7 +32,8 @@ const DEFAULT_CWC_MONITORING = [
   { id: 'CWC_UK_020', name: 'Dehradun City', district: 'Dehradun', river: 'Bindal', lat: 30.316, lon: 78.032, risk: 'LOW', prob: 0.11, stage: 'NORMAL', waterLevel: 640.0, warningLevel: 645.0, dangerLevel: 647.0, rainfallMm: 14, status: 'ONLINE', stationType: 'CWC Hydrological Gauge', soilSaturation: '50%', runoff: 'NORMAL' },
 ];
 
-export default function StationMonitoringPage() {
+export default function StationMonitoringPage() {  const { selectedState, selectedDistrict } = useLocation();
+
   const [stations, setStations] = useState(DEFAULT_CWC_MONITORING);
   const [selectedStation, setSelectedStation] = useState(DEFAULT_CWC_MONITORING[0]);
   const [loading, setLoading] = useState(false);
@@ -146,7 +149,7 @@ export default function StationMonitoringPage() {
     setSearchTerm('');
     setStatusFilter('ALL');
     setRiskFilter('ALL');
-    setDistrictFilter('ALL');
+    setDistrictFilter(selectedDistrict ? selectedDistrict : 'ALL');
     setBasinFilter('ALL');
     setTypeFilter('ALL');
   };
@@ -163,78 +166,114 @@ export default function StationMonitoringPage() {
   const criticalCount = stations.filter((s) => s.status === 'CRITICAL').length;
   const offlineCount = stations.filter((s) => s.status === 'OFFLINE').length;
 
+  // Derive location context
+
+
+
+  const isUttarakhand = !selectedState || selectedState === 'Uttarakhand';
+
+  // Sync district filter with location context if possible
+  useEffect(() => {
+    if (selectedDistrict && districtsList.includes(selectedDistrict)) {
+      setDistrictFilter(selectedDistrict);
+    } else {
+      setDistrictFilter('ALL');
+    }
+  }, [selectedDistrict, districtsList]);
+
+
   return (
     <div className="flex flex-col gap-5 w-full">
       {/* 1. Page Header & Operational Summary KPI Strip */}
-      <div className="flex flex-col gap-4">
-        <div>
-          <h1 className="text-[17px] font-bold text-app-text-primary tracking-tight font-sans">
-            LIVE STATION MONITORING
-          </h1>
-          <p className="text-[11.5px] font-medium text-app-text-secondary">
-            Real-time hydrological, rainfall and environmental station telemetry
-          </p>
-        </div>
-
-        {/* KPI Strip */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          <div className="bg-app-surface border border-app-border p-4 rounded-xl shadow-sm flex items-center gap-3.5">
-            <div className="w-10 h-10 rounded-xl bg-indigo-500/15 text-indigo-400 border border-indigo-500/20 flex items-center justify-center shrink-0">
-              <span className="material-symbols-outlined text-[20px]">sensors</span>
-            </div>
-            <div>
-              <span className="text-[10.5px] font-bold text-app-text-muted uppercase tracking-wider block">
-                TOTAL STATIONS
-              </span>
-              <span className="text-[22px] font-bold text-app-text-primary leading-tight font-mono">
-                {stations.length}
-              </span>
-            </div>
+      <div className="flex flex-col gap-4 border-b border-slate-200 pb-5">
+        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+          <div>
+            <h1 className="text-[17px] font-bold text-app-text-primary tracking-tight font-sans">
+              LIVE STATION MONITORING
+            </h1>
+            <p className="text-[11.5px] font-medium text-app-text-secondary">
+              Real-time hydrological, rainfall and environmental station telemetry
+            </p>
           </div>
-
-          <div className="bg-app-surface border border-app-border p-4 rounded-xl shadow-sm flex items-center gap-3.5">
-            <div className="w-10 h-10 rounded-xl bg-emerald-500/15 text-emerald-500 border border-emerald-500/20 flex items-center justify-center shrink-0">
-              <span className="material-symbols-outlined text-[20px]">check_circle</span>
-            </div>
-            <div>
-              <span className="text-[10.5px] font-bold text-app-text-muted uppercase tracking-wider block">
-                ONLINE & NOMINAL
-              </span>
-              <span className="text-[22px] font-bold text-emerald-500 leading-tight font-mono">
-                {onlineCount} <span className="text-[12px] text-app-text-secondary font-normal">({Math.round((onlineCount / (stations.length || 1)) * 100)}%)</span>
-              </span>
-            </div>
-          </div>
-
-          <div className="bg-app-surface border border-app-border p-4 rounded-xl shadow-sm flex items-center gap-3.5">
-            <div className="w-10 h-10 rounded-xl bg-amber-500/15 text-amber-500 border border-amber-500/20 flex items-center justify-center shrink-0">
-              <span className="material-symbols-outlined text-[20px]">warning</span>
-            </div>
-            <div>
-              <span className="text-[10.5px] font-bold text-app-text-muted uppercase tracking-wider block">
-                WARNING / DEGRADED
-              </span>
-              <span className="text-[22px] font-bold text-amber-500 leading-tight font-mono">
-                {warningCount}
-              </span>
-            </div>
-          </div>
-
-          <div className="bg-app-surface border border-app-border p-4 rounded-xl shadow-sm flex items-center gap-3.5">
-            <div className="w-10 h-10 rounded-xl bg-red-500/15 text-red-500 border border-red-500/20 flex items-center justify-center shrink-0">
-              <span className="material-symbols-outlined text-[20px]">priority_high</span>
-            </div>
-            <div>
-              <span className="text-[10.5px] font-bold text-app-text-muted uppercase tracking-wider block">
-                CRITICAL / EXTREME
-              </span>
-              <span className="text-[22px] font-bold text-red-500 leading-tight font-mono">
-                {criticalCount}
-              </span>
-            </div>
+          <div className="w-full sm:max-w-xs shrink-0">
+            <LocationSearch />
           </div>
         </div>
+
+        {isUttarakhand && (
+          /* KPI Strip */
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-2">
+            <div className="bg-app-surface border border-app-border p-4 rounded-xl shadow-sm flex items-center gap-3.5">
+              <div className="w-10 h-10 rounded-xl bg-indigo-500/15 text-indigo-400 border border-indigo-500/20 flex items-center justify-center shrink-0">
+                <span className="material-symbols-outlined text-[20px]">sensors</span>
+              </div>
+              <div>
+                <span className="text-[10.5px] font-bold text-app-text-muted uppercase tracking-wider block">
+                  TOTAL STATIONS
+                </span>
+                <span className="text-[22px] font-bold text-app-text-primary leading-tight font-mono">
+                  {stations.length}
+                </span>
+              </div>
+            </div>
+
+            <div className="bg-app-surface border border-app-border p-4 rounded-xl shadow-sm flex items-center gap-3.5">
+              <div className="w-10 h-10 rounded-xl bg-emerald-500/15 text-emerald-500 border border-emerald-500/20 flex items-center justify-center shrink-0">
+                <span className="material-symbols-outlined text-[20px]">check_circle</span>
+              </div>
+              <div>
+                <span className="text-[10.5px] font-bold text-app-text-muted uppercase tracking-wider block">
+                  ONLINE & NOMINAL
+                </span>
+                <span className="text-[22px] font-bold text-emerald-500 leading-tight font-mono">
+                  {onlineCount} <span className="text-[12px] text-app-text-secondary font-normal">({Math.round((onlineCount / (stations.length || 1)) * 100)}%)</span>
+                </span>
+              </div>
+            </div>
+
+            <div className="bg-app-surface border border-app-border p-4 rounded-xl shadow-sm flex items-center gap-3.5">
+              <div className="w-10 h-10 rounded-xl bg-amber-500/15 text-amber-500 border border-amber-500/20 flex items-center justify-center shrink-0">
+                <span className="material-symbols-outlined text-[20px]">warning</span>
+              </div>
+              <div>
+                <span className="text-[10.5px] font-bold text-app-text-muted uppercase tracking-wider block">
+                  WARNING / DEGRADED
+                </span>
+                <span className="text-[22px] font-bold text-amber-500 leading-tight font-mono">
+                  {warningCount}
+                </span>
+              </div>
+            </div>
+
+            <div className="bg-app-surface border border-app-border p-4 rounded-xl shadow-sm flex items-center gap-3.5">
+              <div className="w-10 h-10 rounded-xl bg-red-500/15 text-red-500 border border-red-500/20 flex items-center justify-center shrink-0">
+                <span className="material-symbols-outlined text-[20px]">priority_high</span>
+              </div>
+              <div>
+                <span className="text-[10.5px] font-bold text-app-text-muted uppercase tracking-wider block">
+                  CRITICAL / EXTREME
+                </span>
+                <span className="text-[22px] font-bold text-red-500 leading-tight font-mono">
+                  {criticalCount}
+                </span>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
+
+      {!isUttarakhand ? (
+        <div className="bg-slate-50 border border-slate-200 rounded-xl p-12 flex flex-col items-center text-center gap-4 shadow-sm">
+          <span className="material-symbols-outlined text-emerald-400 text-[48px]">check_circle</span>
+          <div>
+            <h3 className="text-[15px] font-bold text-slate-700">Live telemetry unavailable for {selectedState}.</h3>
+            <p className="text-[12.5px] text-slate-500 mt-1 max-w-md">
+              Real-time sensor data and live hydrological station telemetry are currently only integrated for the Uttarakhand region.
+            </p>
+          </div>
+        </div>
+      ) : (
+        <>
 
       {/* 2. Operational Filter Toolbar */}
       <div className="bg-app-surface border border-app-border p-3.5 rounded-xl shadow-sm flex flex-wrap items-center justify-between gap-3 select-none">
@@ -363,6 +402,8 @@ export default function StationMonitoringPage() {
           />
         )}
       </div>
+      </>
+      )}
     </div>
   );
 }

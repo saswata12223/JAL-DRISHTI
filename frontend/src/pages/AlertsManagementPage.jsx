@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { useLocation } from '../context/LocationContext';
+
 import { useNavigate } from 'react-router-dom';
 import AlertPanelCard from '../components/alerts/AlertPanelCard';
 import {
@@ -208,7 +210,7 @@ function AlertDecisionPanel({ alert, onAcknowledge, onResolve }) {
         {/* Key Metrics Row */}
         <div className="grid grid-cols-3 gap-3 border-y border-app-border/60 py-4">
           <div className="flex flex-col">
-            <span className="text-[10px] uppercase font-bold text-app-text-muted mb-1">Risk Probability</span>
+            <span className="text-[10px] uppercase font-bold text-app-text-muted mb-1">Model Probability</span>
             <span className="text-[16px] font-mono font-bold text-app-text-primary">{Math.round(alert.probability * 100)}%</span>
           </div>
           <div className="flex flex-col">
@@ -386,16 +388,24 @@ function TechnicalDetailsPanel({ alert }) {
 // ---------------------------------------------------------------------------
 // PAGE
 // ---------------------------------------------------------------------------
-export default function AlertsManagementPage() {
+export default function AlertsManagementPage() {  const { selectedState, selectedDistrict } = useLocation();
+
   const [alerts, setAlerts] = useState(ALERTS);
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [severityFilter, setSeverityFilter] = useState('ALL');
   const [districtFilter, setDistrictFilter] = useState('ALL');
   const [typeFilter, setTypeFilter] = useState('ALL');
-  const [selectedId, setSelectedId] = useState(ALERTS[0].id);
+  const [selectedId, setSelectedId] = useState(ALERTS[0]?.id);
+
+  // Derive location context
+
+
+
+  const isUttarakhand = !selectedState || selectedState === 'Uttarakhand';
 
   // Establishes canonical fallback first; merges live only when valid.
   useEffect(() => {
+    if (!isUttarakhand) return; // Skip loading if not Uttarakhand
     let mounted = true;
     async function load() {
       const live = await loadAlerts();
@@ -412,7 +422,16 @@ export default function AlertsManagementPage() {
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [isUttarakhand]);
+
+  // Sync district filter with location context if possible
+  useEffect(() => {
+    if (selectedDistrict && ALERT_DISTRICTS.includes(selectedDistrict)) {
+      setDistrictFilter(selectedDistrict);
+    } else {
+      setDistrictFilter('ALL');
+    }
+  }, [selectedDistrict]);
 
   const filteredAlerts = useMemo(() => {
     return alerts.filter((a) => {
@@ -459,7 +478,7 @@ export default function AlertsManagementPage() {
   const handleReset = () => {
     setStatusFilter('ALL');
     setSeverityFilter('ALL');
-    setDistrictFilter('ALL');
+    setDistrictFilter(selectedDistrict && ALERT_DISTRICTS.includes(selectedDistrict) ? selectedDistrict : 'ALL');
     setTypeFilter('ALL');
   };
 
@@ -469,96 +488,116 @@ export default function AlertsManagementPage() {
   return (
     <div className="flex flex-col gap-5 w-full">
       {/* 1. Page Header */}
-      <div className="flex flex-col gap-3.5">
-        <div>
-          <h1 className="text-[17px] font-bold text-app-text-primary tracking-tight font-sans">
-            ALERTS &amp; EARLY WARNING
-          </h1>
-          <p className="text-[11.5px] font-medium text-app-text-secondary">
-            Operational management of active flood warnings and response signals across Uttarakhand
-          </p>
+      <div className="flex flex-col gap-4 border-b border-slate-200 pb-5">
+        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+          <div>
+            <h1 className="text-[17px] font-bold text-app-text-primary tracking-tight font-sans">
+              ALERTS &amp; EARLY WARNING
+            </h1>
+            <p className="text-[11.5px] font-medium text-app-text-secondary">
+              Operational management of active flood warnings and response signals
+            </p>
+          </div>
+          <div className="w-full sm:max-w-xs shrink-0">
+
+          </div>
         </div>
+      </div>
 
-        {/* Filter / Control Bar */}
-        <div className="bg-app-surface border border-app-border p-3 rounded-xl shadow-sm flex flex-wrap items-center justify-between gap-2.5 select-none">
-          <div className="flex flex-wrap items-center gap-2 text-[12px]">
-            <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className={selectClass}>
-              {STATUS_OPTIONS.map((s) => (
-                <option key={s} value={s}>{s === 'ALL' ? 'Status: All' : `Status: ${s}`}</option>
-              ))}
-            </select>
+      {!isUttarakhand || alerts.length === 0 ? (
+        <div className="bg-slate-50 border border-slate-200 rounded-xl p-12 flex flex-col items-center text-center gap-4 shadow-sm">
+          <span className="material-symbols-outlined text-emerald-400 text-[48px]">check_circle</span>
+          <div>
+            <h3 className="text-[15px] font-bold text-slate-700">No verified active alerts available.</h3>
+            <p className="text-[12.5px] text-slate-500 mt-1 max-w-md">
+              There are currently no verified flood warnings or alerts active for {selectedState || 'this region'}. 
+              {!isUttarakhand && " Our ML risk engine is actively calibrated and monitoring only the state of Uttarakhand."}
+            </p>
+          </div>
+        </div>
+      ) : (
+        <>
+          {/* Filter / Control Bar */}
+          <div className="bg-app-surface border border-app-border p-3 rounded-xl shadow-sm flex flex-wrap items-center justify-between gap-2.5 select-none">
+            <div className="flex flex-wrap items-center gap-2 text-[12px]">
+              <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className={selectClass}>
+                {STATUS_OPTIONS.map((s) => (
+                  <option key={s} value={s}>{s === 'ALL' ? 'Status: All' : `Status: ${s}`}</option>
+                ))}
+              </select>
 
-            <select value={severityFilter} onChange={(e) => setSeverityFilter(e.target.value)} className={selectClass}>
-              {SEVERITY_OPTIONS.map((s) => (
-                <option key={s} value={s}>{s === 'ALL' ? 'Severity: All' : `Severity: ${s}`}</option>
-              ))}
-            </select>
+              <select value={severityFilter} onChange={(e) => setSeverityFilter(e.target.value)} className={selectClass}>
+                {SEVERITY_OPTIONS.map((s) => (
+                  <option key={s} value={s}>{s === 'ALL' ? 'Severity: All' : `Severity: ${s}`}</option>
+                ))}
+              </select>
 
-            <select value={districtFilter} onChange={(e) => setDistrictFilter(e.target.value)} className={selectClass}>
-              <option value="ALL">District: All</option>
-              {ALERT_DISTRICTS.map((d) => (
-                <option key={d} value={d}>{d}</option>
-              ))}
-            </select>
+              <select value={districtFilter} onChange={(e) => setDistrictFilter(e.target.value)} className={selectClass}>
+                <option value="ALL">District: All</option>
+                {ALERT_DISTRICTS.map((d) => (
+                  <option key={d} value={d}>{d}</option>
+                ))}
+              </select>
 
-            <select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)} className={selectClass}>
-              <option value="ALL">Type: All</option>
-              {ALERT_TYPES_LIST.map((t) => (
-                <option key={t} value={t}>{t}</option>
-              ))}
-            </select>
+              <select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)} className={selectClass}>
+                <option value="ALL">Type: All</option>
+                {ALERT_TYPES_LIST.map((t) => (
+                  <option key={t} value={t}>{t}</option>
+                ))}
+              </select>
+            </div>
+
+            <button
+              onClick={handleReset}
+              className="px-3 py-1.5 rounded-lg bg-app-surface-elevated hover:bg-app-surface-hover text-app-text-muted hover:text-app-text-primary border border-app-border transition-colors text-[11.5px] font-semibold flex items-center gap-1 cursor-pointer"
+            >
+              <span className="material-symbols-outlined text-[14px]">restart_alt</span>
+              Reset Filters
+            </button>
           </div>
 
-          <button
-            onClick={handleReset}
-            className="px-3 py-1.5 rounded-lg bg-app-surface-elevated hover:bg-app-surface-hover text-app-text-muted hover:text-app-text-primary border border-app-border transition-colors text-[11.5px] font-semibold flex items-center gap-1 cursor-pointer"
-          >
-            <span className="material-symbols-outlined text-[14px]">restart_alt</span>
-            Reset Filters
-          </button>
-        </div>
-      </div>
+          {/* 2. Alert Summary / KPI Row */}
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+            <KpiCard label="Active Alerts" value={kpis.activeAlerts} subtext="Currently unresolved" accent="red" />
+            <KpiCard label="Critical / Extreme" value={kpis.criticalExtreme} subtext="Immediate response priority" accent="red" />
+            <KpiCard label="High / Warning" value={kpis.highWarning} subtext="Heightened vigilance" accent="orange" />
+            <KpiCard label="Acknowledged" value={kpis.acknowledged} subtext="Awaiting resolution" accent="amber" />
+            <KpiCard label="Resolved / Cleared" value={kpis.resolved} subtext={`${kpis.expired} expired`} accent="emerald" />
+          </div>
 
-      {/* 2. Alert Summary / KPI Row */}
-      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-        <KpiCard label="Active Alerts" value={kpis.activeAlerts} subtext="Currently unresolved" accent="red" />
-        <KpiCard label="Critical / Extreme" value={kpis.criticalExtreme} subtext="Immediate response priority" accent="red" />
-        <KpiCard label="High / Warning" value={kpis.highWarning} subtext="Heightened vigilance" accent="orange" />
-        <KpiCard label="Acknowledged" value={kpis.acknowledged} subtext="Awaiting resolution" accent="amber" />
-        <KpiCard label="Resolved / Cleared" value={kpis.resolved} subtext={`${kpis.expired} expired`} accent="emerald" />
-      </div>
+          {/* 3. Alert List + Detail (main work surface) */}
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-5">
+            <div className="lg:col-span-3">
+              <AlertList alerts={filteredAlerts} selectedId={selectedId} onSelect={setSelectedId} />
+            </div>
+            <div className="lg:col-span-2">
+              {selectedAlert ? (
+                <AlertDecisionPanel
+                  alert={selectedAlert}
+                  onAcknowledge={handleAcknowledge}
+                  onResolve={handleResolve}
+                />
+              ) : (
+                <AlertPanelCard title="Alert Detail" subtitle="No alert selected">
+                  <p className="text-[12px] text-app-text-muted py-6 text-center">
+                    No alerts match the current filters. Adjust or reset the filters above to inspect an alert.
+                  </p>
+                </AlertPanelCard>
+              )}
+            </div>
+          </div>
 
-      {/* 3. Alert List + Detail (main work surface) */}
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-5">
-        <div className="lg:col-span-3">
-          <AlertList alerts={filteredAlerts} selectedId={selectedId} onSelect={setSelectedId} />
-        </div>
-        <div className="lg:col-span-2">
-          {selectedAlert ? (
-            <AlertDecisionPanel
-              alert={selectedAlert}
-              onAcknowledge={handleAcknowledge}
-              onResolve={handleResolve}
-            />
-          ) : (
-            <AlertPanelCard title="Alert Detail" subtitle="No alert selected">
-              <p className="text-[12px] text-app-text-muted py-6 text-center">
-                No alerts match the current filters. Adjust or reset the filters above to inspect an alert.
-              </p>
-            </AlertPanelCard>
-          )}
-        </div>
-      </div>
-
-      {/* 4. Timeline + Early Warning / Response */}
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-5">
-        <div className="lg:col-span-3">
-          {selectedAlert ? <Timeline alert={selectedAlert} /> : null}
-        </div>
-        <div className="lg:col-span-2">
-          {selectedAlert ? <TechnicalDetailsPanel alert={selectedAlert} /> : null}
-        </div>
-      </div>
+          {/* 4. Timeline + Early Warning / Response */}
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-5">
+            <div className="lg:col-span-3">
+              {selectedAlert ? <Timeline alert={selectedAlert} /> : null}
+            </div>
+            <div className="lg:col-span-2">
+              {selectedAlert ? <TechnicalDetailsPanel alert={selectedAlert} /> : null}
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }

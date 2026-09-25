@@ -1,0 +1,10 @@
+﻿import pandas as pd
+df = pd.read_csv('data/processed/events/phase11_event_evidence_table.csv')
+print(f"Source: {len(df)}")
+print(f"Canonical: {len(df)}")
+print(f"Verified: {len(df[df.overall_match_status=='VERIFIED'])}")
+print(f"Partial: {len(df[df.overall_match_status=='PARTIAL'])}")
+print(f"Unmatched: {len(df[df.overall_match_status=='REJECTED'])}")
+print(f"Spatially: {len(df[df.spatial_match_status=='VERIFIED_MATCH'])}")
+print(f"Temporally: {len(df[df.temporal_match_status=='VERIFIED_MATCH'])}")
+print(f"Feature: {len(df[df.feature_match_status=='VERIFIED_MATCH'])}")

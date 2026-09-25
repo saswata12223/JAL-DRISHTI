@@ -1,8 +1,8 @@
 # ============================================================
-# JAL DRISHTI — .gitignore
+# JAL DRISHTI â€” .gitignore
 # ============================================================
 
-# ── Environment variables & secrets ─────────────────────────
+# â”€â”€ Environment variables & secrets â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 .env
 .env.local
 .env.*.local
@@ -11,7 +11,7 @@
 .env.development
 
 
-# ── Python ──────────────────────────────────────────────────
+# â”€â”€ Python â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 __pycache__/
 *.py[cod]
 *$py.class
@@ -26,17 +26,17 @@ build/
 .ruff_cache/
 
 
-# ── SQLite / Local Databases (runtime data, never commit) ───
+# â”€â”€ SQLite / Local Databases (runtime data, never commit) â”€â”€â”€
 *.sqlite3
 *.sqlite
 *.db
 
 
-# ── Backend runtime data directory (auth & SOS databases) ───
+# â”€â”€ Backend runtime data directory (auth & SOS databases) â”€â”€â”€
 backend/data/
 
 
-# ── Node / Frontend ──────────────────────────────────────────
+# â”€â”€ Node / Frontend â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 node_modules/
 dist/
 .vite/
@@ -48,7 +48,7 @@ dump.cjs
 frontend/dump.cjs
 
 
-# ── OS / IDE ─────────────────────────────────────────────────
+# â”€â”€ OS / IDE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 .DS_Store
 Thumbs.db
 .idea/
@@ -57,7 +57,7 @@ Thumbs.db
 *.user
 
 
-# ── Large Datasets & Binary Rasters (generated via ingest) ──
+# â”€â”€ Large Datasets & Binary Rasters (generated via ingest) â”€â”€
 data/raw/
 data/backup_august_2026/
 *.nc
@@ -68,7 +68,7 @@ data/backup_august_2026/
 *.tar.gz
 
 
-# ── Generated ML datasets, caches & experimental outputs ────
+# â”€â”€ Generated ML datasets, caches & experimental outputs â”€â”€â”€â”€
 data/processed/ml/rolling/
 !data/processed/ml/rolling/rolling_features_latest.parquet
 data/processed/ml/nowcast/
@@ -84,7 +84,7 @@ data/processed/waterlevel/*.csv
 data/processed/weather/*.csv
 
 
-# ── ML model binary files ────────────────────────────────────
+# â”€â”€ ML model binary files â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 *.h5
 *.hdf5
 *.pkl
@@ -92,7 +92,7 @@ data/processed/weather/*.csv
 *.onnx
 
 
-# ── Geospatial / Weather binary formats ──────────────────────
+# â”€â”€ Geospatial / Weather binary formats â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 *.grib
 *.grib2
 scratch_test_gfs.grib2
@@ -100,5 +100,14 @@ data/processed/gfs/
 data/processed/smap_l4/
 
 
-# ── Test artifacts ───────────────────────────────────────────
+# â”€â”€ Test artifacts â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 test_twilio.py
+envs/
+data/
+models/
+miniconda.exe
+ml/
+pipelines/
+scripts/rivermamba_code/
+temp_results.json
+audit_results.json

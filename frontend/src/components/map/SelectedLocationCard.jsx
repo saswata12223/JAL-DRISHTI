@@ -64,8 +64,52 @@ export default function SelectedLocationCard({ location, onNavigateAlerts, onClo
       </h3>
       <div className="text-[11.5px] font-medium text-[#24464B] mt-0.5 mb-3 flex items-center gap-1.5">
         <span className="material-symbols-outlined text-[13px] text-[#6B858A]">location_on</span>
-        <span>{location.district ? `District: ${location.district}` : 'Uttarakhand Region'}</span>
+        <span>{location.district ? `District: ${location.district}` : (location.adminContext?.district ? `District: ${location.adminContext.district}` : (location.adminContext?.state || 'India'))}</span>
         {location.river && <span>&bull; {location.river} River</span>}
+      </div>
+
+      {/* Geographic Context */}
+      <div className="bg-white border border-[#A5F1F7]/30 rounded-lg p-2.5 mb-3">
+        <div className="text-[10px] font-bold text-[#6B858A] uppercase tracking-wider mb-2">
+          GEOGRAPHIC CONTEXT
+        </div>
+        {!location.adminContext ? (
+           <div className="text-[11px] text-slate-500 italic">Context loading or unavailable...</div>
+        ) : (
+          <div className="grid grid-cols-2 gap-y-1.5 gap-x-2 text-[11px]">
+            <div className="flex flex-col">
+              <span className="text-[#6B858A] text-[9.5px] uppercase">Country</span>
+              <span className="font-bold text-[#102A2E] truncate">
+                {location.adminContext.country || 'INDIA'}
+              </span>
+            </div>
+            <div className="flex flex-col">
+              <span className="text-[#6B858A] text-[9.5px] uppercase">State</span>
+              <span className="font-bold text-[#102A2E] truncate">
+                {location.adminContext.state || location.adminContext.administrative_gis?.state_status || 'Unavailable'}
+              </span>
+            </div>
+            <div className="flex flex-col">
+              <span className="text-[#6B858A] text-[9.5px] uppercase">District</span>
+              <span className="font-bold text-[#102A2E] truncate">
+                {location.adminContext.district || location.adminContext.administrative_gis?.district_status || 'Unavailable'}
+              </span>
+            </div>
+            <div className="flex flex-col">
+              <span className="text-[#6B858A] text-[9.5px] uppercase">Subdistrict</span>
+              <span className="font-bold text-[#102A2E] truncate">
+                {location.adminContext.subdistrict || location.adminContext.administrative_gis?.subdistrict_status || '—'}
+              </span>
+            </div>
+            {/* ML availability firewall indicator */}
+            <div className="col-span-2 flex items-center gap-1.5 pt-1.5 border-t border-[#A5F1F7]/30 mt-0.5">
+              <span className={`w-1.5 h-1.5 rounded-full ${location.adminContext.ml?.available ? 'bg-emerald-500' : 'bg-red-400'}`} />
+              <span className="text-[9.5px] font-semibold text-[#6B858A]">
+                ML: {location.adminContext.ml?.available ? 'AVAILABLE (Uttarakhand)' : (location.adminContext.ml?.reason?.replace(/_/g, ' ') || 'UNAVAILABLE')}
+              </span>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Primary KPI Row */}

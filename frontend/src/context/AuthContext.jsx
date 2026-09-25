@@ -9,7 +9,9 @@ export const AuthProvider = ({ children }) => {
   // We are using /api/v1/auth as the prefix
   const checkAuth = async () => {
     try {
-      const response = await fetch('/api/v1/auth/me');
+      const response = await fetch('/api/v1/auth/me', {
+        credentials: 'include'
+      });
       if (response.ok) {
         const userData = await response.json();
         setUser(userData);
@@ -32,6 +34,7 @@ export const AuthProvider = ({ children }) => {
       const response = await fetch('/api/v1/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({ email, password })
       });
       
@@ -51,6 +54,7 @@ export const AuthProvider = ({ children }) => {
       const response = await fetch('/api/v1/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({ 
           full_name: fullName, 
           email, 
@@ -79,7 +83,10 @@ export const AuthProvider = ({ children }) => {
 
   const logout = async () => {
     try {
-      await fetch('/api/v1/auth/logout', { method: 'POST' });
+      await fetch('/api/v1/auth/logout', { 
+        method: 'POST',
+        credentials: 'include'
+      });
     } catch (e) {}
     setUser(null);
   };

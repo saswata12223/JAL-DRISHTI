@@ -38,7 +38,7 @@ export default function DashboardTrends() {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 select-none font-sans">
-      {/* 1. Risk Probability Trend */}
+      {/* 1. Model Probability Trend */}
       <div className="bg-white rounded-2xl p-6 flex flex-col border border-slate-200 shadow-xs hover:shadow-sm transition-all">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">

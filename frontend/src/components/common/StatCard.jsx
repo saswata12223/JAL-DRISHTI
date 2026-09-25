@@ -14,8 +14,8 @@ export default function StatCard({ label, value, subtext, icon, type = 'default'
     valColor = 'text-[#F97316]';
     badgeColor = 'text-[#F97316]';
   } else if (type === 'alerts') {
-    valColor = 'text-[#D97706]';
-    badgeColor = 'text-[#D97706]';
+    valColor = 'text-[#F97316]';
+    badgeColor = 'text-[#F97316]';
   }
 
   // Format value to 2 digits if less than 10 for clean telemetry aesthetic (e.g. 01)
@@ -23,7 +23,6 @@ export default function StatCard({ label, value, subtext, icon, type = 'default'
   let displayVal = value;
   if (typeof value === 'number') {
     if (value === 0) displayVal = '0';
-    else if (value > 0 && value < 10) displayVal = `0${value}`;
   }
 
   return (
@@ -33,14 +32,19 @@ export default function StatCard({ label, value, subtext, icon, type = 'default'
         <span className="text-[10.5px] font-bold text-slate-500 tracking-wider font-sans truncate uppercase">
           {label}
         </span>
-        <div className="flex items-baseline gap-2 mt-1.5">
-          <span className={`kpi-number text-[32px] font-bold leading-none font-mono tracking-tight ${valColor}`}>
+        <div className="flex items-baseline gap-2 mt-2">
+          <span className={`text-2xl font-bold leading-none tracking-tight ${valColor}`}>
             {displayVal}
           </span>
           {type === 'extreme' && Number(value) > 0 && (
             <span className="w-2 h-2 rounded-full bg-red-600 animate-pulse inline-block mb-1" />
           )}
         </div>
+        {subtext && (
+          <span className="text-[11px] font-medium text-slate-500 mt-2.5">
+            {subtext}
+          </span>
+        )}
       </div>
     </div>
   );

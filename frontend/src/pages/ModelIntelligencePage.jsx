@@ -18,7 +18,7 @@ import {
 
   SOURCE_TAG,
 
-  REFERENCE_DECISIONS_WITH_ACTIONS,
+  
 
   loadModelDecisions,
 
@@ -586,7 +586,7 @@ function ProbabilityGauge({ prob, threshold = 0.4, risk }) {
 
       <div className="flex items-center justify-between mb-2">
 
-        <span className="text-[10px] font-extrabold uppercase tracking-wider text-app-text-muted">Flood Probability</span>
+        <span className="text-[10px] font-extrabold uppercase tracking-wider text-app-text-muted">Model Probability</span>
 
         <span className={`text-[22px] font-bold font-mono ${pct >= 70 ? 'text-red-500' : pct >= 40 ? 'text-orange-500' : pct >= 20 ? 'text-amber-500' : 'text-emerald-500'}`}>
 
@@ -1364,7 +1364,7 @@ function EvaluatePanel() {
 
               <option value="">No station (generic)</option>
 
-              {REFERENCE_DECISIONS_WITH_ACTIONS.map((d) => (
+              {decisions.map((d) => (
 
                 <option key={d.station_id} value={d.station_id}>{d.station_name}</option>
 
@@ -1478,7 +1478,7 @@ function EvaluatePanel() {
 
 export default function ModelIntelligencePage() {
 
-  const [decisions, setDecisions] = useState(REFERENCE_DECISIONS_WITH_ACTIONS);
+  const [decisions, setDecisions] = useState([]);
 
   const [source, setSource] = useState('CALIBRATED_REFERENCE');
 
@@ -1494,7 +1494,7 @@ export default function ModelIntelligencePage() {
 
   const [riskFilter, setRiskFilter] = useState('ALL');
 
-  const [selectedId, setSelectedId] = useState(REFERENCE_DECISIONS_WITH_ACTIONS[0].spatial_id);
+  const [selectedId, setSelectedId] = useState(null.spatial_id);
 
   const [refreshing, setRefreshing] = useState(false);
 
@@ -1572,7 +1572,7 @@ export default function ModelIntelligencePage() {
 
       setPolicySource(pol.source);
 
-      setSelectedId(dec.decisions[0]?.spatial_id || REFERENCE_DECISIONS_WITH_ACTIONS[0].spatial_id);
+      setSelectedId(dec.decisions[0]?.spatial_id || null.spatial_id);
 
     })();
 

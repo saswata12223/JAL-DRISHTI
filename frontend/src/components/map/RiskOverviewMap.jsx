@@ -75,11 +75,11 @@ function MapControls({ map }) {
 
       <button
 
-        onClick={() => map.setView([30.15, 79.2], 8)}
+        onClick={() => map.setView([22.5, 82.0], 5)}
 
         className="w-8 h-8 bg-white/90 backdrop-blur-md border border-[#A5F1F7] text-[#102A2E] hover:bg-[#A5F1F7]/30 rounded-lg flex items-center justify-center transition-all cursor-pointer shadow-sm"
 
-        title="Reset View"
+        title="Fit India"
 
       >
 
@@ -103,11 +103,12 @@ export default function RiskOverviewMap({ stations = DEFAULT_MAP_STATIONS, onSel
 
   // CARTO Voyager / Light Cartography Tiles for hero geospatial visualization
 
-  const cartoApiKey = import.meta.env.VITE_CARTO_API_KEY || 'cb1_2k56_1_d8f949035bf0414f5da8a77b';
+  const cartoApiKey = import.meta.env.VITE_CARTO_API_KEY || '';
 
-  const keyParam = cartoApiKey && cartoApiKey !== 'PASTE_CARTO_KEY_HERE' ? `?key=${cartoApiKey}` : '';
-
-  const tileUrl = `https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png${keyParam}`;
+  const hasValidKey = cartoApiKey && cartoApiKey !== 'PASTE_CARTO_KEY_HERE' && cartoApiKey !== 'cb1_2k56_1_d8f949035bf0414f5da8a77b';
+  const tileUrl = hasValidKey
+    ? `https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png?key=${cartoApiKey}`
+    : `https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png`;
 
 
 
@@ -134,6 +135,9 @@ export default function RiskOverviewMap({ stations = DEFAULT_MAP_STATIONS, onSel
           </h2>
           <span className="text-[9.5px] font-bold text-cyan-900 bg-cyan-100 px-1.5 py-0.5 rounded border border-cyan-200">
             Uttarakhand
+          </span>
+          <span className="text-[9px] font-medium text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">
+            Historical Output
           </span>
         </div>
 
@@ -307,9 +311,9 @@ export default function RiskOverviewMap({ stations = DEFAULT_MAP_STATIONS, onSel
 
                     <div className="flex justify-between items-center text-[11px] pt-1.5 mt-1 border-t border-[#A5F1F7]/40">
 
-                      <span className="text-[#6B858A]">Risk:</span>
+                      <span className="text-[#6B858A]">Model Probability*:</span>
 
-                      <span className="font-bold" style={{ color: fillColor }}>{st.risk} ({Math.round((st.prob || 0.5) * 100)}%)</span>
+                      <span className="font-bold font-mono" style={{ color: fillColor }}>{Math.round((st.prob || 0.5) * 100)}%</span>
 
                     </div>
 

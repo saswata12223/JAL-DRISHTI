@@ -10,51 +10,25 @@ import {
   CartesianGrid,
 } from 'recharts';
 import weatherService from '../services/weatherService';
-import stationsService from '../services/stationsService';
-
-// Standard fallback locations across Uttarakhand
-const DEFAULT_LOCATIONS = [
-  { name: 'Uttarakhand Region (Statewide)', lat: 30.0668, lon: 79.0193, district: 'Statewide' },
-  { name: 'Rishikesh (Ganga Basin)', lat: 30.108, lon: 78.298, district: 'Dehradun' },
-  { name: 'Joshimath (Alaknanda Basin)', lat: 30.556, lon: 79.568, district: 'Chamoli' },
-  { name: 'Uttarkashi (Bhagirathi Basin)', lat: 30.727, lon: 78.435, district: 'Uttarkashi' },
-  { name: 'Rudraprayag (Mandakini Basin)', lat: 30.285, lon: 78.981, district: 'Rudraprayag' },
-  { name: 'Haridwar (Ganga Plain)', lat: 29.945, lon: 78.164, district: 'Haridwar' },
-  { name: 'Dharchula (Kali Basin)', lat: 29.851, lon: 80.542, district: 'Pithoragarh' },
-  { name: 'Dehradun City (Bindal AWS)', lat: 30.316, lon: 78.032, district: 'Dehradun' },
-];
+import LocationSearch from '../components/common/LocationSearch';
+import { useLocation } from '../context/LocationContext';
+import { getLocationCoordinates } from '../utils/stateCoordinates';
 
 export default function LiveForecastPage() {
-  const [locations, setLocations] = useState(DEFAULT_LOCATIONS);
-  const [selectedLocIndex, setSelectedLocIndex] = useState(0);
+  const { selectedState, selectedDistrict, selectedSubdistrict, selectedCoords } = useLocation();
   const [currentWeather, setCurrentWeather] = useState(null);
   const [forecast, setForecast] = useState(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [errorDetail, setErrorDetail] = useState(null);
 
-  // Load monitoring stations to populate location selector dynamically
-  useEffect(() => {
-    async function loadStationsForSelector() {
-      try {
-        const res = await stationsService.getStations();
-        if (res?.data && res.data.length > 0) {
-          const mapped = res.data.map((st) => ({
-            name: `${st.station_name} (${st.river_name || 'Catchment'})`,
-            lat: st.latitude,
-            lon: st.longitude,
-            district: st.district || 'Uttarakhand',
-          }));
-          setLocations([DEFAULT_LOCATIONS[0], ...mapped]);
-        }
-      } catch (e) {
-        console.warn('[LiveForecastPage] Failed to load stations list for selector:', e);
-      }
-    }
-    loadStationsForSelector();
-  }, []);
-
-  const activeLoc = locations[selectedLocIndex] || DEFAULT_LOCATIONS[0];
+  // Derive location for weather query
+  const locName = selectedSubdistrict || selectedDistrict || selectedState || 'Uttarakhand';
+  
+  // Dynamically get coordinates for the selected region
+  const coords = selectedCoords || getLocationCoordinates(selectedState, selectedDistrict);
+  const locLat = coords.lat;
+  const locLon = coords.lon;
 
   const fetchWeather = useCallback(async (isManualRefresh = false) => {
     try {
@@ -66,15 +40,15 @@ export default function LiveForecastPage() {
       setErrorDetail(null);
 
       const [currentRes, forecastRes] = await Promise.all([
-        weatherService.getCurrentWeather(activeLoc.lat, activeLoc.lon, activeLoc.name),
-        weatherService.getWeatherForecast(activeLoc.lat, activeLoc.lon, activeLoc.name),
+        weatherService.getCurrentWeather(locLat, locLon, locName),
+        weatherService.getWeatherForecast(locLat, locLon, locName),
       ]);
 
       if (currentRes && currentRes.success) {
         setCurrentWeather(currentRes);
       } else {
         setCurrentWeather(null);
-        setErrorDetail(currentRes?.detail || 'Live weather data is currently unavailable.');
+        setErrorDetail(currentRes?.detail || 'Live weather data is currently unavailable for this region.');
       }
 
       if (forecastRes && forecastRes.success) {
@@ -89,7 +63,7 @@ export default function LiveForecastPage() {
       setLoading(false);
       setRefreshing(false);
     }
-  }, [activeLoc]);
+  }, [locName, locLat, locLon]);
 
   useEffect(() => {
     fetchWeather();
@@ -111,101 +85,127 @@ export default function LiveForecastPage() {
   const isUnavailable = !currentWeather || !currentWeather.success;
 
   return (
-    <div className="flex flex-col gap-6 w-full">
-      {/* 1. Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-app-border pb-4">
-        <div>
-          <h1 className="text-[20px] font-bold text-app-text-primary tracking-tight font-sans flex items-center gap-2.5">
-            <span className="material-symbols-outlined text-sky-400 text-[26px]">
-              cloud_sync
-            </span>
-            LIVE FORECAST
-          </h1>
-          <p className="text-[12px] font-medium text-app-text-secondary mt-0.5">
-            Real-time atmospheric observations and forecast intelligence
-          </p>
-        </div>
-
-        {/* Controls & Location Selector */}
-        <div className="flex flex-wrap items-center gap-3">
-          {/* Location Dropdown */}
-          <div className="flex items-center gap-1.5 bg-app-surface border border-app-border px-3 py-1.5 rounded-lg shadow-sm">
-            <span className="material-symbols-outlined text-sky-400 text-[18px]">
-              location_on
-            </span>
-            <select
-              value={selectedLocIndex}
-              onChange={(e) => setSelectedLocIndex(Number(e.target.value))}
-              className="bg-transparent text-[12.5px] font-semibold text-app-text-primary outline-none cursor-pointer font-sans"
-            >
-              {locations.map((loc, idx) => (
-                <option key={idx} value={idx} className="bg-white text-[#102A2E]">
-                  {loc.name}
-                </option>
-              ))}
-            </select>
+    <div className="flex flex-col gap-6 w-full font-sans">
+      {/* 1. Page Header & Location Context */}
+      <div className="flex flex-col gap-4 border-b border-slate-200 pb-5">
+        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                Forecast & Monitoring
+              </span>
+            </div>
+            <h1 className="text-[22px] font-bold text-slate-800 tracking-tight flex items-center gap-2.5">
+              <span className="material-symbols-outlined text-cyan-500 text-[26px]">
+                cloud_sync
+              </span>
+              Live Environmental Intelligence
+            </h1>
+            <p className="text-[13px] font-medium text-slate-500 mt-1 max-w-2xl">
+              Real-time atmospheric observations, environmental anomalies, and hydrological monitoring. Data availability depends on verified source coverage for the selected geography.
+            </p>
           </div>
-
-          {/* Status Badge */}
-          {isUnavailable ? (
-            <span className="text-[11px] font-bold text-amber-400 bg-amber-500/10 px-3 py-1.5 rounded-full border border-amber-500/20 flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-amber-400"></span>
-              UNAVAILABLE
-            </span>
-          ) : currentWeather?.is_stale ? (
-            <span className="text-[11px] font-bold text-amber-400 bg-amber-500/10 px-3 py-1.5 rounded-full border border-amber-500/20 flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-amber-400"></span>
-              CACHED (STALE)
-            </span>
-          ) : (
-            <span className="text-[11px] font-bold text-emerald-400 bg-emerald-500/10 px-3 py-1.5 rounded-full border border-emerald-500/20 flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-              LIVE (OPENWEATHER)
-            </span>
-          )}
-
-          {/* Refresh Button */}
-          <button
-            onClick={handleRefreshClick}
-            disabled={refreshing || loading}
-            title="Refresh OpenWeather Data"
-            className="px-3 py-1.5 text-[12px] font-semibold bg-white hover:bg-[#F2FAFB] text-[#102A2E] border border-[rgba(16,42,46,0.12)] rounded-lg transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50 shadow-xs"
-          >
-            <span className={`material-symbols-outlined text-[18px] ${refreshing ? 'animate-spin' : ''}`}>
-              refresh
-            </span>
-            <span>{refreshing ? 'Updating...' : 'Refresh'}</span>
-          </button>
+          <div className="w-full sm:max-w-xs shrink-0">
+            <LocationSearch />
+          </div>
         </div>
       </div>
 
-      {/* 2. Loading State */}
-      {loading ? (
-        <div className="bg-app-surface border border-app-border rounded-xl p-8 text-center text-app-text-secondary font-sans animate-pulse flex flex-col items-center justify-center gap-3">
-          <span className="material-symbols-outlined text-[36px] text-sky-400 animate-spin">
-            sync
+      {isUnavailable ? (
+        <div className="bg-slate-50 border border-slate-200 rounded-xl p-12 flex flex-col items-center text-center gap-4 shadow-sm">
+          <span className="material-symbols-outlined text-slate-400 text-[48px]">cloud_off</span>
+          <div>
+            <h3 className="text-[15px] font-bold text-slate-700">Live Environmental Intelligence unavailable for {selectedState}.</h3>
+            <p className="text-[12.5px] text-slate-500 mt-1 max-w-md">
+              Real-time weather integrations and forecasting models are currently deployed exclusively for the Uttarakhand catchment.
+            </p>
+          </div>
+        </div>
+      ) : (
+        <>
+      {/* 2. Data Sources Matrix */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-3 flex flex-col gap-1">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] font-bold text-emerald-700 uppercase tracking-wider">OpenWeatherMap</span>
+            <span className="material-symbols-outlined text-emerald-500 text-[14px]">check_circle</span>
+          </div>
+          <div className="text-[12px] font-bold text-slate-800">Live source</div>
+        </div>
+        <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 flex flex-col gap-1">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">IMD API</span>
+            <span className="material-symbols-outlined text-slate-400 text-[14px]">cancel</span>
+          </div>
+          <div className="text-[12px] font-bold text-slate-600">NOT CONFIGURED</div>
+        </div>
+        <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 flex flex-col gap-1">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">CWC Gauges</span>
+            <span className="material-symbols-outlined text-slate-400 text-[14px]">cancel</span>
+          </div>
+          <div className="text-[12px] font-bold text-slate-600">UNAVAILABLE</div>
+        </div>
+        <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 flex flex-col gap-1">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] font-bold text-amber-700 uppercase tracking-wider">GPM Satellite</span>
+            <span className="material-symbols-outlined text-amber-500 text-[14px]">history</span>
+          </div>
+          <div className="text-[12px] font-bold text-slate-800">HISTORICAL ONLY</div>
+        </div>
+      </div>
+
+      {/* 3. Controls & Status Bar */}
+      <div className="flex flex-wrap items-center justify-between gap-3 bg-white border border-slate-200 p-3 rounded-xl shadow-sm">
+        <div className="flex items-center gap-3">
+          <span className="text-[13px] font-bold text-slate-800 flex items-center gap-1.5">
+            <span className="material-symbols-outlined text-slate-400 text-[18px]">location_on</span>
+            {locName}
           </span>
-          <span className="text-[14px] font-semibold">Loading live forecast intelligence...</span>
+          {isUnavailable ? (
+            <span className="text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-1 rounded border border-amber-200">
+              DATA UNAVAILABLE
+            </span>
+          ) : currentWeather?.is_stale ? (
+            <span className="text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-1 rounded border border-amber-200">
+              CACHED (STALE)
+            </span>
+          ) : (
+            <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded border border-emerald-200 flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              LIVE
+            </span>
+          )}
+        </div>
+        <button
+          onClick={handleRefreshClick}
+          disabled={refreshing || loading}
+          className="px-3 py-1.5 text-[11px] font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-colors flex items-center gap-1.5 disabled:opacity-50"
+        >
+          <span className={`material-symbols-outlined text-[14px] ${refreshing ? 'animate-spin' : ''}`}>refresh</span>
+          {refreshing ? 'UPDATING...' : 'REFRESH'}
+        </button>
+      </div>
+
+      {/* 4. Loading State */}
+      {loading ? (
+        <div className="bg-white border border-slate-200 rounded-xl p-12 text-center flex flex-col items-center justify-center gap-3 shadow-sm">
+          <span className="material-symbols-outlined text-[32px] text-cyan-400 animate-spin">sync</span>
+          <span className="text-[13px] font-bold text-slate-500">Loading live intelligence...</span>
         </div>
       ) : isUnavailable ? (
-        /* 3. Error / Unavailable Fallback State */
-        <div className="bg-amber-950/20 border border-amber-500/30 rounded-xl p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-amber-200 shadow-sm font-sans">
-          <div className="flex items-start gap-3.5">
-            <span className="material-symbols-outlined text-amber-400 text-[32px] shrink-0 mt-1">
-              cloud_off
-            </span>
-            <div>
-              <h3 className="text-[15px] font-bold text-amber-300">
-                Live weather unavailable
-              </h3>
-              <p className="text-[12.5px] text-amber-200/80 mt-1">
-                {errorDetail || 'OpenWeather service is not configured or temporarily unreachable from the backend.'}
-              </p>
-            </div>
+        /* 5. Error / Unavailable Fallback State */
+        <div className="bg-slate-50 border border-slate-200 rounded-xl p-8 flex flex-col items-center text-center gap-4 shadow-sm">
+          <span className="material-symbols-outlined text-slate-400 text-[48px]">cloud_off</span>
+          <div>
+            <h3 className="text-[15px] font-bold text-slate-700">Live Weather Unavailable</h3>
+            <p className="text-[12.5px] text-slate-500 mt-1">
+              {errorDetail || 'OpenWeather service is not configured or temporarily unreachable from the backend.'}
+            </p>
           </div>
           <button
             onClick={handleRefreshClick}
-            className="px-4 py-2 text-[12px] font-bold bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 rounded-lg transition-all shrink-0 cursor-pointer"
+            className="px-4 py-2 text-[12px] font-bold bg-amber-500/20 hover:bg-amber-500/30 text-amber-600 border border-amber-500/40 rounded-lg transition-all shrink-0 cursor-pointer"
           >
             Retry Connection
           </button>
@@ -553,6 +553,8 @@ export default function LiveForecastPage() {
           Status: <strong className="text-emerald-400 font-bold">{isUnavailable ? 'UNAVAILABLE' : currentWeather?.is_stale ? 'CACHED' : 'LIVE'}</strong>
         </div>
       </div>
+      </>
+      )}
     </div>
   );
 }

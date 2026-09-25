@@ -25,47 +25,50 @@ import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
 
 import { AuthProvider } from './context/AuthContext';
+import { LocationProvider } from './context/LocationContext';
 import ProtectedRoute from './components/ProtectedRoute';
 
 export default function App() {
   return (
     <AuthProvider>
-      <Routes>
-        {/* Public Routes */}
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/signup" element={<SignupPage />} />
-        
-        {/* Routes under AppLayout */}
-        <Route element={<AppLayout />}>
-          {/* Public Informational Routes */}
-          <Route path="about" element={<AboutPage />} />
-          <Route path="resources" element={<ResourcesPage />} />
-          <Route path="about-terrain" element={<AboutTerrainPage />} />
+      <LocationProvider>
+        <Routes>
+          {/* Public Routes */}
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/signup" element={<SignupPage />} />
+          
+          {/* Routes under AppLayout */}
+          <Route element={<AppLayout />}>
+            {/* Public Informational Routes */}
+            <Route path="about" element={<AboutPage />} />
+            <Route path="resources" element={<ResourcesPage />} />
+            <Route path="about-terrain" element={<AboutTerrainPage />} />
 
-          {/* Policy Routes */}
-          <Route path="privacy" element={<PrivacyPolicyPage />} />
-          <Route path="terms" element={<TermsOfServicePage />} />
-          <Route path="accessibility" element={<AccessibilityPage />} />
+            {/* Policy Routes */}
+            <Route path="privacy" element={<PrivacyPolicyPage />} />
+            <Route path="terms" element={<TermsOfServicePage />} />
+            <Route path="accessibility" element={<AccessibilityPage />} />
 
-          {/* Protected Operational Dashboard Routes */}
-          <Route element={<ProtectedRoute />}>
-            <Route path="dashboard" element={<DashboardPage />} />
-            <Route path="immediate-actions" element={<ImmediateActionsPage />} />
-            <Route path="risk-map" element={<Navigate to="/dashboard" replace />} />
-            <Route path="analytics" element={<AnalyticsPage />} />
-            <Route path="monitoring" element={<StationMonitoringPage />} />
-            <Route path="live-forecast" element={<LiveForecastPage />} />
-            <Route path="flood-simulation" element={<FloodSimulationPage />} />
-            <Route path="alerts" element={<AlertsManagementPage />} />
-            <Route path="historical-events" element={<HistoricalEventsPage />} />
-            <Route path="model-intelligence" element={<Navigate to="/analytics" replace />} />
+            {/* Protected Operational Dashboard Routes */}
+            <Route element={<ProtectedRoute />}>
+              <Route path="dashboard" element={<DashboardPage />} />
+              <Route path="immediate-actions" element={<ImmediateActionsPage />} />
+              <Route path="risk-map" element={<Navigate to="/dashboard" replace />} />
+              <Route path="analytics" element={<AnalyticsPage />} />
+              <Route path="monitoring" element={<StationMonitoringPage />} />
+              <Route path="live-forecast" element={<LiveForecastPage />} />
+              <Route path="flood-simulation" element={<FloodSimulationPage />} />
+              <Route path="alerts" element={<AlertsManagementPage />} />
+              <Route path="historical-events" element={<HistoricalEventsPage />} />
+              <Route path="model-intelligence" element={<Navigate to="/analytics" replace />} />
+            </Route>
           </Route>
-        </Route>
 
-        {/* Catch-all redirect to Landing Page */}
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
+          {/* Catch-all redirect to Landing Page */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </LocationProvider>
     </AuthProvider>
   );
 }

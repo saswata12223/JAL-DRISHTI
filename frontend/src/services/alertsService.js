@@ -44,7 +44,7 @@ import { STATIONS, primaryDriver, resolveBasin } from './analyticsService';
 
 //   Monitoring (analyticsService.STATIONS). A district alert
 
-//   therefore corresponds to the identical risk probability,
+//   therefore corresponds to the identical Model Probability,
 
 //   rainfall, water level and severity shown on those screens.
 
@@ -174,49 +174,7 @@ function buildCanonicalAlerts() {
 
   // exist to demonstrate the full alert management workflow.
 
-  const statusPlan = {
-
-    CWC_UK_001: 'ACTIVE',
-
-    CWC_UK_002: 'ACTIVE',
-
-    CWC_UK_003: 'ACTIVE',
-
-    CWC_UK_004: 'ACTIVE',
-
-    CWC_UK_005: 'ACKNOWLEDGED',
-
-    CWC_UK_015: 'ACKNOWLEDGED',
-
-    CWC_UK_008: 'ACTIVE',
-
-    CWC_UK_006: 'RESOLVED',
-
-    CWC_UK_007: 'RESOLVED',
-
-    CWC_UK_009: 'EXPIRED',
-
-    CWC_UK_012: 'EXPIRED',
-
-    CWC_UK_010: 'ACTIVE',
-
-    CWC_UK_011: 'ACTIVE',
-
-    CWC_UK_013: 'ACTIVE',
-
-    CWC_UK_014: 'ACTIVE',
-
-    CWC_UK_016: 'ACTIVE',
-
-    CWC_UK_017: 'ACTIVE',
-
-    CWC_UK_018: 'ACTIVE',
-
-    CWC_UK_019: 'ACTIVE',
-
-    CWC_UK_020: 'ACTIVE',
-
-  };
+  const statusPlan = {};
 
 
 
@@ -272,7 +230,7 @@ function buildCanonicalAlerts() {
 
         {
 
-          signal: 'Flood Probability',
+          signal: 'Model Probability',
 
           value: `${Math.round(s.prob * 100)}%`,
 
