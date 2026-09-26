@@ -37,7 +37,10 @@ except Exception as e:
 def get_db() -> Generator[Session, None, None]:
     """Dependency for providing request-scoped database sessions."""
     if SessionLocal is None:
-        raise RuntimeError("Database engine is not configured.")
+        # Return a dummy or yield nothing so that it doesn't crash on dependency resolution
+        # Auth can check if db is None
+        yield None
+        return
     db = SessionLocal()
     try:
         yield db

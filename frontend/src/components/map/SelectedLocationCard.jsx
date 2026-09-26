@@ -1,8 +1,33 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 export default function SelectedLocationCard({ location, onNavigateAlerts, onClose }) {
   const navigate = useNavigate();
+  const [envData, setEnvData] = useState(null);
+  const [envLoading, setEnvLoading] = useState(false);
+  const [envError, setEnvError] = useState(null);
+
+  useEffect(() => {
+    if (location && location.lat != null && location.lon != null) {
+      setEnvLoading(true);
+      setEnvError(null);
+      setEnvData(null);
+      fetch(`/api/environment?lat=${location.lat}&lon=${location.lon}`)
+        .then(res => {
+          if (!res.ok) throw new Error('Network response was not ok');
+          return res.json();
+        })
+        .then(data => {
+          setEnvData(data);
+          setEnvLoading(false);
+        })
+        .catch(err => {
+          console.error("Failed to fetch environment data:", err);
+          setEnvError("Unable to fetch Open-Meteo data. Please try again.");
+          setEnvLoading(false);
+        });
+    }
+  }, [location]);
 
   if (!location) {
     return (
@@ -157,6 +182,85 @@ export default function SelectedLocationCard({ location, onNavigateAlerts, onClo
           <div className="flex items-center justify-between col-span-2 pt-1 border-t border-[#A5F1F7]/35">
             <span className="text-[#6B858A]">Water Level (MSL):</span>
             <span className="font-bold font-mono text-[#102A2E]">{location.waterLevel} m</span>
+          </div>
+        )}
+      </div>
+
+      {/* Environmental Data from Open-Meteo */}
+      <div className="bg-white border border-[#A5F1F7]/30 rounded-lg p-2.5 mb-3">
+        <div className="text-[10px] font-bold text-[#6B858A] uppercase tracking-wider mb-2 border-b border-[#A5F1F7]/30 pb-1">
+          OPEN-METEO ENVIRONMENTAL DATA
+        </div>
+        <div className="text-[9.5px] text-amber-600 bg-amber-50 p-1.5 rounded border border-amber-100 italic mb-2">
+          Note: This is weather-model/reanalysis/forecast-derived data. Local ESP32 sensors provide the ground measurements.
+        </div>
+
+        {envLoading && (
+          <div className="text-[11px] text-cyan-700 py-2 flex items-center gap-1.5">
+            <span className="material-symbols-outlined animate-spin text-[14px]">sync</span>
+            Fetching environmental data...
+          </div>
+        )}
+
+        {envError && (
+          <div className="text-[11px] text-red-600 py-2">
+            {envError}
+          </div>
+        )}
+
+        {envData && (
+          <div className="space-y-3 mt-2">
+            <div className="space-y-1">
+              <h4 className="text-[10px] font-bold flex items-center gap-1 text-[#24464B]">
+                <span>🌧️</span> CURRENT WEATHER
+              </h4>
+              <div className="text-[10px] grid grid-cols-2 gap-y-1 gap-x-2">
+                <span className="text-[#6B858A]">Temp:</span> <span className="font-bold text-[#102A2E]">{envData.current.temperature_2m} °C</span>
+                <span className="text-[#6B858A]">Humidity:</span> <span className="font-bold text-[#102A2E]">{envData.current.relative_humidity_2m} %</span>
+                <span className="text-[#6B858A]">Rain:</span> <span className="font-bold text-[#102A2E]">{envData.current.rain} mm</span>
+                <span className="text-[#6B858A]">Wind:</span> <span className="font-bold text-[#102A2E]">{envData.current.wind_speed_10m} km/h</span>
+              </div>
+            </div>
+
+            <div className="space-y-1">
+              <h4 className="text-[10px] font-bold flex items-center gap-1 text-[#24464B]">
+                <span>🌱</span> SOIL MOISTURE
+              </h4>
+              <div className="text-[10px] grid grid-cols-2 gap-y-1 gap-x-2">
+                <span className="text-[#6B858A]">0–1 cm:</span> <span className="font-bold text-[#102A2E]">{envData.hourly.soil_moisture_0_to_1cm?.[0] ?? 'N/A'} m³/m³</span>
+                <span className="text-[#6B858A]">1–3 cm:</span> <span className="font-bold text-[#102A2E]">{envData.hourly.soil_moisture_1_to_3cm?.[0] ?? 'N/A'} m³/m³</span>
+                <span className="text-[#6B858A]">3–9 cm:</span> <span className="font-bold text-[#102A2E]">{envData.hourly.soil_moisture_3_to_9cm?.[0] ?? 'N/A'} m³/m³</span>
+                <span className="text-[#6B858A]">9–27 cm:</span> <span className="font-bold text-[#102A2E]">{envData.hourly.soil_moisture_9_to_27cm?.[0] ?? 'N/A'} m³/m³</span>
+                <span className="text-[#6B858A]">27–81 cm:</span> <span className="font-bold text-[#102A2E]">{envData.hourly.soil_moisture_27_to_81cm?.[0] ?? 'N/A'} m³/m³</span>
+              </div>
+            </div>
+
+            <div className="space-y-1">
+              <h4 className="text-[10px] font-bold flex items-center gap-1 text-[#24464B]">
+                <span>🌧️</span> RAINFALL FORECAST
+              </h4>
+              <div className="text-[10px] grid grid-cols-2 gap-y-1 gap-x-2">
+                <span className="text-[#6B858A]">Next 1 hour:</span> <span className="font-bold text-[#102A2E]">{(envData.hourly.precipitation?.slice(1, 2).reduce((a, b) => a + b, 0) || 0).toFixed(1)} mm</span>
+                <span className="text-[#6B858A]">Next 3 hours:</span> <span className="font-bold text-[#102A2E]">{(envData.hourly.precipitation?.slice(1, 4).reduce((a, b) => a + b, 0) || 0).toFixed(1)} mm</span>
+                <span className="text-[#6B858A]">Next 6 hours:</span> <span className="font-bold text-[#102A2E]">{(envData.hourly.precipitation?.slice(1, 7).reduce((a, b) => a + b, 0) || 0).toFixed(1)} mm</span>
+                <span className="text-[#6B858A]">Next 24 hours:</span> <span className="font-bold text-[#102A2E]">{(envData.hourly.precipitation?.slice(1, 25).reduce((a, b) => a + b, 0) || 0).toFixed(1)} mm</span>
+              </div>
+            </div>
+            
+            {envData.elevation !== undefined && (
+              <div className="space-y-1">
+                <h4 className="text-[10px] font-bold flex items-center gap-1 text-[#24464B]">
+                  <span>⛰️</span> ELEVATION
+                </h4>
+                <div className="text-[10px]">
+                  <span className="text-[#6B858A] ml-4">{envData.elevation} meters</span>
+                </div>
+              </div>
+            )}
+            
+            <div className="pt-2 mt-2 border-t border-slate-200/80 text-[8.5px] text-[#6B858A]">
+              Last updated: {envData.current.time || new Date().toISOString()}
+            </div>
           </div>
         )}
       </div>

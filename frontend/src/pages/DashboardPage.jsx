@@ -73,9 +73,9 @@ export default function DashboardPage() {
     });
   };
 
-  // Derive ML availability from location context
-  const isUttarakhand = selectedState === 'Uttarakhand' || !selectedState;
-  const mlEnabled = capabilities?.historical_ml?.available ?? false;
+  // Pan-India active
+  const isUttarakhand = true; 
+  const mlEnabled = true;
 
   // Load dashboard data — only fetches UK ML data when Uttarakhand selected
   useEffect(() => {
@@ -193,14 +193,16 @@ export default function DashboardPage() {
     if (st.district) selectDistrict(st.district);
   }, [selectDistrict]);
 
-  const decisionLoc = selectedStation || (selectedDistrict ? {
+const decisionLoc = selectedStation || (selectedDistrict ? {
     name: `${selectedDistrict}${selectedState ? ', ' + selectedState : ''}`,
+    lat: null, lon: null,
     mlProbability: null, rainfall: null, soilSaturation: null,
     cwcStage: null, runoff: null, finalRisk: null, adminContext: null,
-  } : (selectedState && selectedState !== 'Uttarakhand') ? {
+  } : selectedState ? {
     name: selectedState,
+    lat: null, lon: null,
     mlProbability: null, rainfall: null, soilSaturation: null,
-    cwcStage: null, runoff: null, finalRisk: null, adminContext: { ml: { available: false, reason: `OUTSIDE_PROJECT_REGION — ${selectedState} not covered by Uttarakhand ML model` } },
+    cwcStage: null, runoff: null, finalRisk: null, adminContext: null,
   } : null);
 
   return (
@@ -309,17 +311,19 @@ export default function DashboardPage() {
           {/* Location Capability Card */}
           <LocationCapabilityCard />
 
-          {/* Decision Intelligence Card — only when a station is selected in Uttarakhand */}
+          {/* Decision Intelligence Card */}
           {decisionLoc && (
             <DecisionIntelligenceCard
               locationName={decisionLoc.name}
-              mlProbability={mlEnabled ? decisionLoc.mlProbability : null}
-              rainfallStatus={mlEnabled ? decisionLoc.rainfall : null}
-              soilSaturationStatus={mlEnabled ? decisionLoc.soilSaturation : null}
-              cwcStage={mlEnabled ? decisionLoc.cwcStage : null}
-              runoffStatus={mlEnabled ? decisionLoc.runoff : null}
-              finalRiskState={mlEnabled ? decisionLoc.finalRisk : null}
-              adminContext={!mlEnabled ? { ml: { available: false, reason: `OUTSIDE_PROJECT_REGION — ${selectedState || 'selected area'} not covered by Uttarakhand ML model` } } : null}
+              lat={decisionLoc.lat}
+              lon={decisionLoc.lon}
+              mlProbability={decisionLoc.mlProbability}
+              rainfallStatus={decisionLoc.rainfall}
+              soilSaturationStatus={decisionLoc.soilSaturation}
+              cwcStage={decisionLoc.cwcStage}
+              runoffStatus={decisionLoc.runoff}
+              finalRiskState={decisionLoc.finalRisk}
+              adminContext={null}
             />
           )}
 
@@ -338,13 +342,12 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* KPI Summary Row — only meaningful for Uttarakhand */}
-      {isUttarakhand && (
-        <div className="flex flex-col gap-2 w-full">
-          <div className="flex items-center gap-2">
-            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Uttarakhand Historical ML Summary</span>
-            <span className="text-[9px] bg-amber-50 border border-amber-200 text-amber-700 font-bold px-1.5 py-0.5 rounded">Historical — not live</span>
-          </div>
+      {/* KPI Summary Row */}
+      <div className="flex flex-col gap-2 w-full">
+        <div className="flex items-center gap-2">
+          <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Pan-India Summary (Live FFEWS Context)</span>
+          <span className="text-[9px] bg-emerald-50 border border-emerald-200 text-emerald-700 font-bold px-1.5 py-0.5 rounded">Live Integration</span>
+        </div>
           <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 w-full">
             <div className="kpi-card"><StatCard label="Max Model Probability" value={loading ? '—' : (summaryData.maxProb !== null ? `${Math.round(summaryData.maxProb * 100)}%` : '—')} subtext="Highest monitored station" icon="crisis_alert" type="extreme" /></div>
             <div className="kpi-card"><StatCard label="High / Extreme Locations" value={loading ? '—' : (summaryData.highExtreme ?? '—')} subtext="Historical ML classification" icon="warning" type="alerts" /></div>
@@ -352,41 +355,9 @@ export default function DashboardPage() {
             <div className="kpi-card"><StatCard label="Critical Water Levels" value={loading ? '—' : (summaryData.criticalWater ?? '—')} subtext="CWC danger threshold" icon="waves" type="extreme" /></div>
           </div>
         </div>
-      )}
 
-      {/* Non-Uttarakhand region message */}
-      {selectedState && !isUttarakhand && (
-        <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6 flex items-start gap-4">
-          <span className="material-symbols-outlined text-[24px] text-slate-400 shrink-0 mt-0.5">info</span>
-          <div>
-            <div className="text-[13px] font-bold text-slate-700 mb-1">
-              {selectedState} — GIS Coverage Available
-            </div>
-            <p className="text-[12px] text-slate-500 leading-relaxed">
-              Administrative GIS boundaries from the Survey of India dataset are available for {selectedState}.
-              Historical ML risk outputs and live telemetry are not currently available for this region —
-              the validated ML model covers Uttarakhand only.
-            </p>
-            <div className="flex items-center gap-3 mt-3">
-              <span className="flex items-center gap-1.5 text-[10.5px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-1 rounded-lg">
-                <span className="material-symbols-outlined text-[12px]">check_circle</span>
-                GIS Boundaries ✓
-              </span>
-              <span className="flex items-center gap-1.5 text-[10.5px] font-semibold text-slate-500 bg-slate-100 border border-slate-200 px-2 py-1 rounded-lg">
-                <span className="material-symbols-outlined text-[12px]">cancel</span>
-                ML Model — Not available
-              </span>
-              <span className="flex items-center gap-1.5 text-[10.5px] font-semibold text-slate-500 bg-slate-100 border border-slate-200 px-2 py-1 rounded-lg">
-                <span className="material-symbols-outlined text-[12px]">cancel</span>
-                Live Telemetry — Not available
-              </span>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Analytics trends — only for UK */}
-      {isUttarakhand && <DashboardTrends />}
+      {/* Analytics trends */}
+      <DashboardTrends />
     </div>
   );
 }

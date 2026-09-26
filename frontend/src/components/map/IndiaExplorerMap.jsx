@@ -1,7 +1,9 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { MapContainer, TileLayer, GeoJSON, useMap, CircleMarker, Tooltip } from 'react-leaflet';
+import L from 'leaflet';
 import { useLocation } from '../../context/LocationContext';
 import gisService from '../../services/gisService';
+import { SEARCH_INDEX } from '../../utils/stateCoordinates';
 
 // Uttarakhand monitoring stations (historical ML coverage)
 const UK_STATIONS = [
@@ -14,8 +16,6 @@ const UK_STATIONS = [
   { id: 'CWC_UK_007', name: 'Haridwar', district: 'Haridwar', river: 'Ganga', lat: 29.945, lon: 78.164, risk: 'LOW', prob: 0.12 },
   { id: 'CWC_UK_008', name: 'Dharchula', district: 'Pithoragarh', river: 'Kali', lat: 29.851, lon: 80.542, risk: 'EXTREME', prob: 0.88 },
 ];
-
-import L from 'leaflet';
 
 function MapFlyTo({ state, district, boundaries }) {
   const map = useMap();
@@ -33,6 +33,14 @@ function MapFlyTo({ state, district, boundaries }) {
       map.flyTo([30.3, 78.5], 9, { duration: 1.2 });
     } else if (state === 'Uttarakhand') {
       map.flyTo([30.15, 79.2], 8, { duration: 1.2 });
+    } else if (state) {
+      // Find the state in SEARCH_INDEX to fly to its coordinates
+      const stateInfo = SEARCH_INDEX.find(s => s.label === state);
+      if (stateInfo) {
+        map.flyTo([stateInfo.lat, stateInfo.lon], 7, { duration: 1.2 });
+      } else {
+        map.flyTo([22.5, 82.0], 5, { duration: 1.0 });
+      }
     } else {
       map.flyTo([22.5, 82.0], 5, { duration: 1.0 });
     }
@@ -59,6 +67,35 @@ export default function IndiaExplorerMap({ stations = [], onSelectStation }) {
   const [loadingBounds, setLoadingBounds] = useState(true);
   const [filter, setFilter] = useState('ALL');
   const [map, setMap] = useState(null);
+
+  // Environment Data State
+  const [envData, setEnvData] = useState(null);
+  const [envLoading, setEnvLoading] = useState(false);
+  const [envError, setEnvError] = useState(null);
+  const [activeMarker, setActiveMarker] = useState(null);
+
+  const handleMarkerClick = async (st) => {
+    if (onSelectStation) onSelectStation(st);
+    setActiveMarker(st);
+    setEnvLoading(true);
+    setEnvError(null);
+    setEnvData(null);
+    try {
+      const lat = st.lat;
+      const lon = st.lon;
+      const response = await fetch(`/api/environment?lat=${lat}&lon=${lon}`);
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      const data = await response.json();
+      setEnvData(data);
+    } catch (err) {
+      console.error("Failed to fetch environment data:", err);
+      setEnvError("Unable to fetch Open-Meteo data. Please try again.");
+    } finally {
+      setEnvLoading(false);
+    }
+  };
 
   // Load GIS boundaries from SOI backend
   useEffect(() => {
@@ -107,14 +144,31 @@ export default function IndiaExplorerMap({ stations = [], onSelectStation }) {
     });
   }, [selectState, stateStyle]);
 
-  // Active stations — only show UK stations when Uttarakhand selected or no selection
-  const showStations = !selectedState || selectedState === 'Uttarakhand';
-  const activeStations = showStations ? (stations.length > 0 ? stations : UK_STATIONS) : [];
+  // Active stations logic to include all states
+  const activeStations = (() => {
+    const baseStations = stations.length > 0 ? stations : UK_STATIONS;
+    const otherStations = SEARCH_INDEX.filter(s => s.state !== 'Uttarakhand' && s.type !== 'State').map(s => ({
+      id: `LOC_${s.label.replace(/\s+/g, '_')}`,
+      name: s.label,
+      district: s.district || 'State Level',
+      river: 'Regional Basin',
+      lat: s.lat,
+      lon: s.lon,
+      risk: 'NORMAL',
+      prob: 0.1,
+      state: s.state || s.label
+    }));
+    
+    return [...baseStations, ...otherStations];
+  })();
+
   const filteredStations = activeStations.filter(st => {
     if (filter === 'EXTREME') return st.risk === 'EXTREME';
     if (filter === 'HIGH') return ['HIGH', 'EXTREME'].includes(st.risk);
     return true;
   });
+
+  const showStations = true;
 
   return (
     <div className="relative w-full h-full min-h-[480px] rounded-2xl overflow-hidden border border-slate-200 bg-white shadow-xs">
@@ -187,7 +241,7 @@ export default function IndiaExplorerMap({ stations = [], onSelectStation }) {
               center={[st.lat, st.lon]}
               radius={radius}
               pathOptions={{ color: fillColor, weight: 1.5, fillColor, fillOpacity: 0.9 }}
-              eventHandlers={{ click: () => onSelectStation && onSelectStation(st) }}
+              eventHandlers={{ click: () => handleMarkerClick(st) }}
             >
               <Tooltip direction="top" offset={[0, -6]}>
                 <div className="text-[10px] font-bold text-slate-800">
@@ -203,6 +257,107 @@ export default function IndiaExplorerMap({ stations = [], onSelectStation }) {
         <MapFlyTo state={selectedState} district={selectedDistrict} boundaries={boundaries} />
         <MapZoomControls />
       </MapContainer>
+
+      {/* Floating Environment Data Panel */}
+      {activeMarker && (
+        <div className="absolute top-4 right-14 z-[500] w-72 bg-white/95 backdrop-blur-md border border-slate-200/90 rounded-xl shadow-lg pointer-events-auto flex flex-col max-h-[85%] overflow-y-auto overflow-x-hidden">
+          <div className="p-3 border-b border-slate-200/80 bg-slate-50/50 flex justify-between items-center sticky top-0 z-10">
+            <h3 className="text-[11px] font-bold text-slate-900 tracking-wide font-sans">
+              JAL DRISHTI — LOCATION DATA
+            </h3>
+            <button onClick={() => setActiveMarker(null)} className="text-slate-400 hover:text-slate-700 cursor-pointer">
+              <span className="material-symbols-outlined text-[14px]">close</span>
+            </button>
+          </div>
+          
+          <div className="p-4 space-y-4 font-sans text-slate-800">
+            <div className="space-y-1">
+              <h4 className="text-[12px] font-bold flex items-center gap-1">
+                <span>📍</span> Location: {activeMarker.name}
+              </h4>
+              <div className="text-[11px] text-slate-600 font-mono ml-5">
+                Latitude: {activeMarker.lat.toFixed(5)}<br/>
+                Longitude: {activeMarker.lon.toFixed(5)}
+              </div>
+            </div>
+
+            {envLoading && (
+              <div className="text-[12px] text-cyan-700 font-medium py-4 flex items-center gap-2">
+                <span className="material-symbols-outlined animate-spin text-[16px]">sync</span>
+                Fetching environmental data...
+              </div>
+            )}
+
+            {envError && (
+              <div className="text-[12px] text-red-600 font-medium py-4">
+                {envError}
+              </div>
+            )}
+
+            {envData && (
+              <>
+                <div className="text-[10px] font-medium text-amber-600 bg-amber-50 p-2 rounded border border-amber-100 italic">
+                  Note: The following is <strong>Open-Meteo environmental data</strong> (weather-model/reanalysis/forecast-derived). ESP32 sensors provide local ground measurements.
+                </div>
+
+                <div className="space-y-1.5">
+                  <h4 className="text-[12px] font-bold flex items-center gap-1 border-b border-slate-100 pb-1">
+                    <span>🌧️</span> CURRENT WEATHER
+                  </h4>
+                  <div className="text-[11px] text-slate-600 grid grid-cols-2 gap-y-1 ml-1">
+                    <span>Temperature:</span> <span className="font-semibold text-slate-800">{envData.current.temperature_2m} °C</span>
+                    <span>Humidity:</span> <span className="font-semibold text-slate-800">{envData.current.relative_humidity_2m} %</span>
+                    <span>Rain:</span> <span className="font-semibold text-slate-800">{envData.current.rain} mm</span>
+                    <span>Precipitation:</span> <span className="font-semibold text-slate-800">{envData.current.precipitation} mm</span>
+                    <span>Wind:</span> <span className="font-semibold text-slate-800">{envData.current.wind_speed_10m} km/h</span>
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <h4 className="text-[12px] font-bold flex items-center gap-1 border-b border-slate-100 pb-1">
+                    <span>🌱</span> SOIL MOISTURE
+                  </h4>
+                  <div className="text-[11px] text-slate-600 grid grid-cols-2 gap-y-1 ml-1">
+                    <span>0–1 cm:</span> <span className="font-semibold text-slate-800">{envData.hourly.soil_moisture_0_to_1cm?.[0] ?? 'N/A'} m³/m³</span>
+                    <span>1–3 cm:</span> <span className="font-semibold text-slate-800">{envData.hourly.soil_moisture_1_to_3cm?.[0] ?? 'N/A'} m³/m³</span>
+                    <span>3–9 cm:</span> <span className="font-semibold text-slate-800">{envData.hourly.soil_moisture_3_to_9cm?.[0] ?? 'N/A'} m³/m³</span>
+                    <span>9–27 cm:</span> <span className="font-semibold text-slate-800">{envData.hourly.soil_moisture_9_to_27cm?.[0] ?? 'N/A'} m³/m³</span>
+                    <span>27–81 cm:</span> <span className="font-semibold text-slate-800">{envData.hourly.soil_moisture_27_to_81cm?.[0] ?? 'N/A'} m³/m³</span>
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <h4 className="text-[12px] font-bold flex items-center gap-1 border-b border-slate-100 pb-1">
+                    <span>🌧️</span> RAINFALL FORECAST
+                  </h4>
+                  <div className="text-[11px] text-slate-600 grid grid-cols-2 gap-y-1 ml-1">
+                    <span>Next 1 hour:</span> <span className="font-semibold text-slate-800">{(envData.hourly.precipitation?.slice(1, 2).reduce((a, b) => a + b, 0) || 0).toFixed(1)} mm</span>
+                    <span>Next 3 hours:</span> <span className="font-semibold text-slate-800">{(envData.hourly.precipitation?.slice(1, 4).reduce((a, b) => a + b, 0) || 0).toFixed(1)} mm</span>
+                    <span>Next 6 hours:</span> <span className="font-semibold text-slate-800">{(envData.hourly.precipitation?.slice(1, 7).reduce((a, b) => a + b, 0) || 0).toFixed(1)} mm</span>
+                    <span>Next 24 hours:</span> <span className="font-semibold text-slate-800">{(envData.hourly.precipitation?.slice(1, 25).reduce((a, b) => a + b, 0) || 0).toFixed(1)} mm</span>
+                  </div>
+                </div>
+
+                {envData.elevation !== undefined && (
+                  <div className="space-y-1.5">
+                    <h4 className="text-[12px] font-bold flex items-center gap-1 border-b border-slate-100 pb-1">
+                      <span>⛰️</span> ELEVATION
+                    </h4>
+                    <div className="text-[11px] text-slate-600 ml-1">
+                      {envData.elevation} meters
+                    </div>
+                  </div>
+                )}
+
+                <div className="pt-2 mt-2 border-t border-slate-200/80 text-[9px] text-slate-400">
+                  <div>Last updated: {envData.current.time || new Date().toISOString()}</div>
+                  <div>Source: Open-Meteo</div>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Bottom legend */}
       <div className="absolute bottom-4 left-4 z-[400] bg-white/90 backdrop-blur-md border border-slate-200 px-3 py-2 rounded-xl shadow-sm pointer-events-none">

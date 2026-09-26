@@ -4,6 +4,7 @@ import { useLocation } from '../context/LocationContext';
 import immediateActionsService from '../services/immediateActionsService';
 import TacticalActionMap from '../components/immediate-actions/TacticalActionMap';
 import AudioCallSimulatorModal from '../components/immediate-actions/AudioCallSimulatorModal';
+import { getLocationCoordinates } from '../utils/stateCoordinates';
 
 // Multilingual Warning Audio Scripts
 const AUDIO_SCRIPTS = {
@@ -110,6 +111,68 @@ export default function ImmediateActionsPage() {  const { selectedState, selecte
   // Map focus & routing state
   const [selectedEntity, setSelectedEntity] = useState(null);
   const [activeRoute, setActiveRoute] = useState(null);
+
+  const { shiftedTacticalData, shiftedShelters, shiftedSosAlerts } = React.useMemo(() => {
+    const isUk = !selectedState || selectedState === 'Uttarakhand';
+    if (isUk || !tacticalData) {
+      return { shiftedTacticalData: tacticalData, shiftedShelters: shelters, shiftedSosAlerts: sosAlerts };
+    }
+    
+    const center = getLocationCoordinates(selectedState, selectedDistrict) || { lat: 20, lon: 80 };
+    const stateName = selectedState;
+
+    const genForces = [
+      { id: 'F1', name: `1st ${stateName} Battalion`, type: 'NDRF', organization: 'NDRF', base_name: `${stateName} Command Base`, assigned_sector: 'Central Flood Zone', lat: center.lat + 0.05, lon: center.lon - 0.08, status: 'DEPLOYED', personnel: 150, equipment: { boats: 10, drones: 2 }, commander: 'Cmdr. A. Sharma' },
+      { id: 'F2', name: `${stateName} SDRF QRT`, type: 'SDRF', organization: 'SDRF', base_name: 'Forward Tactical Post', assigned_sector: 'Eastern Riverbank', lat: center.lat - 0.04, lon: center.lon + 0.06, status: 'STANDBY', personnel: 60, equipment: { boats: 4, drones: 1 }, commander: 'Capt. S. Verma' }
+    ];
+
+    const genIngress = [
+      { id: 'R1', name: `${stateName} Primary Evac Route`, type: 'ROAD', status: 'OPEN', clearance_capacity: 'Heavy Machinery / Convoy', total_distance_km: 45, path_coordinates: [[center.lat + 0.1, center.lon - 0.1], [center.lat + 0.05, center.lon - 0.05], [center.lat, center.lon]] },
+      { id: 'R2', name: `Sub-sector Connector`, type: 'ROAD', status: 'RESTRICTED', clearance_capacity: 'Light 4x4 Only', total_distance_km: 18, path_coordinates: [[center.lat - 0.1, center.lon + 0.1], [center.lat - 0.04, center.lon + 0.06]] }
+    ];
+
+    const genVul = [
+      { id: 'V1', name: 'Critical River Bridge', vulnerability_desc: 'Water level 1m below bridge deck. High risk of washout.', lat: center.lat + 0.02, lon: center.lon - 0.03, status: 'CRITICAL' },
+      { id: 'V2', name: 'Low-lying Highway Dip', vulnerability_desc: 'Waterlogging detected. Route impassable for light vehicles.', lat: center.lat - 0.03, lon: center.lon + 0.02, status: 'WARNING' }
+    ];
+
+    const genPop = [
+      { id: 'P1', name: 'Riverfront Settlement', district: stateName, population_at_risk: 4500, est_evacuation_time_hrs: 4, lat: center.lat + 0.01, lon: center.lon - 0.01, priority: 'HIGH' }
+    ];
+
+    const genRoutes = [
+      { from_point_id: 'P1', from_name: 'Riverfront Settlement', to_shelter_id: 'S1', to_shelter_name: `${stateName} Central Relief Camp`, shortest_distance_km: 8.5, est_rescue_vehicle_mins: 45, est_walking_mins: 120, safety_score: '92% SAFE', waypoints: [[center.lat + 0.01, center.lon - 0.01], [center.lat + 0.03, center.lon + 0.02], [center.lat + 0.05, center.lon + 0.05]] }
+    ];
+
+    const genShelters = [
+      { id: 'S1', name: `${stateName} Central Relief Camp`, type: 'EDUCATIONAL', district: stateName, lat: center.lat + 0.05, lon: center.lon + 0.05, max_capacity: 2000, current_occupancy: 400, status: 'OPEN', supplies: { drinking_water_days: 7, food_rations_days: 7 }, last_message_received: 'Ready for evacuees' },
+      { id: 'S2', name: 'Auxiliary Shelter Ground', type: 'MUNICIPAL', district: stateName, lat: center.lat - 0.06, lon: center.lon - 0.02, max_capacity: 500, current_occupancy: 480, status: 'FULL', supplies: { drinking_water_days: 2, food_rations_days: 3 }, last_message_received: 'Diverting to Central Camp' }
+    ];
+
+    const genSos = [
+      { id: 'SOS1', source_number: '919876543210', latitude: center.lat + 0.015, longitude: center.lon - 0.005, status: 'PENDING', message: 'Trapped on roof, water rising fast!', timestamp: new Date().toISOString() }
+    ];
+
+    return {
+      shiftedTacticalData: {
+        forces: genForces,
+        ingress_routes: genIngress,
+        vulnerable_points: genVul,
+        population_centers: genPop,
+        safe_shortest_routes: genRoutes
+      },
+      shiftedShelters: genShelters,
+      shiftedSosAlerts: genSos
+    };
+  }, [tacticalData, shelters, sosAlerts, selectedState, selectedDistrict]);
+
+  useEffect(() => {
+    if (shiftedTacticalData?.safe_shortest_routes?.length > 0) {
+      setActiveRoute(shiftedTacticalData.safe_shortest_routes[0]);
+    } else {
+      setActiveRoute(null);
+    }
+  }, [shiftedTacticalData]);
 
   // Audio simulator modal
   const [callModalOpen, setCallModalOpen] = useState(false);
@@ -739,18 +802,6 @@ export default function ImmediateActionsPage() {  const { selectedState, selecte
         </div>
       </div>
 
-      {!isUttarakhand ? (
-        <div className="bg-slate-50 border border-slate-200 rounded-xl p-12 flex flex-col items-center text-center gap-4 shadow-sm">
-          <span className="material-symbols-outlined text-emerald-400 text-[48px]">check_circle</span>
-          <div>
-            <h3 className="text-[15px] font-bold text-slate-700">Immediate Actions & Tactical Command unavailable for {selectedState}.</h3>
-            <p className="text-[12.5px] text-slate-500 mt-1 max-w-md">
-              Tactical dispatch, calling, and force routing systems are exclusively integrated with the Uttarakhand disaster management command framework.
-            </p>
-          </div>
-        </div>
-      ) : (
-        <>
         <div className="flex items-center gap-3 shrink-0 my-2">
           <button
             onClick={() => setCallModalOpen(true)}
@@ -830,11 +881,12 @@ export default function ImmediateActionsPage() {  const { selectedState, selecte
               </div>
             </div>
             <TacticalActionMap
-              tacticalData={{ ...tacticalData, shelters, sosAlerts }}
+              tacticalData={{ ...shiftedTacticalData, shelters: shiftedShelters, sosAlerts: shiftedSosAlerts }}
               selectedEntity={selectedEntity}
               onSelectEntity={setSelectedEntity}
               activeRouteId={activeRoute?.from_point_id}
               onSelectRoute={setActiveRoute}
+              selectedState={selectedState}
             />
           </div>
 
@@ -850,7 +902,7 @@ export default function ImmediateActionsPage() {  const { selectedState, selecte
               </span>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {tacticalData?.forces?.map((force) => (
+              {shiftedTacticalData?.forces?.map((force) => (
                 <div
                   key={force.id}
                   onClick={() => setSelectedEntity({ ...force, type: 'FORCE', name: `${force.organization} - ${force.base_name}` })}
@@ -921,7 +973,7 @@ export default function ImmediateActionsPage() {  const { selectedState, selecte
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
-                  {tacticalData?.ingress_routes?.map((route) => (
+                  {shiftedTacticalData?.ingress_routes?.map((route) => (
                     <tr key={route.id} className="hover:bg-slate-50 transition-colors">
                       <td className="py-3 px-3 font-bold text-slate-900">{route.name}</td>
                       <td className="py-3 px-3 text-slate-700">
@@ -948,7 +1000,7 @@ export default function ImmediateActionsPage() {  const { selectedState, selecte
               Critical Vulnerable Hazard Bottlenecks (Landslide / Bridge Outburst Points)
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {tacticalData?.vulnerable_points?.map((vul) => (
+              {shiftedTacticalData?.vulnerable_points?.map((vul) => (
                 <div
                   key={vul.id}
                   onClick={() => setSelectedEntity({ ...vul, type: 'VULNERABLE', description: vul.vulnerability_desc })}
@@ -989,12 +1041,12 @@ export default function ImmediateActionsPage() {  const { selectedState, selecte
               </span>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {tacticalData?.population_centers?.map((pop) => (
+              {shiftedTacticalData?.population_centers?.map((pop) => (
                 <div
                   key={pop.id}
                   onClick={() => {
                     setSelectedEntity({ ...pop, type: 'POPULATION', description: `Approx Pop: ${pop.approx_population.toLocaleString()} | Target: ${pop.safe_shelter_target}` });
-                    const match = tacticalData?.safe_shortest_routes?.find((r) => r.from_point_id === pop.id);
+                    const match = shiftedTacticalData?.safe_shortest_routes?.find((r) => r.from_point_id === pop.id);
                     if (match) setActiveRoute(match);
                   }}
                   className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm hover:border-purple-400 transition-all cursor-pointer space-y-3"
@@ -1060,7 +1112,7 @@ export default function ImmediateActionsPage() {  const { selectedState, selecte
 
             {/* Route Selector Strip */}
             <div className="flex flex-wrap items-center gap-2">
-              {tacticalData?.safe_shortest_routes?.map((route) => {
+              {shiftedTacticalData?.safe_shortest_routes?.map((route) => {
                 const isSelected = activeRoute?.from_point_id === route.from_point_id;
                 return (
                   <button
@@ -2399,8 +2451,6 @@ export default function ImmediateActionsPage() {  const { selectedState, selecte
         onClose={() => setCallModalOpen(false)}
         defaultNumbers={TARGET_NUMBERS}
       />
-      </>
-      )}
     </div>
   );
 }

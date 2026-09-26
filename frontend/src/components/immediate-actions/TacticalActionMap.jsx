@@ -22,46 +22,44 @@ const CARTO_API_KEY = import.meta.env.VITE_CARTO_API_KEY || '';
 
 
 
-function MapFitBounds() {
+import { getLocationCoordinates } from '../../utils/stateCoordinates';
 
+function MapFitBounds({ selectedState }) {
   const map = useMap();
 
   useEffect(() => {
-
     if (map) {
-
       const timer = setTimeout(() => {
-
         map.invalidateSize();
-
+        if (selectedState && selectedState !== 'Uttarakhand') {
+           const coords = getLocationCoordinates(selectedState, null);
+           if (coords) {
+             const offset = 1.5;
+             map.fitBounds([
+               [coords.lat - offset, coords.lon - offset],
+               [coords.lat + offset, coords.lon + offset]
+             ], { padding: [25, 25] });
+             return;
+           }
+        }
         map.fitBounds(UTTARAKHAND_BOUNDS, { padding: [25, 25] });
-
       }, 120);
-
       return () => clearTimeout(timer);
-
     }
-
-  }, [map]);
+  }, [map, selectedState]);
 
   return null;
-
 }
 
 
 
 export default function TacticalActionMap({
-
   tacticalData,
-
   selectedEntity,
-
   onSelectEntity,
-
   activeRouteId,
-
   onSelectRoute,
-
+  selectedState,
 }) {
 
   const [basemapType, setBasemapType] = useState('topo'); // 'topo', 'osm', 'satellite', 'carto'
@@ -480,7 +478,7 @@ export default function TacticalActionMap({
 
       >
 
-        <MapFitBounds />
+        <MapFitBounds selectedState={selectedState} />
 
         {/* Dynamic Basemap Tile Layer */}
 

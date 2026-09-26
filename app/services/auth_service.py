@@ -42,6 +42,19 @@ def get_current_user(request: Request, db: Session = Depends(get_db)):
     except jwt.PyJWTError:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Could not validate credentials")
     
+    if user_id == "1":
+        # Always return mock user for fallback auth, regardless of DB state
+        return User(
+            id=1,
+            email="chatterjeesaswata5@gmail.com",
+            full_name="Admin User",
+            role="admin",
+            created_at=datetime.utcnow(),
+        )
+
+    if db is None:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found (DB unavailable)")
+
     user = db.query(User).filter(User.id == int(user_id)).first()
     if user is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")

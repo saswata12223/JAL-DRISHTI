@@ -12,6 +12,7 @@ from fastapi.responses import JSONResponse
 
 from app.config import settings
 from app.api.routes import api_router
+from app.api.routes.environment import router as environment_router
 from app.services.prediction_service import PredictionService
 from app.db.sos_database import init_sos_db
 
@@ -56,6 +57,9 @@ app.add_middleware(
 
 # Register API v1 routes
 app.include_router(api_router, prefix=settings.API_V1_STR)
+
+# Register environment route
+app.include_router(environment_router)
 
 
 @app.get("/", tags=["Root"])

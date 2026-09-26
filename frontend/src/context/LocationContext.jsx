@@ -57,8 +57,8 @@ export function deriveCapabilities(state = null, district = null) {
 }
 
 export const LocationProvider = ({ children }) => {
-  const [selectedState, setSelectedState] = useState(null);
-  const [selectedDistrict, setSelectedDistrict] = useState(null);
+  const [selectedState, setSelectedState] = useState(() => sessionStorage.getItem('jaldrishti_state') || null);
+  const [selectedDistrict, setSelectedDistrict] = useState(() => sessionStorage.getItem('jaldrishti_district') || null);
   const [selectedSubdistrict, setSelectedSubdistrict] = useState(null);
   const [selectedCoords, setSelectedCoords] = useState(null);
 
@@ -66,12 +66,17 @@ export const LocationProvider = ({ children }) => {
     setSelectedState(stateName);
     setSelectedDistrict(null);
     setSelectedSubdistrict(null);
+    if (stateName) sessionStorage.setItem('jaldrishti_state', stateName);
+    else sessionStorage.removeItem('jaldrishti_state');
+    sessionStorage.removeItem('jaldrishti_district');
     if (coords) setSelectedCoords(coords);
   }, []);
 
   const selectDistrict = useCallback((districtName, coords = null) => {
     setSelectedDistrict(districtName);
     setSelectedSubdistrict(null);
+    if (districtName) sessionStorage.setItem('jaldrishti_district', districtName);
+    else sessionStorage.removeItem('jaldrishti_district');
     if (coords) setSelectedCoords(coords);
   }, []);
 
