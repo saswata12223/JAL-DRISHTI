@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import ResourcesSection from '../components/about/ResourcesSection';
 
 export default function AboutPage() {
   useEffect(() => {
@@ -435,6 +436,9 @@ export default function AboutPage() {
           </section>
         </div>
 
+        {/* SECTION 11.5 - RESOURCES */}
+        <ResourcesSection />
+
         {/* SECTION 12 - ABOUT FOOTER */}
         <section className="flex flex-col sm:flex-row items-center justify-between gap-6 border-t border-slate-200 pt-8 mt-4 pb-4">
           <div className="flex flex-col items-start gap-1">
@@ -447,7 +451,6 @@ export default function AboutPage() {
             <a href="/dashboard" className="hover:text-[#0F4C81] transition-colors focus:outline-none focus:underline">Risk Map</a>
             <a href="/live-forecast" className="hover:text-[#0F4C81] transition-colors focus:outline-none focus:underline">Live Forecast</a>
             <a href="/monitoring" className="hover:text-[#0F4C81] transition-colors focus:outline-none focus:underline">Monitoring</a>
-            <a href="/resources" className="hover:text-[#0F4C81] transition-colors focus:outline-none focus:underline">Resources</a>
             <a href="https://usdma.uk.gov.in/" target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 hover:text-[#0F4C81] transition-colors focus:outline-none focus:underline">Official USDMA <span className="material-symbols-outlined text-[10px]">open_in_new</span></a>
           </div>
         </section>

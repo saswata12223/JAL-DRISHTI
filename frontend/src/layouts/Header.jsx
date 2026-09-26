@@ -29,7 +29,7 @@ const NAV_GROUPS = [
       { name: 'Model Explainability', path: '/analytics?tab=model_explainability' }
     ]
   },
-  { name: 'Resources', path: '/resources' },
+  { name: 'Terrain Model', path: '/about-terrain' },
   { name: 'About', path: '/about' }
 ];
 
