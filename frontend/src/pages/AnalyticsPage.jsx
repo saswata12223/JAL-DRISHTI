@@ -150,7 +150,7 @@ function LiveSnapshotPanel({ summary }) {
       subtitle="Real output of the latest state-wide evaluation sweep"
       badge={
         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[9.5px] font-bold uppercase tracking-wider bg-emerald-500/10 border-emerald-500/30 text-emerald-500">
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> Live API
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> Live API
         </span>
       }
     >
@@ -208,7 +208,7 @@ function PolicyPanel({ policy, policySource }) {
 
         <div>
           <span className="text-[10px] font-extrabold uppercase tracking-wider text-app-text-muted block mb-1.5">
-            ML Probability Bands (threshold {policy.ml_decision_threshold ?? MODEL_META.decisionThreshold})
+            Probability Bands (threshold {policy.ml_decision_threshold ?? MODEL_META.decisionThreshold})
           </span>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
             {Object.entries(policy.probability_bands || {}).map(([key, band]) => (
@@ -364,7 +364,7 @@ function EvaluatePanel({ decisions = [] }) {
     <PanelCard
       icon="science"
       title="On-Demand Model Evaluation"
-      subtitle="Run live XGBoost inference + SCS-CN physics + CWC fusion"
+      subtitle="Run real-time risk computation + SCS-CN physics + CWC fusion"
       badge={<span className="px-2 py-0.5 rounded-full bg-app-surface-elevated border border-app-border text-[10.5px] font-bold text-app-text-muted font-mono">POST /risk/evaluate</span>}
     >
       <div className="flex flex-col gap-4">
@@ -514,7 +514,7 @@ function ProbabilityGauge({ prob, threshold = 0.4, risk }) {
           style={{ left: `${Math.min(Math.max(threshold * 100, 0), 100)}%` }}
         />
       </div>
-      <span className="text-[9.5px] font-medium text-app-text-muted mt-1.5 block">Decision threshold {threshold} — ML probability banding</span>
+      <span className="text-[9.5px] font-medium text-app-text-muted mt-1.5 block">Decision threshold {threshold} — probability banding</span>
     </div>
   );
 }
@@ -659,7 +659,7 @@ function DecisionDetail({ decision }) {
             <span className="material-symbols-outlined text-[14px] group-open:rotate-180 transition-transform">expand_more</span>
           </summary>
           <div className="flex flex-col px-4 pb-4 gap-0">
-            <DetailRow label="ML Risk Class" value={decision.ml_risk_class} mono />
+            <DetailRow label="Risk Class" value={decision.ml_risk_class} mono />
             <DetailRow label="Model" value={`${decision.model_name} v${decision.model_version}`} mono />
             <DetailRow label="Risk Policy" value={`v${decision.risk_policy_version}`} mono />
             <DetailRow label="Environmental State" value={stateLabel(decision.environmental_condition)} />
@@ -720,7 +720,7 @@ function QuickRegionRiskEvaluator({ decisions }) {
           Quick Region Risk Evaluator
         </span>
         <span className="text-[11.5px] text-app-text-secondary">
-          Select a specific region/station to immediately fetch its AI-evaluated flood risk %.
+          Select a specific region/station to immediately compute regional risk probability.
         </span>
       </div>
 
@@ -987,7 +987,7 @@ export default function AnalyticsPage() {  const { selectedState, selectedDistri
           <div>
             <h3 className="text-[15px] font-bold text-slate-700">Analytics unavailable for {selectedState}.</h3>
             <p className="text-[12.5px] text-slate-500 mt-1 max-w-md">
-              Detailed machine learning analytics and risk metrics are only generated for the Uttarakhand model coverage area.
+              Detailed dynamic risk assessment and metrics are only generated for the Uttarakhand model coverage area.
             </p>
           </div>
         </div>

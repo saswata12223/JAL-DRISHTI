@@ -78,7 +78,7 @@ export default function Footer() {
               <span className="bg-white/5 border border-white/10 px-2 py-1 rounded text-slate-400">GSI</span>
             </div>
             <div className="text-[10px] text-slate-500 lg:text-right mt-1">
-              ML Model: XGBoost (historical calibrated reference)<br />
+              Risk Engine: Operational Hydrological Assessment<br />
               GIS: Survey of India (SOI) — Pan-India
             </div>
           </div>

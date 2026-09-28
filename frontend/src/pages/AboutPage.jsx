@@ -17,7 +17,7 @@ export default function AboutPage() {
             Understanding Jal Drishti
           </h1>
           <h2 className="text-lg md:text-xl font-medium text-slate-600 max-w-3xl leading-relaxed mt-2">
-            An integrated hydrological intelligence platform for flash-flood risk monitoring and decision support in Uttarakhand's mountainous terrain.
+            An integrated hydrological intelligence platform for flash-flood risk monitoring and decision support in mountainous terrain.
           </h2>
           <p className="text-sm md:text-[15px] text-slate-500 max-w-4xl leading-relaxed mt-4">
             Jal Drishti brings together rainfall, soil moisture, terrain, weather, hydrological observations and predictive modelling into a common geospatial decision-support environment.
@@ -28,7 +28,7 @@ export default function AboutPage() {
         <section className="flex flex-col gap-8">
           <h2 className="text-2xl font-bold text-[#0A2540] tracking-tight">Why Flash Flood Risk Is Difficult in the Himalayas</h2>
           <p className="text-[15px] text-slate-600 max-w-4xl leading-relaxed">
-            Uttarakhand's mountainous terrain creates complex hydrological conditions where intense rainfall, steep slopes, drainage characteristics, soil wetness and river response can interact over short time periods. The system therefore cannot rely on a single rainfall number or a single sensor.
+            Mountainous terrain creates complex hydrological conditions where intense rainfall, steep slopes, drainage characteristics, soil wetness and river response can interact over short time periods. The system therefore cannot rely on a single rainfall number or a single sensor.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
@@ -82,10 +82,10 @@ export default function AboutPage() {
                 </div>
                 <div className="w-full h-px bg-slate-100"></div>
                 <div className="flex items-center gap-3">
-                  <span className="material-symbols-outlined text-emerald-500">memory</span>
+                  <span className="material-symbols-outlined text-emerald-500">crisis_alert</span>
                   <div>
-                    <div className="text-sm font-bold text-slate-700">Uttarakhand Focus</div>
-                    <div className="text-[11px] text-slate-500">ML Risk Engine & Live Telemetry</div>
+                    <div className="text-sm font-bold text-slate-700">Dynamic Risk Zones</div>
+                    <div className="text-[11px] text-slate-500">Predictive Modeling & Live Telemetry</div>
                   </div>
                 </div>
               </div>
@@ -99,9 +99,9 @@ export default function AboutPage() {
               </p>
             </div>
             <div className="bg-white border-l-4 border-l-emerald-400 p-5 rounded-r-lg shadow-sm">
-              <h3 className="font-bold text-slate-700 text-sm mb-2">Machine Learning & Live Layer</h3>
+              <h3 className="font-bold text-slate-700 text-sm mb-2">Predictive & Live Layer</h3>
               <p className="text-xs text-slate-600 leading-relaxed">
-                Live gauge telemetry, predictive hydrology, and ML-driven risk analytics are strictly bounded to Uttarakhand. The system prioritizes data honesty: it will not fabricate charts or risk metrics for regions lacking calibrated models or sensor data.
+                Live gauge telemetry and predictive hydrological analytics are dynamically bounded to regions with verified sensor coverage. The system prioritizes data honesty: it will not fabricate charts or risk metrics for uncalibrated regions.
               </p>
             </div>
           </div>
@@ -147,7 +147,7 @@ export default function AboutPage() {
                 <span className="material-symbols-outlined text-[24px]">model_training</span>
               </div>
               <h3 className="text-sm font-bold text-[#0A2540] uppercase tracking-wider">Modelling</h3>
-              <p className="text-[11px] text-slate-500 max-w-[150px]">Machine-learning and physics-informed indicators are evaluated together.</p>
+              <p className="text-[11px] text-slate-500 max-w-[150px]">Operational and physics-informed indicators are evaluated together.</p>
             </div>
 
             <span className="material-symbols-outlined text-slate-300 transform rotate-90 lg:rotate-0">arrow_forward</span>

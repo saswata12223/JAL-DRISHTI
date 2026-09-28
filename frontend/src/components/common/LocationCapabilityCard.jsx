@@ -18,12 +18,12 @@ const CAPABILITY_CONFIG = [
   },
   {
     key: 'historical_ml',
-    label: 'Flash-Flood ML',
+    label: 'Dynamic Risk Modeling',
     icon: 'psychology',
     alwaysAvailable: false,
     detail: (caps) => caps.historical_ml.available
-      ? 'XGBoost calibrated reference — Uttarakhand'
-      : 'Uttarakhand project area only',
+      ? 'Calibrated operational reference — Uttarakhand'
+      : 'Coverage pending for this region',
   },
   {
     key: 'live_weather',
@@ -43,7 +43,7 @@ const CAPABILITY_CONFIG = [
   },
   {
     key: 'ml_live_inference',
-    label: 'Live ML Inference',
+    label: 'Real-time Risk Assessment',
     icon: 'bolt',
     alwaysAvailable: false,
     detail: () => 'Blocked — insufficient sensor data',
@@ -97,41 +97,37 @@ export default function LocationCapabilityCard({ compact = false }) {
   const isUttarakhand = true;
 
   return (
-    <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-xs font-sans select-none">
+    <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-xs font-sans select-none shrink-0">
       {/* Header */}
-      <div className={`px-4 py-3 border-b border-slate-100 ${isUttarakhand ? 'bg-gradient-to-r from-cyan-50 to-white' : 'bg-white'}`}>
-        <div className="flex items-start justify-between gap-2">
+      <div className="relative px-4 py-3 border-b border-[#0A2540] overflow-hidden bg-[#0A2540]">
+        <div 
+          className="absolute inset-0 z-0 opacity-20 pointer-events-none"
+          style={{
+            backgroundImage: "url('/assets/images/himalayan_hero_bg.jpg')",
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+          }}
+        />
+        <div className="relative z-10 flex items-start justify-between gap-2">
           <div>
-            <div className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Location Capabilities</div>
-            <div className="text-[13px] font-bold text-slate-900 leading-tight">{locationLabel}</div>
+            <div className="text-[9px] font-bold text-cyan-400/80 uppercase tracking-widest mb-0.5">Location Capabilities</div>
+            <div className="text-[13px] font-bold text-white leading-tight">{locationLabel}</div>
             {selectedState && (
-              <div className="text-[10px] text-slate-500 mt-0.5 font-mono">{scopeLabel}</div>
+              <div className="text-[10px] text-slate-400 mt-0.5 font-mono">{scopeLabel}</div>
             )}
           </div>
-          {/* Coverage badge */}
-          {capabilities.historical_ml.available ? (
-            <span className="text-[9px] font-bold bg-cyan-100 text-cyan-800 border border-cyan-200 px-2 py-0.5 rounded-full whitespace-nowrap">ML Available</span>
-          ) : capabilities.sih_region?.available === 'YES' ? (
-            <span className="text-[9px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200 px-2 py-0.5 rounded-full whitespace-nowrap">SIH Core Region</span>
-          ) : capabilities.sih_region?.available === 'PARTIAL' ? (
-            <span className="text-[9px] font-bold bg-amber-100 text-amber-800 border border-amber-200 px-2 py-0.5 rounded-full whitespace-nowrap">Future Expansion</span>
-          ) : selectedState ? (
-            <span className="text-[9px] font-bold bg-slate-100 text-slate-500 border border-slate-200 px-2 py-0.5 rounded-full whitespace-nowrap">GIS Only</span>
-          ) : (
-            <span className="text-[9px] font-bold bg-slate-100 text-slate-500 border border-slate-200 px-2 py-0.5 rounded-full whitespace-nowrap">Pan-India</span>
-          )}
         </div>
 
         {/* Breadcrumb */}
         {breadcrumb.length > 1 && (
-          <div className="flex items-center gap-1 flex-wrap mt-2">
+          <div className="relative z-10 flex items-center gap-1 flex-wrap mt-2">
             {breadcrumb.map((crumb, i) => (
               <React.Fragment key={crumb.label}>
-                {i > 0 && <span className="text-slate-300 text-[9px]">›</span>}
+                {i > 0 && <span className="text-white/40 text-[9px]">›</span>}
                 <button
                   onClick={crumb.onClick || undefined}
                   disabled={!crumb.onClick}
-                  className={`text-[9.5px] font-semibold transition-colors ${crumb.active ? 'text-slate-800' : 'text-cyan-600 hover:text-cyan-800'} ${!crumb.onClick ? 'cursor-default' : ''}`}
+                  className={`text-[9.5px] font-semibold transition-colors ${crumb.active ? 'text-white font-bold' : 'text-cyan-400 hover:text-cyan-300'} ${!crumb.onClick ? 'cursor-default' : ''}`}
                 >
                   {crumb.label}
                 </button>

@@ -334,7 +334,7 @@ const decisionLoc = selectedStation || (selectedDistrict ? {
               <div>
                 <div className="text-[12px] font-bold text-slate-600">Select a Location</div>
                 <p className="text-[10.5px] text-slate-400 mt-1 leading-relaxed">
-                  Click any state on the map or use the search to explore capabilities. In Uttarakhand, you can click monitoring stations for historical ML risk data.
+                  Click any state on the map or use the search to explore capabilities. Select an active monitoring station to view dynamic risk assessment data.
                 </p>
               </div>
             </div>
