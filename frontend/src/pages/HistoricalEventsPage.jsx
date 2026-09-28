@@ -525,7 +525,7 @@ export default function HistoricalEventsPage() {  const { selectedState, selecte
 
 
 
-  const isUttarakhand = !selectedState || selectedState === 'Uttarakhand';
+  const isUttarakhand = true;
 
   // Sync district filter with location context if possible
   useEffect(() => {

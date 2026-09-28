@@ -25,8 +25,7 @@ const NAV_GROUPS = [
     name: 'Analytics',
     dropdown: [
       { name: 'Risk Analytics', path: '/analytics?tab=risk_analytics' },
-      { name: 'Historical Events', path: '/historical-events' },
-      { name: 'Model Explainability', path: '/analytics?tab=model_explainability' }
+      { name: 'Historical Events', path: '/historical-events' }
     ]
   },
   { name: 'Terrain Model', path: '/about-terrain' },
@@ -84,7 +83,7 @@ function NavDropdown({ group, isActive }) {
 
       {open && createPortal(
         <div 
-          className="fixed w-48 bg-[#0F2942] border border-white/10 rounded-xl shadow-2xl py-1.5 z-[200] flex flex-col dropdown-portal-menu"
+          className="fixed w-48 bg-[#0F2942] border border-white/10 rounded-xl shadow-2xl py-1.5 z-[9999] flex flex-col dropdown-portal-menu"
           style={{ top: coords.top, left: coords.left }}
         >
           {group.dropdown.map(child => {
@@ -188,7 +187,7 @@ export default function Header({
 
   return (
 
-    <header className="fixed top-0 left-0 w-full z-[1000] bg-[#0A2540] text-white select-none border-b border-white/10 backdrop-blur-xl">
+    <header className="fixed top-0 left-0 w-full z-[5000] bg-[#0A2540] text-white select-none border-b border-white/10 backdrop-blur-xl">
 
 
 

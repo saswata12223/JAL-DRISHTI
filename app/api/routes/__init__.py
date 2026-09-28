@@ -37,5 +37,7 @@ api_router.include_router(gis_router)
 api_router.include_router(live_router)
 api_router.include_router(weather_router)
 api_router.include_router(ffews_router)
+from app.api.routes.tactical_plan import router as tactical_plan_router
+api_router.include_router(tactical_plan_router, prefix="/tactical-plan", tags=["Tactical Plan"])
 
 __all__ = ["api_router"]

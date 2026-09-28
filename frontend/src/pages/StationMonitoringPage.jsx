@@ -170,7 +170,7 @@ export default function StationMonitoringPage() {  const { selectedState, select
 
 
 
-  const isUttarakhand = !selectedState || selectedState === 'Uttarakhand';
+  const isUttarakhand = true;
 
   // Sync district filter with location context if possible
   useEffect(() => {

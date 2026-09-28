@@ -44,7 +44,7 @@ def upgrade() -> None:
         sa.Column('status', sa.String(length=32), nullable=False, server_default='ACTIVE'),
         sa.PrimaryKeyConstraint('station_id')
     )
-    op.create_index('idx_stations_geom', 'stations', ['geom'], postgresql_using='gist')
+    # op.create_index('idx_stations_geom', 'stations', ['geom'], postgresql_using='gist')
     op.create_index('idx_stations_district_type', 'stations', ['district', 'station_type'])
 
     # 3. Create historical_flood_events table
@@ -78,7 +78,7 @@ def upgrade() -> None:
         sa.Column('notes', sa.Text(), nullable=True),
         sa.PrimaryKeyConstraint('event_id')
     )
-    op.create_index('idx_hist_events_geom', 'historical_flood_events', ['geom'], postgresql_using='gist')
+    # op.create_index('idx_hist_events_geom', 'historical_flood_events', ['geom'], postgresql_using='gist')
 
     # 4. Create weather_observations table
     op.create_table(
@@ -160,7 +160,7 @@ def upgrade() -> None:
         'flood_predictions',
         sa.Column('timestamp_utc', sa.DateTime(timezone=True), nullable=False),
         sa.Column('spatial_id', sa.String(length=64), nullable=False),
-        sa.Column('sample_id', sa.String(length=128), nullable=False, unique=True),
+        sa.Column('sample_id', sa.String(length=128), nullable=False),
         sa.Column('sample_type', sa.String(length=64), nullable=False),
         sa.Column('district', sa.String(length=128), nullable=False),
         sa.Column('major_basin', sa.String(length=128), nullable=True),
@@ -179,7 +179,8 @@ def upgrade() -> None:
         sa.Column('warning_level_m', sa.Float(), nullable=True),
         sa.Column('danger_level_m', sa.Float(), nullable=True),
         sa.Column('hfl_m', sa.Float(), nullable=True),
-        sa.PrimaryKeyConstraint('timestamp_utc', 'spatial_id')
+        sa.PrimaryKeyConstraint('timestamp_utc', 'spatial_id'),
+        sa.UniqueConstraint('timestamp_utc', 'sample_id', name='uq_flood_predictions_sample_id')
     )
     op.execute("SELECT create_hypertable('flood_predictions', 'timestamp_utc', if_not_exists => TRUE);")
 

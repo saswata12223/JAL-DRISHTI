@@ -1,29 +1,29 @@
 export const SEARCH_INDEX = [
   // Tier 1: Core Himalayan
   { label: 'Uttarakhand', type: 'State', lat: 30.15, lon: 79.2, state: 'Uttarakhand', district: null, mlAvailable: true },
-  { label: 'Himachal Pradesh', type: 'State', lat: 31.6, lon: 77.1, state: 'Himachal Pradesh', district: null },
-  { label: 'Jammu & Kashmir', type: 'UT', lat: 33.7, lon: 76.9, state: 'Jammu & Kashmir', district: null },
-  { label: 'Ladakh', type: 'UT', lat: 34.2, lon: 77.6, state: 'Ladakh', district: null },
-  { label: 'Sikkim', type: 'State', lat: 27.5, lon: 88.5, state: 'Sikkim', district: null },
-  { label: 'Arunachal Pradesh', type: 'State', lat: 28.2, lon: 94.7, state: 'Arunachal Pradesh', district: null },
+  { label: 'Himachal Pradesh', type: 'State', lat: 31.6, lon: 77.1, state: 'Himachal Pradesh', district: null, mlAvailable: true },
+  { label: 'Jammu & Kashmir', type: 'UT', lat: 33.7, lon: 76.9, state: 'Jammu & Kashmir', district: null, mlAvailable: true },
+  { label: 'Ladakh', type: 'UT', lat: 34.2, lon: 77.6, state: 'Ladakh', district: null, mlAvailable: true },
+  { label: 'Sikkim', type: 'State', lat: 27.5, lon: 88.5, state: 'Sikkim', district: null, mlAvailable: true },
+  { label: 'Arunachal Pradesh', type: 'State', lat: 28.2, lon: 94.7, state: 'Arunachal Pradesh', district: null, mlAvailable: true },
 
   // Tier 2: North-East Hills
-  { label: 'Meghalaya', type: 'State', lat: 25.5, lon: 91.4, state: 'Meghalaya', district: null },
-  { label: 'Nagaland', type: 'State', lat: 26.2, lon: 94.6, state: 'Nagaland', district: null },
-  { label: 'Manipur', type: 'State', lat: 24.7, lon: 93.9, state: 'Manipur', district: null },
-  { label: 'Mizoram', type: 'State', lat: 23.2, lon: 92.9, state: 'Mizoram', district: null },
-  { label: 'Tripura', type: 'State', lat: 23.8, lon: 91.3, state: 'Tripura', district: null },
-  { label: 'Assam', type: 'State', lat: 26.2, lon: 92.9, state: 'Assam', district: null },
+  { label: 'Meghalaya', type: 'State', lat: 25.5, lon: 91.4, state: 'Meghalaya', district: null, mlAvailable: true },
+  { label: 'Nagaland', type: 'State', lat: 26.2, lon: 94.6, state: 'Nagaland', district: null, mlAvailable: true },
+  { label: 'Manipur', type: 'State', lat: 24.7, lon: 93.9, state: 'Manipur', district: null, mlAvailable: true },
+  { label: 'Mizoram', type: 'State', lat: 23.2, lon: 92.9, state: 'Mizoram', district: null, mlAvailable: true },
+  { label: 'Tripura', type: 'State', lat: 23.8, lon: 91.3, state: 'Tripura', district: null, mlAvailable: true },
+  { label: 'Assam', type: 'State', lat: 26.2, lon: 92.9, state: 'Assam', district: null, mlAvailable: true },
 
   // Tier 3: Sub-Himalayan
-  { label: 'West Bengal', type: 'State', lat: 22.5, lon: 87.3, state: 'West Bengal', district: null },
+  { label: 'West Bengal', type: 'State', lat: 22.5, lon: 87.3, state: 'West Bengal', district: null, mlAvailable: true },
 
   // Tier 4: Western Ghats Terrain
-  { label: 'Maharashtra', type: 'State', lat: 19.6, lon: 75.3, state: 'Maharashtra', district: null },
-  { label: 'Goa', type: 'State', lat: 15.3, lon: 74.0, state: 'Goa', district: null },
-  { label: 'Karnataka', type: 'State', lat: 15.3, lon: 75.7, state: 'Karnataka', district: null },
-  { label: 'Kerala', type: 'State', lat: 10.5, lon: 76.3, state: 'Kerala', district: null },
-  { label: 'Tamil Nadu', type: 'State', lat: 11.1, lon: 78.7, state: 'Tamil Nadu', district: null },
+  { label: 'Maharashtra', type: 'State', lat: 19.6, lon: 75.3, state: 'Maharashtra', district: null, mlAvailable: true },
+  { label: 'Goa', type: 'State', lat: 15.3, lon: 74.0, state: 'Goa', district: null, mlAvailable: true },
+  { label: 'Karnataka', type: 'State', lat: 15.3, lon: 75.7, state: 'Karnataka', district: null, mlAvailable: true },
+  { label: 'Kerala', type: 'State', lat: 10.5, lon: 76.3, state: 'Kerala', district: null, mlAvailable: true },
+  { label: 'Tamil Nadu', type: 'State', lat: 11.1, lon: 78.7, state: 'Tamil Nadu', district: null, mlAvailable: true },
 
   // --- DISTRICTS ---
   // Uttarakhand districts
@@ -60,6 +60,6 @@ export const getLocationCoordinates = (state, district) => {
     const s = SEARCH_INDEX.find(item => item.state === state && !item.district);
     if (s) return { lat: s.lat, lon: s.lon };
   }
-  // Default to Uttarakhand
-  return { lat: 30.15, lon: 79.2 };
+  // Default to India Center
+  return { lat: 20.5937, lon: 78.9629 };
 };

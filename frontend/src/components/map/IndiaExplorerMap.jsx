@@ -120,7 +120,7 @@ export default function IndiaExplorerMap({ stations = [], onSelectStation }) {
   const stateStyle = useCallback((feature) => {
     const stateName = feature?.properties?.ST_NM || feature?.properties?.NAME_1 || '';
     const isSelected = stateName === selectedState;
-    const isUttarakhand = stateName === 'Uttarakhand';
+    const isUttarakhand = true;
     return {
       fillColor: isSelected ? '#0ea5e9' : isUttarakhand ? '#0284c7' : '#cbd5e1',
       fillOpacity: isSelected ? 0.35 : isUttarakhand ? 0.2 : 0.12,

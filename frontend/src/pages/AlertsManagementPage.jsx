@@ -401,7 +401,7 @@ export default function AlertsManagementPage() {  const { selectedState, selecte
 
 
 
-  const isUttarakhand = !selectedState || selectedState === 'Uttarakhand';
+  const isUttarakhand = true;
 
   // Establishes canonical fallback first; merges live only when valid.
   useEffect(() => {

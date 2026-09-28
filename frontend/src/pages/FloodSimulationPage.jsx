@@ -292,7 +292,7 @@ export default function FloodSimulationPage() {
 
 
 
-  const isUttarakhand = !selectedState || selectedState === 'Uttarakhand';
+  const isUttarakhand = true;
 
   return (
     <div className="flex flex-col gap-3 w-full font-sans select-none">

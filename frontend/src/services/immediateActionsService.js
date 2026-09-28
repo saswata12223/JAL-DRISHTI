@@ -1,38 +1,7 @@
 import api from './api';
 
 export const immediateActionsService = {
-  // Return rich mock data since backend endpoint is missing/not-implemented yet
-  getTacticalPlan: async () => {
-    return {
-      data: {
-        forces: [
-          { id: 'F1', organization: 'NDRF', battalion: '8th Battalion', base_name: 'Srinagar Base', district: 'Pauri Garhwal', lat: 30.22, lon: 78.78, mobilization_status: 'DEPLOYED', personnel_count: 120, motorized_boats: 8, drone_surveillance_units: 3, assigned_zone: 'Alaknanda Valley', commanding_officer: 'Cmdr. R. Singh' },
-          { id: 'F2', organization: 'SDRF', battalion: 'Quick Response Team', base_name: 'Gauchar Camp', district: 'Chamoli', lat: 30.28, lon: 79.15, mobilization_status: 'STANDBY', personnel_count: 45, motorized_boats: 2, drone_surveillance_units: 1, assigned_zone: 'Mandakini Confluence', commanding_officer: 'Capt. A. Rawat' }
-        ],
-        ingress_routes: [
-          { id: 'ROUTE-NH07', name: 'Alpha Corridor (NH-07)', entry_point: 'Rishikesh Base', destination: 'Srinagar Sector', clearance_capacity: 'Heavy Machinery / Convoy', total_distance_km: 105, status: 'OPEN', path_coordinates: [[30.1, 78.3], [30.15, 78.5], [30.22, 78.78]] },
-          { id: 'ROUTE-NH107', name: 'Bravo Corridor (NH-107)', entry_point: 'Rudraprayag', destination: 'Kedarnath Valley', clearance_capacity: 'Light 4x4 / Foot', total_distance_km: 75, status: 'RESTRICTED', path_coordinates: [[30.28, 78.98], [30.45, 79.05], [30.73, 79.06]] }
-        ],
-        vulnerable_points: [
-          { id: 'V1', name: 'Sirobagarh Landslide Zone', hazard_type: 'LANDSLIDE', risk_severity: 'EXTREME', lat: 30.25, lon: 78.85, vulnerability_desc: 'Chronic landslide bottleneck blocking NH-07.', mitigation: 'Dozer stationed at km 14.' },
-          { id: 'V2', name: 'Sonprayag Bridge', hazard_type: 'RIVER_BREACH', risk_severity: 'HIGH', lat: 30.63, lon: 78.99, vulnerability_desc: 'Bridge structural integrity compromised by surging river.', mitigation: 'Traffic halted. Aerial bypass active.' }
-        ],
-        population_centers: [
-          { id: 'P1', name: 'Rudraprayag Town', district: 'Rudraprayag', lat: 30.28, lon: 78.98, approx_population: 15400, vulnerable_riverfront_population: 3200, pilgrim_floating_headcount: 5000, risk_level: 'EXTREME', safe_shelter_target: 'Degree College Relief Camp', egress_protocol: 'Uphill via Temple Road' },
-          { id: 'P2', name: 'Gauchar', district: 'Chamoli', lat: 30.28, lon: 79.15, approx_population: 9800, vulnerable_riverfront_population: 1100, pilgrim_floating_headcount: 800, risk_level: 'HIGH', safe_shelter_target: 'ITBP Helipad Ground', egress_protocol: 'Move towards airstrip perimeter' }
-        ],
-        safe_shortest_routes: [
-          { from_point_id: 'P1', from_name: 'Rudraprayag Town', to_shelter_name: 'Degree College Relief Camp', shortest_distance_km: 2.5, est_foot_hours: 0.8, est_rescue_vehicle_mins: 12, elevation_change_m: 150, safety_score: '98% SAFE', hazard_avoidance: 'Avoids lower bazaar riverfront.', waypoints: [[30.28, 78.98], [30.285, 78.985], [30.29, 78.99]] }
-        ],
-        shelters: [
-          { id: 'S1', name: 'Degree College Relief Camp', type: 'EDUCATIONAL', district: 'Rudraprayag', lat: 30.29, lon: 78.99, max_capacity: 1500, current_occupancy: 450, status: 'OPEN', supplies: { drinking_water_days: 5, food_rations_days: 7, emergency_blankets: 2000, medical_team_on_site: true }, last_message_received: 'Send more blankets', last_response_sent: 'Dispatched via convoy' }
-        ],
-        sosAlerts: [
-          { id: 'SOS1', sender_id: 'USR-992', name: 'Anil Kumar', phone: '9876543210', timestamp: new Date().toISOString(), latitude: 30.27, longitude: 78.97, distress_type: 'Trapped by water', message: 'Water entering ground floor, need boat rescue.', people_trapped: 4, battery: 15, mesh_hops: 2, status: 'ACTIVE' }
-        ]
-      }
-    };
-  },
+  getTacticalPlan: (stateName = 'Uttarakhand') => api.get(`/tactical-plan/${stateName}`),
 
   // Automated Twilio Voice Call Outbound Dispatch
   dispatchVoiceCalls: (payload) => {

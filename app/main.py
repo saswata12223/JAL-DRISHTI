@@ -5,6 +5,7 @@ Technology Stack: FastAPI, PostgreSQL, PostGIS, TimescaleDB
 """
 
 import logging
+import asyncio
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -15,6 +16,7 @@ from app.api.routes import api_router
 from app.api.routes.environment import router as environment_router
 from app.services.prediction_service import PredictionService
 from app.db.sos_database import init_sos_db
+from app.services.sachet_service import ingest_sachet_alerts
 
 logging.basicConfig(
     level=logging.INFO,
@@ -22,6 +24,17 @@ logging.basicConfig(
 )
 logger = logging.getLogger("FlashFloodAI.Main")
 
+async def background_sachet_ingestion():
+    while True:
+        try:
+            logger.info("Running background SACHET CAP XML ingestion...")
+            # Ideally this would be an async HTTP call or run in a threadpool so it doesn't block the event loop
+            await asyncio.to_thread(ingest_sachet_alerts)
+            logger.info("SACHET ingestion complete. Sleeping for 5 minutes.")
+        except Exception as e:
+            logger.error(f"Error during scheduled SACHET ingestion: {e}")
+        
+        await asyncio.sleep(300) # Sleep for 5 minutes
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -32,14 +45,20 @@ async def lifespan(app: FastAPI):
     _ = PredictionService.get_instance()
     logger.info(f"Initializing SOS Database...")
     init_sos_db()
+    
+    # Start the background tasks
+    ingestion_task = asyncio.create_task(background_sachet_ingestion())
+    
     yield
+    
+    ingestion_task.cancel()
     logger.info("Shutting down FlashFloodAI Backend REST API.")
 
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
     version=settings.VERSION,
-    description="Operational Flash Flood Early Warning and Environmental Monitoring API for Uttarakhand, India.",
+    description="Operational Flash Flood Early Warning and Environmental Monitoring API for India.",
     lifespan=lifespan,
     docs_url="/docs",
     redoc_url="/redoc",

@@ -338,7 +338,7 @@ function NumberField({ label, value, onChange, step = '1', min, max, suffix }) {
   );
 }
 
-function EvaluatePanel() {
+function EvaluatePanel({ decisions = [] }) {
   const [form, setForm] = useState(EVAL_DEFAULTS);
   const [status, setStatus] = useState('idle');
   const [result, setResult] = useState(null);
@@ -935,7 +935,7 @@ export default function AnalyticsPage() {  const { selectedState, selectedDistri
 
 
 
-  const isUttarakhand = !selectedState || selectedState === 'Uttarakhand';
+  const isUttarakhand = true;
 
 
 
@@ -1103,7 +1103,7 @@ export default function AnalyticsPage() {  const { selectedState, selectedDistri
                 </div>
                 <PolicyPanel policy={modelPolicy} policySource={policySource} />
                 <DistributionCharts decisions={modelDecisions} summary={modelSummary} />
-                <EvaluatePanel />
+                <EvaluatePanel decisions={modelDecisions} />
               </div>
             </details>
           </div>

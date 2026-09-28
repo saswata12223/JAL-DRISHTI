@@ -21,7 +21,7 @@ def upgrade() -> None:
         'risk_decisions',
         sa.Column('timestamp_utc', sa.DateTime(timezone=True), nullable=False),
         sa.Column('spatial_id', sa.String(length=64), nullable=False),
-        sa.Column('sample_id', sa.String(length=128), nullable=False, unique=True),
+        sa.Column('sample_id', sa.String(length=128), nullable=False),
         sa.Column('sample_type', sa.String(length=64), nullable=False),
         sa.Column('station_id', sa.String(length=64), nullable=True),
         sa.Column('station_name', sa.String(length=255), nullable=True),
@@ -60,9 +60,10 @@ def upgrade() -> None:
         sa.Column('risk_policy_version', sa.String(length=32), nullable=False, server_default='8.1.0'),
         sa.Column('threshold_source', sa.String(length=255), nullable=True),
         sa.Column('generated_at_utc', sa.DateTime(timezone=True), nullable=False),
-        sa.PrimaryKeyConstraint('timestamp_utc', 'spatial_id')
+        sa.PrimaryKeyConstraint('timestamp_utc', 'spatial_id'),
+        sa.UniqueConstraint('timestamp_utc', 'sample_id', name='uq_risk_decisions_sample_id')
     )
-    op.create_index('idx_risk_decisions_geom', 'risk_decisions', ['geom'], postgresql_using='gist')
+    # op.create_index('idx_risk_decisions_geom', 'risk_decisions', ['geom'], postgresql_using='gist')
     op.create_index('idx_risk_decisions_district_risk', 'risk_decisions', ['district', 'final_risk_class'])
     op.create_index('idx_risk_decisions_priority', 'risk_decisions', ['alert_priority'])
     op.execute("SELECT create_hypertable('risk_decisions', 'timestamp_utc', if_not_exists => TRUE);")

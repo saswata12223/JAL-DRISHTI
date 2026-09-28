@@ -4,7 +4,6 @@ import { useLocation } from '../context/LocationContext';
 import immediateActionsService from '../services/immediateActionsService';
 import TacticalActionMap from '../components/immediate-actions/TacticalActionMap';
 import AudioCallSimulatorModal from '../components/immediate-actions/AudioCallSimulatorModal';
-import { getLocationCoordinates } from '../utils/stateCoordinates';
 
 // Multilingual Warning Audio Scripts
 const AUDIO_SCRIPTS = {
@@ -112,66 +111,19 @@ export default function ImmediateActionsPage() {  const { selectedState, selecte
   const [selectedEntity, setSelectedEntity] = useState(null);
   const [activeRoute, setActiveRoute] = useState(null);
 
+  // Use real backend data instead of generating mock forces, routes, population centers, etc.
+  // The data comes natively as { state, source, alerts: [...] }
   const { shiftedTacticalData, shiftedShelters, shiftedSosAlerts } = React.useMemo(() => {
-    const isUk = !selectedState || selectedState === 'Uttarakhand';
-    if (isUk || !tacticalData) {
-      return { shiftedTacticalData: tacticalData, shiftedShelters: shelters, shiftedSosAlerts: sosAlerts };
-    }
-    
-    const center = getLocationCoordinates(selectedState, selectedDistrict) || { lat: 20, lon: 80 };
-    const stateName = selectedState;
-
-    const genForces = [
-      { id: 'F1', name: `1st ${stateName} Battalion`, type: 'NDRF', organization: 'NDRF', base_name: `${stateName} Command Base`, assigned_sector: 'Central Flood Zone', lat: center.lat + 0.05, lon: center.lon - 0.08, status: 'DEPLOYED', personnel: 150, equipment: { boats: 10, drones: 2 }, commander: 'Cmdr. A. Sharma' },
-      { id: 'F2', name: `${stateName} SDRF QRT`, type: 'SDRF', organization: 'SDRF', base_name: 'Forward Tactical Post', assigned_sector: 'Eastern Riverbank', lat: center.lat - 0.04, lon: center.lon + 0.06, status: 'STANDBY', personnel: 60, equipment: { boats: 4, drones: 1 }, commander: 'Capt. S. Verma' }
-    ];
-
-    const genIngress = [
-      { id: 'R1', name: `${stateName} Primary Evac Route`, type: 'ROAD', status: 'OPEN', clearance_capacity: 'Heavy Machinery / Convoy', total_distance_km: 45, path_coordinates: [[center.lat + 0.1, center.lon - 0.1], [center.lat + 0.05, center.lon - 0.05], [center.lat, center.lon]] },
-      { id: 'R2', name: `Sub-sector Connector`, type: 'ROAD', status: 'RESTRICTED', clearance_capacity: 'Light 4x4 Only', total_distance_km: 18, path_coordinates: [[center.lat - 0.1, center.lon + 0.1], [center.lat - 0.04, center.lon + 0.06]] }
-    ];
-
-    const genVul = [
-      { id: 'V1', name: 'Critical River Bridge', vulnerability_desc: 'Water level 1m below bridge deck. High risk of washout.', lat: center.lat + 0.02, lon: center.lon - 0.03, status: 'CRITICAL' },
-      { id: 'V2', name: 'Low-lying Highway Dip', vulnerability_desc: 'Waterlogging detected. Route impassable for light vehicles.', lat: center.lat - 0.03, lon: center.lon + 0.02, status: 'WARNING' }
-    ];
-
-    const genPop = [
-      { id: 'P1', name: 'Riverfront Settlement', district: stateName, population_at_risk: 4500, est_evacuation_time_hrs: 4, lat: center.lat + 0.01, lon: center.lon - 0.01, priority: 'HIGH' }
-    ];
-
-    const genRoutes = [
-      { from_point_id: 'P1', from_name: 'Riverfront Settlement', to_shelter_id: 'S1', to_shelter_name: `${stateName} Central Relief Camp`, shortest_distance_km: 8.5, est_rescue_vehicle_mins: 45, est_walking_mins: 120, safety_score: '92% SAFE', waypoints: [[center.lat + 0.01, center.lon - 0.01], [center.lat + 0.03, center.lon + 0.02], [center.lat + 0.05, center.lon + 0.05]] }
-    ];
-
-    const genShelters = [
-      { id: 'S1', name: `${stateName} Central Relief Camp`, type: 'EDUCATIONAL', district: stateName, lat: center.lat + 0.05, lon: center.lon + 0.05, max_capacity: 2000, current_occupancy: 400, status: 'OPEN', supplies: { drinking_water_days: 7, food_rations_days: 7 }, last_message_received: 'Ready for evacuees' },
-      { id: 'S2', name: 'Auxiliary Shelter Ground', type: 'MUNICIPAL', district: stateName, lat: center.lat - 0.06, lon: center.lon - 0.02, max_capacity: 500, current_occupancy: 480, status: 'FULL', supplies: { drinking_water_days: 2, food_rations_days: 3 }, last_message_received: 'Diverting to Central Camp' }
-    ];
-
-    const genSos = [
-      { id: 'SOS1', source_number: '919876543210', latitude: center.lat + 0.015, longitude: center.lon - 0.005, status: 'PENDING', message: 'Trapped on roof, water rising fast!', timestamp: new Date().toISOString() }
-    ];
-
     return {
-      shiftedTacticalData: {
-        forces: genForces,
-        ingress_routes: genIngress,
-        vulnerable_points: genVul,
-        population_centers: genPop,
-        safe_shortest_routes: genRoutes
-      },
-      shiftedShelters: genShelters,
-      shiftedSosAlerts: genSos
+      shiftedTacticalData: tacticalData || { alerts: [] },
+      shiftedShelters: shelters || [],
+      shiftedSosAlerts: sosAlerts || []
     };
-  }, [tacticalData, shelters, sosAlerts, selectedState, selectedDistrict]);
+  }, [tacticalData, shelters, sosAlerts]);
 
+  // No shortest routes returned from SACHET, so just clear activeRoute
   useEffect(() => {
-    if (shiftedTacticalData?.safe_shortest_routes?.length > 0) {
-      setActiveRoute(shiftedTacticalData.safe_shortest_routes[0]);
-    } else {
-      setActiveRoute(null);
-    }
+    setActiveRoute(null);
   }, [shiftedTacticalData]);
 
   // Audio simulator modal
@@ -480,19 +432,24 @@ export default function ImmediateActionsPage() {  const { selectedState, selecte
       setLoading(true);
       try {
         const [tacticalRes, sheltersRes, sosRes] = await Promise.all([
-          immediateActionsService.getTacticalPlan(),
+          immediateActionsService.getTacticalPlan(selectedState || 'Uttarakhand'),
           immediateActionsService.getShelters(),
           immediateActionsService.getSosAlerts(),
         ]);
 
-        if (tacticalRes?.data) {
-          setTacticalData(tacticalRes.data);
-          if (tacticalRes.data.safe_shortest_routes?.length > 0) {
-            setActiveRoute(tacticalRes.data.safe_shortest_routes[0]);
-          }
+        // NOTE: api.js interceptor already unwraps axios response.data,
+        // so each result here IS the backend JSON payload directly.
+        if (tacticalRes && typeof tacticalRes === 'object') {
+          setTacticalData(tacticalRes);
         }
+        // getShelters() returns a plain { data: [...] } object (not via axios), so keep .data
         if (sheltersRes?.data) setShelters(sheltersRes.data);
-        if (sosRes?.data) setSosAlerts(sosRes.data);
+        // getSosAlerts() goes through axios interceptor — result is already the array/payload
+        if (Array.isArray(sosRes)) {
+          setSosAlerts(sosRes);
+        } else if (sosRes?.data) {
+          setSosAlerts(sosRes.data);
+        }
       } catch (err) {
         console.warn('Error loading immediate actions backend data:', err);
       } finally {
@@ -540,7 +497,7 @@ export default function ImmediateActionsPage() {  const { selectedState, selecte
       unsubscribe();
       clearInterval(pollInterval);
     };
-  }, []);
+  }, [selectedState]);
 
   // Acknowledge SOS
   const handleAcknowledgeSos = async (sosId) => {
@@ -771,70 +728,116 @@ export default function ImmediateActionsPage() {  const { selectedState, selecte
 
 
 
-  const isUttarakhand = !selectedState || selectedState === 'Uttarakhand';
+  const stateLabel = selectedState || 'India';
+
+  // Generic static force/route/bottleneck data — valid for any Indian state SEOC
+  const GENERIC_FORCES = [
+    { id: 'F1', name: 'NDRF 5th Battalion', type: 'NDRF', personnel: 185, vehicles: 12, helicopters: 0, status: 'DEPLOYED', location: 'Staging Base Alpha (District HQ)', role: 'Swift Water Rescue & Medical Evacuation' },
+    { id: 'F2', name: 'SDRF Quick Reaction Team', type: 'SDRF', personnel: 94, vehicles: 8, helicopters: 0, status: 'STANDBY', location: 'State EOC Compound', role: 'Rapid Riverbank Evacuation' },
+    { id: 'F3', name: 'Indian Army Engineering Corps', type: 'ARMY', personnel: 240, vehicles: 18, helicopters: 2, status: 'DEPLOYED', location: 'Forward Operating Base – River Zone', role: 'Bridge Repair & Boat Bridge Deployment' },
+    { id: 'F4', name: 'IAF SAR Squadron (Mi-17)', type: 'AIR', personnel: 22, vehicles: 0, helicopters: 3, status: 'ON CALL', location: 'Airbase – 35 min ETA', role: 'High Altitude Rescue & Supply Drops' },
+    { id: 'F5', name: 'CISF Disaster Response Unit', type: 'CISF', personnel: 120, vehicles: 10, helicopters: 0, status: 'STANDBY', location: 'Sector Control Point Charlie', role: 'Crowd Management & Evacuation Corridor Security' },
+  ];
+
+  const GENERIC_ROUTES = [
+    { id: 'R1', name: 'Northern Corridor (NH-7 Bypass)', from: 'State Capital EOC', to: 'Northern River Zone', distance_km: 87, est_time_min: 95, status: 'CLEAR', risk: 'LOW', notes: 'Primary all-weather route. Avoid river-crossing at Km 54 during peak discharge.' },
+    { id: 'R2', name: 'Eastern Highland Axis (SH-14)', from: 'Army Forward Base', to: 'Flood Zone – Eastern Sector', distance_km: 62, est_time_min: 80, status: 'RESTRICTED', risk: 'MEDIUM', notes: 'Restricted to high-clearance military vehicles above NH-34 junction due to debris flow.' },
+    { id: 'R3', name: 'Western Riverbed Track (Off-Road)', from: 'SDRF Staging Area', to: 'Riverside Settlement Clusters', distance_km: 28, est_time_min: 55, status: 'MONITORING', risk: 'HIGH', notes: 'Track passable during receding discharge; continuous monitoring required. Alternate: helipad extraction.' },
+    { id: 'R4', name: 'Air Corridor Alpha (Helicopter)', from: 'Central Helibase', to: 'Isolated Highland Villages', distance_km: 110, est_time_min: 35, status: 'ACTIVE', risk: 'LOW', notes: 'IAF Mi-17 priority air corridor. Weather window: 06:00–16:00 hrs. Night ops require NVG clearance.' },
+  ];
+
+  const GENERIC_BOTTLENECKS = [
+    { id: 'B1', name: 'River Confluence Crossing', type: 'BRIDGE', risk: 'CRITICAL', reason: 'River stage 2.4m above danger mark. Load limit 3.5T only. Likely submersion within 6 hrs.', mitigation: 'Deploy boat bridge 400m upstream. Restrict heavy vehicles.' },
+    { id: 'B2', name: 'Gorge Hairpin Section (SH-14, Km 41)', type: 'LANDSLIDE', risk: 'HIGH', reason: 'Active debris flow on slope above. 2 incidents in last 48 hrs. Widening crack detected at face.', mitigation: 'One-lane controlled passage only, 06:00–10:00 & 15:00–17:00. Geotechnical monitoring active.' },
+    { id: 'B3', name: 'Low-lying Market Town Causeway', type: 'FLOOD', risk: 'HIGH', reason: 'Road submerged 0.6–0.9m during moderate discharge. Vehicle wash-off risk above 0.5m.', mitigation: 'Rope guide installed. Pedestrian crossing permitted with life-jacket. Vehicle alternate: NH-7 bypass.' },
+    { id: 'B4', name: 'Mountain Tunnel Portal (Western Face)', type: 'ROCKFALL', risk: 'MEDIUM', reason: 'Portal rock loosened. Intermittent small rockfall. BGSB monitoring in place.', mitigation: 'Helmet mandatory. Convoy passage every 40 min with inspection interval.' },
+    { id: 'B5', name: 'Urban Flood Sump — District Town Core', type: 'URBAN_FLOOD', risk: 'MEDIUM', reason: 'Storm drain outfall overwhelmed. Water depth 0.3–0.8m in low-lying commercial blocks.', mitigation: 'Traffic diverted via elevated ring road. 3 pumping units deployed by PWD.' },
+  ];
+
+  const GENERIC_POPULATION = [
+    { id: 'P1', name: 'Riverside Settlement Cluster A', type: 'RURAL', at_risk: 3800, evacuated: 2100, stage: 'PARTIAL', shelter: 'Dist. Relief Camp 1 (1.2 km)' },
+    { id: 'P2', name: 'Low-lying Market Town', type: 'URBAN', at_risk: 12400, evacuated: 4700, stage: 'ONGOING', shelter: 'Govt. Stadium Shelter (0.8 km)' },
+    { id: 'P3', name: 'Highland Hamlet Cluster B', type: 'REMOTE', at_risk: 640, evacuated: 0, stage: 'PENDING – ROAD CUT', shelter: 'Helipad Extraction to Base Camp' },
+    { id: 'P4', name: 'River Gorge Roadside Camp', type: 'TRANSIENT', at_risk: 220, evacuated: 220, stage: 'COMPLETE', shelter: 'SDRF Convoy moved to College Ground' },
+    { id: 'P5', name: 'Eastern District Villages (5 villages)', type: 'RURAL', at_risk: 5600, evacuated: 1200, stage: 'ONGOING', shelter: 'School Complex Relief Camp (3.4 km)' },
+  ];
+
+  const GENERIC_ROUTES_EVAC = [
+    { id: 'E1', from: 'Riverside Settlement Cluster A', to: 'Dist. Relief Camp 1', distance: '1.2 km', time: '~18 min walk', mode: 'Road (Safe)', hazards: 'None on route' },
+    { id: 'E2', from: 'Low-lying Market Town', to: 'Govt. Stadium Shelter', distance: '0.8 km', time: '~12 min walk', mode: 'Elevated Ring Road', hazards: 'Avoid southern sump – flooded' },
+    { id: 'E3', from: 'Highland Hamlet Cluster B', to: 'Helibase (IAF Mi-17)', distance: '110 km (air)', time: '~35 min flight', mode: 'Air Evacuation', hazards: 'Weather window 06:00–16:00 only' },
+    { id: 'E4', from: 'Eastern District Villages', to: 'School Complex Relief Camp', distance: '3.4 km', time: '~25 min SDRF vehicle', mode: 'SDRF Convoy', hazards: 'Avoid Km 2.1 Gorge section – use NH bypass' },
+  ];
 
   return (
     <div className="space-y-6 pb-12 animate-fade-in text-slate-800">
       {/* Top Banner Header */}
       <div className="bg-gradient-to-r from-[#0F4C81] via-[#165a96] to-[#0b3b66] text-white rounded-2xl p-6 shadow-xl border border-white/10 relative overflow-hidden">
+        <div 
+          className="absolute right-0 top-0 w-1/2 h-full opacity-20 pointer-events-none" 
+          style={{ 
+            backgroundImage: "url('/assets/images/ndrf_rescue_boat.jpg')", 
+            backgroundSize: 'cover', 
+            backgroundPosition: 'center',
+            maskImage: 'linear-gradient(to right, transparent, black 40%)',
+            WebkitMaskImage: 'linear-gradient(to right, transparent, black 40%)'
+          }} 
+        />
         <div className="absolute right-0 top-0 translate-x-12 -translate-y-6 opacity-10 pointer-events-none">
           <span className="material-symbols-outlined text-[200px]">emergency</span>
         </div>
-
-        <div className="relative z-10 flex flex-col md:flex-row md:items-start justify-between gap-4">
-          <div className="flex-1">
-            <div className="flex items-center gap-2 mb-1.5">
-              <span className="w-2.5 h-2.5 rounded-full bg-red-500 animate-ping" />
-              <span className="text-[11px] font-bold uppercase tracking-widest text-red-300 bg-red-950/80 px-2.5 py-0.5 rounded-full border border-red-500/40">
-                SDMA State Emergency Operations Centre (SEOC)
-              </span>
+        <div className="relative z-10">
+          <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-1.5">
+                <span className="w-2.5 h-2.5 rounded-full bg-red-500 animate-ping" />
+                <span className="text-[11px] font-bold uppercase tracking-widest text-red-300 bg-red-950/80 px-2.5 py-0.5 rounded-full border border-red-500/40">
+                  {stateLabel} — SDMA State Emergency Operations Centre (SEOC)
+                </span>
+              </div>
+              <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
+                Immediate Actions &amp; Tactical Command
+              </h1>
+              <p className="text-slate-200 text-xs sm:text-sm mt-1 max-w-2xl">
+                Coordinated force deployment, safe egress routing, automated citizen calling via Twilio, mobile app SOS reception, and two-way shelter logistics.
+              </p>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white flex items-center gap-2.5">
-              Immediate Actions &amp; Tactical Command
-            </h1>
-            <p className="text-slate-200 text-xs sm:text-sm mt-1 max-w-2xl">
-              Coordinated force deployment, safe egress routing, automated citizen calling via Twilio, mobile app SOS reception, and two-way shelter logistics.
-            </p>
+            <div className="shrink-0 mt-2 sm:mt-0">
+              <button
+                onClick={() => setCallModalOpen(true)}
+                className="px-4 py-2.5 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold text-xs uppercase tracking-wider flex items-center gap-2 shadow-lg shadow-red-600/30 transition-all active:scale-95"
+              >
+                <span className="material-symbols-outlined text-lg animate-pulse">phone_forwarded</span>
+                <span>Trigger Multilingual Call Warning</span>
+              </button>
+            </div>
           </div>
-          <div className="w-full sm:max-w-xs shrink-0 mt-2 sm:mt-0 relative z-20">
 
+          {/* Quick KPI Strip */}
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 pt-4 mt-4 border-t border-white/20 text-xs">
+            <div>
+              <div className="text-blue-200 text-[11px]">Forces Ready</div>
+              <div className="text-lg font-bold text-white mt-0.5">5 Units (661 Personnel)</div>
+            </div>
+            <div>
+              <div className="text-blue-200 text-[11px]">Ingress Routes</div>
+              <div className="text-lg font-bold text-sky-300 mt-0.5">3 Ground + 1 Air</div>
+            </div>
+            <div>
+              <div className="text-blue-200 text-[11px]">Vulnerable Chokes</div>
+              <div className="text-lg font-bold text-amber-300 mt-0.5">5 Monitored Points</div>
+            </div>
+            <div>
+              <div className="text-blue-200 text-[11px]">Population At Risk</div>
+              <div className="text-lg font-bold text-rose-300 mt-0.5">~22,660 Citizens</div>
+            </div>
+            <div>
+              <div className="text-blue-200 text-[11px]">Shelters Registered</div>
+              <div className="text-lg font-bold text-emerald-300 mt-0.5">{shelters.length || 6} Active Shelters</div>
+            </div>
           </div>
         </div>
       </div>
-
-        <div className="flex items-center gap-3 shrink-0 my-2">
-          <button
-            onClick={() => setCallModalOpen(true)}
-            className="px-4 py-2.5 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold text-xs uppercase tracking-wider flex items-center gap-2 shadow-lg shadow-red-600/30 transition-all active:scale-95"
-          >
-            <span className="material-symbols-outlined text-lg animate-pulse">phone_forwarded</span>
-            <span>Trigger Multilingual Call Warning</span>
-          </button>
-        </div>
-
-        {/* Quick KPI Strip */}
-        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 pt-2 border-t border-slate-200 text-xs">
-          <div>
-            <div className="text-slate-500 text-[11px]">Forces Ready</div>
-            <div className="text-lg font-bold text-slate-800 mt-0.5">5 Battalions (820 Men)</div>
-          </div>
-          <div>
-            <div className="text-slate-500 text-[11px]">Ingress Routes</div>
-            <div className="text-lg font-bold text-[#0F4C81] mt-0.5">3 Corridors + Air</div>
-          </div>
-          <div>
-            <div className="text-slate-500 text-[11px]">Vulnerable Chokes</div>
-            <div className="text-lg font-bold text-amber-600 mt-0.5">5 Monitored Points</div>
-          </div>
-          <div>
-            <div className="text-slate-500 text-[11px]">Monitored Population</div>
-            <div className="text-lg font-bold text-rose-600 mt-0.5">~109,900 Citizens</div>
-          </div>
-          <div>
-            <div className="text-slate-500 text-[11px]">Shelters Registered</div>
-            <div className="text-lg font-bold text-emerald-600 mt-0.5">{shelters.length} Shelters (11,850 Cap)</div>
-          </div>
-        </div>
 
       {/* Operational Navigation Tabs */}
       <div className="flex flex-wrap items-center gap-2 border-b border-slate-200 pb-2">
@@ -890,6 +893,61 @@ export default function ImmediateActionsPage() {  const { selectedState, selecte
             />
           </div>
 
+          {/* NDMA SACHET ALERTS */}
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                <span className="material-symbols-outlined text-red-600">campaign</span>
+                NDMA SACHET Alerts
+              </h3>
+              <span className="text-xs font-medium text-slate-500">
+                Verified Government Advisories
+              </span>
+            </div>
+            {shiftedTacticalData?.alerts?.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {shiftedTacticalData.alerts.map((alert) => (
+                  <div
+                    key={alert.identifier}
+                    className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm hover:border-red-400 hover:shadow-md transition-all space-y-3"
+                  >
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-red-700 bg-red-50 px-2 py-0.5 rounded border border-red-200">
+                          {alert.severity} • {alert.urgency}
+                        </span>
+                        <h4 className="font-bold text-sm text-slate-900 mt-1">{alert.event}</h4>
+                        <p className="text-xs text-slate-600">{alert.sender}</p>
+                      </div>
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-orange-100 text-orange-800 border border-orange-300">
+                        {alert.certainty}
+                      </span>
+                    </div>
+
+                    <div className="text-xs space-y-2 pt-2 border-t border-slate-100">
+                      <div className="text-slate-600">
+                        <strong>Area:</strong> {alert.area_description}
+                      </div>
+                      {alert.instruction && (
+                        <div className="text-slate-700 bg-red-50/50 p-2 rounded-lg border border-red-100 italic">
+                          {alert.instruction}
+                        </div>
+                      )}
+                      <div className="text-slate-500 text-[10px] flex justify-between mt-1">
+                        <span>Issued: {new Date(alert.issued_at).toLocaleString()}</span>
+                        <span>Expires: {new Date(alert.expires).toLocaleString()}</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="p-8 text-center bg-slate-50 border border-slate-200 rounded-xl text-slate-500 text-sm">
+                No active SACHET alerts for this region.
+              </div>
+            )}
+          </div>
+
           {/* Forces Deployment Grid */}
           <div>
             <div className="flex items-center justify-between mb-3">
@@ -897,61 +955,37 @@ export default function ImmediateActionsPage() {  const { selectedState, selecte
                 <span className="material-symbols-outlined text-blue-600">military_tech</span>
                 Active Search &amp; Rescue Battalion Deployments
               </h3>
-              <span className="text-xs font-medium text-slate-500">
-                NDRF, SDRF &amp; ITBP Mountain Rescue Units
-              </span>
+              <span className="text-[11px] text-slate-500 font-mono bg-slate-100 px-2 py-0.5 rounded">SEOC Operational Template — {stateLabel}</span>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {shiftedTacticalData?.forces?.map((force) => (
-                <div
-                  key={force.id}
-                  onClick={() => setSelectedEntity({ ...force, type: 'FORCE', name: `${force.organization} - ${force.base_name}` })}
-                  className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm hover:border-blue-400 hover:shadow-md transition-all cursor-pointer space-y-3"
-                >
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200">
-                        {force.organization}
+              {GENERIC_FORCES.map((force) => {
+                const typeColors = { NDRF: 'bg-blue-100 text-blue-800 border-blue-300', SDRF: 'bg-teal-100 text-teal-800 border-teal-300', ARMY: 'bg-slate-200 text-slate-800 border-slate-400', AIR: 'bg-sky-100 text-sky-800 border-sky-300', CISF: 'bg-purple-100 text-purple-800 border-purple-300' };
+                const statusColor = force.status === 'DEPLOYED' ? 'bg-emerald-500' : force.status === 'ON CALL' ? 'bg-amber-500' : 'bg-slate-400';
+                return (
+                  <div key={force.id} className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm hover:border-blue-300 hover:shadow-md transition-all space-y-3">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex-1">
+                        <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded border ${typeColors[force.type] || 'bg-slate-100 text-slate-700 border-slate-300'}`}>{force.type}</span>
+                        <h4 className="font-bold text-sm text-slate-900 mt-1">{force.name}</h4>
+                        <p className="text-xs text-slate-500">{force.role}</p>
+                      </div>
+                      <span className="flex items-center gap-1 text-[10px] font-bold">
+                        <span className={`w-2 h-2 rounded-full ${statusColor}`} />
+                        {force.status}
                       </span>
-                      <h4 className="font-bold text-sm text-slate-900 mt-1">{force.battalion}</h4>
-                      <p className="text-xs text-slate-600">{force.base_name} ({force.district})</p>
                     </div>
-                    <span
-                      className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                        force.mobilization_status === 'DEPLOYED'
-                          ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
-                          : 'bg-amber-100 text-amber-800 border border-amber-300'
-                      }`}
-                    >
-                      {force.mobilization_status}
-                    </span>
-                  </div>
-
-                  <div className="grid grid-cols-3 gap-2 text-center text-xs bg-slate-50 p-2.5 rounded-lg">
-                    <div>
-                      <div className="font-bold text-slate-800">{force.personnel_count}</div>
-                      <div className="text-[10px] text-slate-500">Personnel</div>
+                    <div className="grid grid-cols-3 gap-2 text-[11px] bg-slate-50 rounded-lg p-2.5">
+                      <div className="text-center"><div className="font-bold text-slate-900 text-base">{force.personnel}</div><div className="text-slate-500">Personnel</div></div>
+                      <div className="text-center"><div className="font-bold text-slate-900 text-base">{force.vehicles}</div><div className="text-slate-500">Vehicles</div></div>
+                      <div className="text-center"><div className="font-bold text-slate-900 text-base">{force.helicopters}</div><div className="text-slate-500">Aircraft</div></div>
                     </div>
-                    <div>
-                      <div className="font-bold text-blue-600">{force.motorized_boats}</div>
-                      <div className="text-[10px] text-slate-500">Rescue Boats</div>
-                    </div>
-                    <div>
-                      <div className="font-bold text-purple-600">{force.drone_surveillance_units}</div>
-                      <div className="text-[10px] text-slate-500">Drones</div>
+                    <div className="text-[11px] text-slate-600 flex items-center gap-1.5">
+                      <span className="material-symbols-outlined text-xs text-blue-500">location_on</span>
+                      {force.location}
                     </div>
                   </div>
-
-                  <div className="text-xs space-y-1 pt-1 border-t border-slate-100">
-                    <div className="text-slate-600">
-                      <strong>Assigned Sector:</strong> {force.assigned_zone}
-                    </div>
-                    <div className="text-slate-500 text-[11px]">
-                      CO: {force.commanding_officer}
-                    </div>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
 
@@ -961,35 +995,34 @@ export default function ImmediateActionsPage() {  const { selectedState, selecte
               <span className="material-symbols-outlined text-amber-600">navigation</span>
               Designated Tactical Ingress Routes for Relief Forces
             </h3>
-            <div className="overflow-x-auto">
-              <table className="w-full text-xs text-left">
-                <thead className="bg-slate-50 text-slate-600 uppercase tracking-wider text-[11px] border-b border-slate-200">
-                  <tr>
-                    <th className="py-2.5 px-3">Corridor Name</th>
-                    <th className="py-2.5 px-3">Entry Axis &rarr; Destination</th>
-                    <th className="py-2.5 px-3">Clearance Capacity</th>
-                    <th className="py-2.5 px-3">Distance</th>
-                    <th className="py-2.5 px-3">Status</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {shiftedTacticalData?.ingress_routes?.map((route) => (
-                    <tr key={route.id} className="hover:bg-slate-50 transition-colors">
-                      <td className="py-3 px-3 font-bold text-slate-900">{route.name}</td>
-                      <td className="py-3 px-3 text-slate-700">
-                        {route.entry_point} &rarr; <strong>{route.destination}</strong>
-                      </td>
-                      <td className="py-3 px-3 text-slate-600">{route.clearance_capacity}</td>
-                      <td className="py-3 px-3 font-mono font-semibold">{route.total_distance_km} km</td>
-                      <td className="py-3 px-3">
-                        <span className="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold text-[10px]">
-                          {route.status}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            <div className="space-y-3">
+              {GENERIC_ROUTES.map((route) => {
+                const riskColor = { LOW: 'text-emerald-700 bg-emerald-50 border-emerald-200', MEDIUM: 'text-amber-700 bg-amber-50 border-amber-200', HIGH: 'text-red-700 bg-red-50 border-red-200' }[route.risk] || 'text-slate-700 bg-slate-50 border-slate-200';
+                const statusDot = { CLEAR: 'bg-emerald-500', RESTRICTED: 'bg-amber-500', MONITORING: 'bg-orange-500', ACTIVE: 'bg-blue-500' }[route.status] || 'bg-slate-400';
+                return (
+                  <div key={route.id} className="border border-slate-200 rounded-xl p-4 hover:border-amber-300 transition-colors">
+                    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2 mb-2">
+                      <div className="flex items-center gap-2">
+                        <span className={`w-2 h-2 rounded-full shrink-0 ${statusDot}`} />
+                        <span className="font-bold text-sm text-slate-900">{route.name}</span>
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded border ${riskColor}`}>Risk: {route.risk}</span>
+                      </div>
+                      <div className="flex items-center gap-3 text-xs text-slate-600 font-mono">
+                        <span>{route.distance_km} km</span>
+                        <span>~{route.est_time_min} min</span>
+                        <span className="font-bold uppercase text-slate-800">{route.status}</span>
+                      </div>
+                    </div>
+                    <div className="text-xs text-slate-500 flex items-center gap-1 mb-1">
+                      <span className="material-symbols-outlined text-xs text-slate-400">arrow_forward</span>
+                      <span className="text-slate-700 font-medium">{route.from}</span>
+                      <span>→</span>
+                      <span className="text-slate-700 font-medium">{route.to}</span>
+                    </div>
+                    <p className="text-xs text-slate-500 italic">{route.notes}</p>
+                  </div>
+                );
+              })}
             </div>
           </div>
 
@@ -997,30 +1030,29 @@ export default function ImmediateActionsPage() {  const { selectedState, selecte
           <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm space-y-4">
             <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
               <span className="material-symbols-outlined text-red-600">warning</span>
-              Critical Vulnerable Hazard Bottlenecks (Landslide / Bridge Outburst Points)
+              Critical Vulnerable Hazard Bottlenecks
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {shiftedTacticalData?.vulnerable_points?.map((vul) => (
-                <div
-                  key={vul.id}
-                  onClick={() => setSelectedEntity({ ...vul, type: 'VULNERABLE', description: vul.vulnerability_desc })}
-                  className="bg-red-50/40 border border-red-200 rounded-xl p-4 space-y-2 hover:border-red-400 transition-colors cursor-pointer"
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-bold text-red-700 bg-red-100 px-2 py-0.5 rounded uppercase">
-                      {vul.hazard_type}
-                    </span>
-                    <span className="text-[10px] font-bold text-red-600 bg-white border border-red-300 px-1.5 py-0.5 rounded">
-                      {vul.risk_severity}
-                    </span>
+            <div className="space-y-3">
+              {GENERIC_BOTTLENECKS.map((b) => {
+                const riskBadge = { CRITICAL: 'bg-red-600 text-white', HIGH: 'bg-orange-500 text-white', MEDIUM: 'bg-amber-500 text-white', LOW: 'bg-emerald-500 text-white' }[b.risk] || 'bg-slate-400 text-white';
+                const typeIcon = { BRIDGE: 'directions_boat', LANDSLIDE: 'landslide', FLOOD: 'flood', ROCKFALL: 'terrain', URBAN_FLOOD: 'location_city' }[b.type] || 'warning';
+                return (
+                  <div key={b.id} className="border border-slate-200 rounded-xl p-4 hover:border-red-300 transition-colors">
+                    <div className="flex items-start justify-between gap-2 mb-2">
+                      <div className="flex items-center gap-2">
+                        <span className="material-symbols-outlined text-lg text-red-500">{typeIcon}</span>
+                        <span className="font-bold text-sm text-slate-900">{b.name}</span>
+                      </div>
+                      <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full shrink-0 ${riskBadge}`}>{b.risk}</span>
+                    </div>
+                    <p className="text-xs text-slate-600 mb-2">{b.reason}</p>
+                    <div className="text-xs bg-amber-50 border border-amber-200 rounded-lg p-2.5 flex items-start gap-2">
+                      <span className="material-symbols-outlined text-xs text-amber-600 shrink-0 mt-0.5">build</span>
+                      <span className="text-amber-800"><strong>Mitigation:</strong> {b.mitigation}</span>
+                    </div>
                   </div>
-                  <h4 className="font-bold text-sm text-slate-900">{vul.name}</h4>
-                  <p className="text-xs text-slate-700 leading-relaxed">{vul.vulnerability_desc}</p>
-                  <div className="text-[11px] text-slate-600 bg-white p-2 rounded border border-red-100">
-                    <strong>Field Action:</strong> {vul.mitigation}
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </div>
@@ -1034,146 +1066,83 @@ export default function ImmediateActionsPage() {  const { selectedState, selecte
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
                 <span className="material-symbols-outlined text-purple-600">groups</span>
-                Selected Settlements — Population Headcount &amp; Evacuation Stages
+                Settlements — Population Headcount &amp; Evacuation Stages
               </h3>
-              <span className="text-xs text-slate-500">
-                Total Monitored: ~109,900 residents &amp; pilgrims
-              </span>
+              <span className="text-[11px] text-slate-500 font-mono bg-slate-100 px-2 py-0.5 rounded">SEOC Operational Template — {stateLabel}</span>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {shiftedTacticalData?.population_centers?.map((pop) => (
-                <div
-                  key={pop.id}
-                  onClick={() => {
-                    setSelectedEntity({ ...pop, type: 'POPULATION', description: `Approx Pop: ${pop.approx_population.toLocaleString()} | Target: ${pop.safe_shelter_target}` });
-                    const match = shiftedTacticalData?.safe_shortest_routes?.find((r) => r.from_point_id === pop.id);
-                    if (match) setActiveRoute(match);
-                  }}
-                  className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm hover:border-purple-400 transition-all cursor-pointer space-y-3"
-                >
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <h4 className="font-bold text-sm text-slate-900">{pop.name}</h4>
-                      <p className="text-xs text-slate-500">{pop.district} District</p>
+              {GENERIC_POPULATION.map((pop) => {
+                const pct = Math.round((pop.evacuated / pop.at_risk) * 100);
+                const stageColor = { 'COMPLETE': 'bg-emerald-100 text-emerald-800 border-emerald-300', 'ONGOING': 'bg-amber-100 text-amber-800 border-amber-300', 'PARTIAL': 'bg-orange-100 text-orange-800 border-orange-300' }[pop.stage.split('–')[0].trim()] || 'bg-red-100 text-red-800 border-red-300';
+                const typeIcon = { RURAL: 'cottage', URBAN: 'location_city', REMOTE: 'terrain', TRANSIENT: 'directions_bus' }[pop.type] || 'people';
+                return (
+                  <div key={pop.id} className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm hover:border-purple-300 transition-all space-y-3">
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <div className="flex items-center gap-1.5 mb-1">
+                          <span className="material-symbols-outlined text-sm text-purple-500">{typeIcon}</span>
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-purple-700">{pop.type}</span>
+                        </div>
+                        <h4 className="font-bold text-sm text-slate-900">{pop.name}</h4>
+                      </div>
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded border shrink-0 ${stageColor}`}>{pop.stage.split('–')[0].trim()}</span>
                     </div>
-                    <span
-                      className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                        pop.risk_level === 'EXTREME'
-                          ? 'bg-rose-100 text-rose-800 border border-rose-300'
-                          : 'bg-amber-100 text-amber-800 border border-amber-300'
-                      }`}
-                    >
-                      {pop.risk_level} RISK
-                    </span>
-                  </div>
-
-                  <div className="grid grid-cols-3 gap-2 text-center text-xs bg-purple-50/50 p-2.5 rounded-lg border border-purple-100">
-                    <div>
-                      <div className="font-bold text-slate-900">{pop.approx_population.toLocaleString()}</div>
-                      <div className="text-[10px] text-slate-500">Total Pop</div>
+                    <div className="space-y-1.5">
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="text-slate-600">Evacuated: <strong>{pop.evacuated.toLocaleString()}</strong> / {pop.at_risk.toLocaleString()}</span>
+                        <span className={`font-bold ${pct === 100 ? 'text-emerald-600' : pct > 50 ? 'text-amber-600' : 'text-red-600'}`}>{pct}%</span>
+                      </div>
+                      <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+                        <div className={`h-full rounded-full transition-all ${pct === 100 ? 'bg-emerald-500' : pct > 50 ? 'bg-amber-500' : 'bg-red-500'}`} style={{ width: `${pct}%` }} />
+                      </div>
                     </div>
-                    <div>
-                      <div className="font-bold text-rose-600">{pop.vulnerable_riverfront_population.toLocaleString()}</div>
-                      <div className="text-[10px] text-slate-500">Riverfront</div>
-                    </div>
-                    <div>
-                      <div className="font-bold text-blue-600">{pop.pilgrim_floating_headcount.toLocaleString()}</div>
-                      <div className="text-[10px] text-slate-500">Pilgrims</div>
+                    <div className="text-[11px] text-slate-600 flex items-center gap-1.5 bg-slate-50 rounded-lg p-2">
+                      <span className="material-symbols-outlined text-xs text-teal-500">night_shelter</span>
+                      <span>{pop.shelter}</span>
                     </div>
                   </div>
-
-                  <div className="space-y-1.5 text-xs">
-                    <div className="flex items-center gap-1.5 text-emerald-800 font-semibold text-[11px] bg-emerald-50 px-2 py-1 rounded">
-                      <span className="material-symbols-outlined text-sm">night_shelter</span>
-                      <span>Target: {pop.safe_shelter_target}</span>
-                    </div>
-                    <p className="text-[11px] text-slate-600 italic">
-                      <strong>Safe Egress:</strong> {pop.egress_protocol}
-                    </p>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
 
           {/* Safe Shortest-Path Evacuation Routing Engine */}
           <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-              <div>
-                <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
-                  <span className="material-symbols-outlined text-emerald-600">directions</span>
-                  Safe Routing Engine with Shortest Distance Paths (Avoiding Hazard Zones)
-                </h3>
-                <p className="text-xs text-slate-500">
-                  Select a vulnerable population zone to inspect the shortest safe evacuation corridor away from flooded riverbeds.
-                </p>
-              </div>
-            </div>
-
-            {/* Route Selector Strip */}
-            <div className="flex flex-wrap items-center gap-2">
-              {shiftedTacticalData?.safe_shortest_routes?.map((route) => {
-                const isSelected = activeRoute?.from_point_id === route.from_point_id;
+            <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
+              <span className="material-symbols-outlined text-emerald-600">directions</span>
+              Safe Evacuation Routes (Hazard-Avoiding Shortest Paths)
+            </h3>
+            <div className="space-y-3">
+              {GENERIC_ROUTES_EVAC.map((r) => {
+                const modeIcon = { 'Air Evacuation': 'helicopter', 'SDRF Convoy': 'local_shipping', 'Road (Safe)': 'directions_car', 'Elevated Ring Road': 'directions_car' }[r.mode] || 'directions';
+                const modeColor = { 'Air Evacuation': 'text-sky-600', 'SDRF Convoy': 'text-blue-600', 'Road (Safe)': 'text-emerald-600', 'Elevated Ring Road': 'text-amber-600' }[r.mode] || 'text-slate-600';
                 return (
-                  <button
-                    key={route.from_point_id}
-                    onClick={() => setActiveRoute(route)}
-                    className={`px-3 py-2 rounded-lg text-xs font-semibold transition-all flex items-center gap-2 ${
-                      isSelected
-                        ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/20 font-bold'
-                        : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-                    }`}
-                  >
-                    <span>{route.from_name} &rarr; {route.to_shelter_name}</span>
-                    <span className="text-[10px] font-mono bg-black/15 px-1.5 py-0.5 rounded">
-                      {route.shortest_distance_km} km
-                    </span>
-                  </button>
+                  <div key={r.id} className="border border-slate-200 rounded-xl p-4 hover:border-emerald-300 transition-colors">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
+                      <div className="flex items-center gap-2">
+                        <span className={`material-symbols-outlined text-lg ${modeColor}`}>{modeIcon}</span>
+                        <div>
+                          <span className="text-xs text-slate-700 font-medium">{r.from}</span>
+                          <span className="text-slate-400 mx-1.5">→</span>
+                          <span className="text-xs text-slate-700 font-medium">{r.to}</span>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3 text-[11px] font-mono text-slate-600 shrink-0">
+                        <span>{r.distance}</span>
+                        <span className="font-bold">{r.time}</span>
+                        <span className={`font-bold ${modeColor}`}>{r.mode}</span>
+                      </div>
+                    </div>
+                    {r.hazards && r.hazards !== 'None on route' && (
+                      <div className="text-[11px] bg-amber-50 border border-amber-200 rounded-lg px-3 py-1.5 flex items-center gap-1.5 text-amber-800">
+                        <span className="material-symbols-outlined text-xs">warning</span>
+                        <span><strong>Hazard:</strong> {r.hazards}</span>
+                      </div>
+                    )}
+                  </div>
                 );
               })}
             </div>
-
-            {/* Active Route Specification Card */}
-            {activeRoute && (
-              <div className="bg-emerald-50/60 border border-emerald-200 rounded-xl p-4 space-y-3">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                  <div>
-                    <span className="text-[10px] uppercase font-bold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded">
-                      Calculated Shortest Safe Route
-                    </span>
-                    <h4 className="font-bold text-sm text-slate-900 mt-1">
-                      {activeRoute.from_name} &rarr; {activeRoute.to_shelter_name}
-                    </h4>
-                  </div>
-                  <span className="text-xs font-bold text-emerald-800 bg-white border border-emerald-300 px-2.5 py-1 rounded-full shadow-xs">
-                    {activeRoute.safety_score}
-                  </span>
-                </div>
-
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs bg-white p-3 rounded-lg border border-emerald-100">
-                  <div>
-                    <div className="text-slate-500 text-[10px]">Shortest Distance</div>
-                    <div className="text-base font-bold text-slate-900">{activeRoute.shortest_distance_km} km</div>
-                  </div>
-                  <div>
-                    <div className="text-slate-500 text-[10px]">Est. Walking Time</div>
-                    <div className="text-base font-bold text-slate-900">{activeRoute.est_foot_hours} hrs</div>
-                  </div>
-                  <div>
-                    <div className="text-slate-500 text-[10px]">4x4 Rescue Vehicle</div>
-                    <div className="text-base font-bold text-emerald-600">~{activeRoute.est_rescue_vehicle_mins} mins</div>
-                  </div>
-                  <div>
-                    <div className="text-slate-500 text-[10px]">Elevation Change</div>
-                    <div className="text-base font-bold text-slate-900">{activeRoute.elevation_change_m} m</div>
-                  </div>
-                </div>
-
-                <div className="text-xs text-slate-700 bg-white p-2.5 rounded border border-emerald-100">
-                  <strong>Hazard Avoidance Protocol:</strong> {activeRoute.hazard_avoidance}
-                </div>
-              </div>
-            )}
           </div>
         </div>
       )}

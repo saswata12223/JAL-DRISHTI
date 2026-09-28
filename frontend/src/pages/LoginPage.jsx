@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 export default function LoginPage() {
@@ -9,6 +9,7 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -16,7 +17,15 @@ export default function LoginPage() {
     setLoading(true);
     const result = await login(email, password);
     if (result.success) {
-      navigate('/dashboard');
+      const from = location.state?.from;
+      if (from) {
+        navigate(
+          `${from.pathname}${from.search || ''}${from.hash || ''}`,
+          { replace: true }
+        );
+      } else {
+        navigate('/dashboard', { replace: true });
+      }
     } else {
       setError(result.error);
     }

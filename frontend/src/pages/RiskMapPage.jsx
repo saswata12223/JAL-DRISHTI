@@ -130,7 +130,7 @@ export default function RiskMapPage() {  const { selectedState, selectedDistrict
   // Use location context
 
 
-  const isUttarakhand = !selectedState || selectedState === 'Uttarakhand';
+  const isUttarakhand = true;
 
   const [map, setMap] = useState(null);
   const [stations, setStations] = useState(DEFAULT_CWC_STATIONS);

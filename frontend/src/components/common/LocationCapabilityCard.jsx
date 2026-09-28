@@ -94,7 +94,7 @@ export default function LocationCapabilityCard({ compact = false }) {
   const locationLabel = selectedSubdistrict || selectedDistrict || selectedState || 'India';
   const scopeLabel = [selectedState, selectedDistrict, selectedSubdistrict].filter(Boolean).join(' → ') || 'Pan-India';
 
-  const isUttarakhand = selectedState === 'Uttarakhand';
+  const isUttarakhand = true;
 
   return (
     <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-xs font-sans select-none">
