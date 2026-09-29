@@ -4,6 +4,8 @@ import { useLocation } from '../context/LocationContext';
 import immediateActionsService from '../services/immediateActionsService';
 import TacticalActionMap from '../components/immediate-actions/TacticalActionMap';
 import AudioCallSimulatorModal from '../components/immediate-actions/AudioCallSimulatorModal';
+import AiCallingAgentModal from '../components/immediate-actions/AiCallingAgentModal';
+import { getLocationCoordinates } from '../utils/stateCoordinates';
 
 // Multilingual Warning Audio Scripts
 const AUDIO_SCRIPTS = {
@@ -839,6 +841,39 @@ export default function ImmediateActionsPage() {  const { selectedState, selecte
         </div>
       </div>
 
+        <div className="flex items-center gap-3 shrink-0 my-2">
+          <button
+            onClick={() => setCallModalOpen(true)}
+            className="px-4 py-2.5 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold text-xs uppercase tracking-wider flex items-center gap-2 shadow-lg shadow-red-600/30 transition-all active:scale-95"
+          >
+            <span className="material-symbols-outlined text-lg animate-pulse">smart_toy</span>
+            <span>Trigger AI Voice Agent</span>
+          </button>
+        </div>
+
+        {/* Quick KPI Strip */}
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 pt-2 border-t border-slate-200 text-xs">
+          <div>
+            <div className="text-slate-500 text-[11px]">Forces Ready</div>
+            <div className="text-lg font-bold text-slate-800 mt-0.5">5 Battalions (820 Men)</div>
+          </div>
+          <div>
+            <div className="text-slate-500 text-[11px]">Ingress Routes</div>
+            <div className="text-lg font-bold text-[#0F4C81] mt-0.5">3 Corridors + Air</div>
+          </div>
+          <div>
+            <div className="text-slate-500 text-[11px]">Vulnerable Chokes</div>
+            <div className="text-lg font-bold text-amber-600 mt-0.5">5 Monitored Points</div>
+          </div>
+          <div>
+            <div className="text-slate-500 text-[11px]">Monitored Population</div>
+            <div className="text-lg font-bold text-rose-600 mt-0.5">~109,900 Citizens</div>
+          </div>
+          <div>
+            <div className="text-slate-500 text-[11px]">Shelters Registered</div>
+            <div className="text-lg font-bold text-emerald-600 mt-0.5">{shelters.length} Shelters (11,850 Cap)</div>
+          </div>
+        </div>
       {/* Operational Navigation Tabs */}
       <div className="flex flex-wrap items-center gap-2 border-b border-slate-200 pb-2">
         {[
@@ -1165,7 +1200,7 @@ export default function ImmediateActionsPage() {  const { selectedState, selecte
               <div className="flex items-center gap-2">
                 <span className="px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-300 font-mono text-[11px] font-bold flex items-center gap-1.5">
                   <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                  Twilio PSTN Gateway: ONLINE
+                  AI Agent Gateway: ONLINE
                 </span>
                 <button
                   onClick={() => setCallModalOpen(true)}
@@ -1237,9 +1272,9 @@ export default function ImmediateActionsPage() {  const { selectedState, selecte
                           className="w-full py-2 px-3 rounded-lg bg-emerald-600 hover:bg-emerald-500 disabled:opacity-60 text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm shadow-emerald-600/20 transition-all active:scale-98 cursor-pointer"
                         >
                           <span className={`material-symbols-outlined text-sm ${isCalling ? 'animate-spin' : ''}`}>
-                            {isCalling ? 'sync' : 'call'}
+                            {isCalling ? 'sync' : 'smart_toy'}
                           </span>
-                          <span>{isCalling ? 'Dialing Twilio PSTN...' : 'Call Handset via Twilio'}</span>
+                          <span>{isCalling ? 'Connecting AI Agent...' : 'Call Handset via AI Agent'}</span>
                         </button>
 
                         <button
@@ -1262,7 +1297,7 @@ export default function ImmediateActionsPage() {  const { selectedState, selecte
               {/* Master Dispatch to All 3 Handsets */}
               <div className="pt-3 border-t border-slate-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                 <div className="text-xs text-slate-600">
-                  Trigger automated outbound phone call to <strong>all 3 registered handsets simultaneously</strong> via Twilio:
+                  Trigger autonomous AI voice agent call to <strong>all 3 registered handsets simultaneously</strong>:
                 </div>
                 <button
                   type="button"
@@ -1271,9 +1306,9 @@ export default function ImmediateActionsPage() {  const { selectedState, selecte
                   className="w-full sm:w-auto shrink-0 px-4 py-2.5 rounded-xl bg-red-600 hover:bg-red-500 disabled:opacity-60 text-white font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-md shadow-red-600/30 transition-all active:scale-98 cursor-pointer"
                 >
                   <span className={`material-symbols-outlined text-base ${allCallsLoading ? 'animate-spin' : ''}`}>
-                    {allCallsLoading ? 'sync' : 'phone_forwarded'}
+                    {allCallsLoading ? 'sync' : 'smart_toy'}
                   </span>
-                  <span>{allCallsLoading ? 'Broadcasting via Twilio...' : '⚡ Call All 3 Handsets via Twilio'}</span>
+                  <span>{allCallsLoading ? 'Dispatching AI Agent...' : '⚡ Call All 3 Handsets via AI Agent'}</span>
                 </button>
               </div>
 
@@ -1281,7 +1316,7 @@ export default function ImmediateActionsPage() {  const { selectedState, selecte
               {allCallsResult && (
                 <div className="p-3 rounded-xl bg-slate-900 text-white text-xs font-mono space-y-2 border border-slate-700">
                   <div className="flex items-center justify-between text-emerald-400 font-bold">
-                    <span>Twilio Broadcast Status: {allCallsResult.message || 'Dispatched'}</span>
+                    <span>AI Agent Broadcast Status: {allCallsResult.message || 'Dispatched'}</span>
                     <span>{allCallsResult.count || 3} Handsets Dialed</span>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1 border-t border-slate-800">
@@ -2414,8 +2449,8 @@ export default function ImmediateActionsPage() {  const { selectedState, selecte
         </div>
       )}
 
-      {/* Multilingual Voice Call Simulator Modal */}
-      <AudioCallSimulatorModal
+      {/* AI Voice Calling Agent Modal */}
+      <AiCallingAgentModal
         isOpen={callModalOpen}
         onClose={() => setCallModalOpen(false)}
         defaultNumbers={TARGET_NUMBERS}

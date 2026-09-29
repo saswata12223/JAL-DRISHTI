@@ -19,6 +19,7 @@ from app.api.routes.gis import router as gis_router
 from app.api.routes.live import router as live_router
 from app.api.routes.weather import router as weather_router
 from app.api.routes.ffews import router as ffews_router
+from app.api.routes.immediate_actions import router as immediate_actions_router
 
 api_router = APIRouter()
 
@@ -39,5 +40,6 @@ api_router.include_router(weather_router)
 api_router.include_router(ffews_router)
 from app.api.routes.tactical_plan import router as tactical_plan_router
 api_router.include_router(tactical_plan_router, prefix="/tactical-plan", tags=["Tactical Plan"])
+api_router.include_router(immediate_actions_router)
 
 __all__ = ["api_router"]
