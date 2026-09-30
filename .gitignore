@@ -104,7 +104,7 @@ data/processed/smap_l4/
 test_twilio.py
 envs/
 data/
-models/
+/models/
 miniconda.exe
 ml/
 pipelines/
