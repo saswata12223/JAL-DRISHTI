@@ -1,4 +1,4 @@
-const API_BASE = 'http://localhost:8000/api/v1/ffews';
+const API_BASE = '/api/v1/ffews';
 
 export async function fetchFfewsTelemetry(lat, lon) {
   try {
@@ -63,3 +63,4 @@ export async function fetchAllFfewsRegions() {
   });
   return Promise.all(promises);
 }
+

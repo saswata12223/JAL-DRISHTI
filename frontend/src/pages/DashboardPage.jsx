@@ -5,8 +5,6 @@ import IndiaExplorerMap from '../components/map/IndiaExplorerMap';
 import LocationCapabilityCard from '../components/common/LocationCapabilityCard';
 import LocationSearch from '../components/common/LocationSearch';
 import DecisionIntelligenceCard from '../components/decision/DecisionIntelligenceCard';
-import StatCard from '../components/common/StatCard';
-import DashboardTrends from '../components/charts/DashboardTrends';
 import riskService from '../services/riskService';
 import stationsService from '../services/stationsService';
 import { loadSummary, loadModelDecisions } from '../services/modelIntelligenceService';
@@ -341,23 +339,6 @@ const decisionLoc = selectedStation || (selectedDistrict ? {
           )}
         </div>
       </div>
-
-      {/* KPI Summary Row */}
-      <div className="flex flex-col gap-2 w-full">
-        <div className="flex items-center gap-2">
-          <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Pan-India Summary (Live FFEWS Context)</span>
-          <span className="text-[9px] bg-emerald-50 border border-emerald-200 text-emerald-700 font-bold px-1.5 py-0.5 rounded">Live Integration</span>
-        </div>
-          <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 w-full">
-            <div className="kpi-card"><StatCard label="Max Model Probability" value={loading ? '—' : (summaryData.maxProb !== null ? `${Math.round(summaryData.maxProb * 100)}%` : '—')} subtext="Highest monitored station" icon="crisis_alert" type="extreme" /></div>
-            <div className="kpi-card"><StatCard label="High / Extreme Locations" value={loading ? '—' : (summaryData.highExtreme ?? '—')} subtext="Historical ML classification" icon="warning" type="alerts" /></div>
-            <div className="kpi-card"><StatCard label="Peak Rainfall" value={loading ? '—' : (summaryData.maxRain !== null ? `${Math.round(summaryData.maxRain)} mm/h` : '—')} subtext="From calibrated reference" icon="water_drop" type="default" /></div>
-            <div className="kpi-card"><StatCard label="Critical Water Levels" value={loading ? '—' : (summaryData.criticalWater ?? '—')} subtext="CWC danger threshold" icon="waves" type="extreme" /></div>
-          </div>
-        </div>
-
-      {/* Analytics trends */}
-      <DashboardTrends />
     </div>
   );
 }

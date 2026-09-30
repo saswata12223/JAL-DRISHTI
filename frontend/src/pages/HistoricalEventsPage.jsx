@@ -14,6 +14,7 @@ import {
 } from 'recharts';
 import { useTheme } from '../context/ThemeContext';
 import PanelCard from '../components/analytics/PanelCard';
+import DashboardTrends from '../components/charts/DashboardTrends';
 import { STATIONS } from '../services/analyticsService';
 import {
   HISTORICAL_EVENTS,
@@ -666,6 +667,22 @@ export default function HistoricalEventsPage() {  const { selectedState, selecte
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
         <DistrictAnalysis byDistrict={byDistrict} />
         {selectedEvent && <CurrentVsHistorical event={selectedEvent} />}
+      </div>
+
+      {/* 6. Live Risk & Rainfall Progression Context */}
+      <div className="flex flex-col gap-3 pt-2 border-t border-app-border/60">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="material-symbols-outlined text-[18px] text-indigo-400">trending_up</span>
+            <span className="text-[12px] font-bold text-app-text-primary uppercase tracking-wider">
+              Live Risk & Rainfall Progression Context
+            </span>
+          </div>
+          <span className="text-[9.5px] bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
+            Live Stream
+          </span>
+        </div>
+        <DashboardTrends />
       </div>
       </>
       )}

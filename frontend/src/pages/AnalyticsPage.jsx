@@ -14,6 +14,7 @@ import PredictionVsObservedPanel from '../components/analytics/PredictionVsObser
 import TopRiskLocationsPanel from '../components/analytics/TopRiskLocationsPanel';
 import AnalyticalInsightPanel from '../components/analytics/AnalyticalInsightPanel';
 import FfewsForecastPanel from '../components/analytics/FfewsForecastPanel';
+import DashboardTrends from '../components/charts/DashboardTrends';
 import { fetchAllFfewsRegions, HILLY_REGIONS } from '../services/ffewsService';
 
 import {
@@ -1064,6 +1065,22 @@ export default function AnalyticsPage() {  const { selectedState, selectedDistri
                   <div className="xl:col-span-2">
                     <AnalyticalInsightPanel insight={insight} />
                   </div>
+                </div>
+
+                {/* Live Risk & Rainfall Infiltration Trends */}
+                <div className="flex flex-col gap-3 pt-2 border-t border-app-border">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="material-symbols-outlined text-[18px] text-indigo-400">trending_up</span>
+                      <span className="text-[12px] font-bold text-app-text-primary uppercase tracking-wider">
+                        Live Risk & Rainfall Infiltration Trends
+                      </span>
+                    </div>
+                    <span className="text-[9.5px] bg-emerald-500/10 border border-emerald-500/30 text-emerald-500 font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
+                      Live Telemetry
+                    </span>
+                  </div>
+                  <DashboardTrends />
                 </div>
               </>
             )}
